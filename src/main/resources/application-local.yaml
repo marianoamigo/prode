@@ -1,0 +1,6 @@
+info:
+  app:
+    environment: "LOCAL"
+
+server:
+  port: 8080
