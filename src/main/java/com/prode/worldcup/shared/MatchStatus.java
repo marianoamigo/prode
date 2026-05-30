@@ -5,7 +5,8 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum Role {
-    ADMIN,
-    USER;
+public enum MatchStatus {
+    SCHEDULED,
+    LIVE,
+    FINISHED
 }

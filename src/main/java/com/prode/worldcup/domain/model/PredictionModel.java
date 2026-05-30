@@ -3,6 +3,7 @@ package com.prode.worldcup.domain.model;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 public class PredictionModel {
-    private String id; //UUID
+    private UUID id; //UUID
     private UserModel user;
     private MatchModel match;
     private Integer predictionHomeScore;

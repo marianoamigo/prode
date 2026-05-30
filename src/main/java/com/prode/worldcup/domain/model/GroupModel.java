@@ -3,6 +3,7 @@ package com.prode.worldcup.domain.model;
 import lombok.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -10,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 public class GroupModel {
-    String id;
-    String name;
-    List<TeamModel> teams;
+    private UUID id;
+    private String name;
+    private List<TeamModel> teams;
 }

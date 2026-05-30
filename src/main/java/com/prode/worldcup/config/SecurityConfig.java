@@ -23,7 +23,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        log.info(SecurityConfig.class.getSimpleName() +" ---> CREANDO SECURITY FILTER CHAIN");
+        log.info("["+ SecurityConfig.class.getSimpleName()+" ] " +" ---> CREANDO SECURITY FILTER CHAIN");
 
         http
                 .csrf(AbstractHttpConfigurer::disable)

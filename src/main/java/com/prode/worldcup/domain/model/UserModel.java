@@ -4,6 +4,7 @@ import com.prode.worldcup.shared.Role;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 public class UserModel {
-    private String id; //UUID
+    private UUID id; //UUID
     private String googleId;
     private String email;
     private String name;
