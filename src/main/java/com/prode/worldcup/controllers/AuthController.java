@@ -14,6 +14,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public Object me(@AuthenticationPrincipal OAuth2User user) {
+
         return user.getAttributes();
     }
 }
