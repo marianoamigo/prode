@@ -1,4 +1,4 @@
-package com.prode.worldcup.domain.dtos;
+package com.prode.worldcup.domain.dtos.response;
 
 import com.prode.worldcup.shared.MatchStage;
 import com.prode.worldcup.shared.MatchStatus;

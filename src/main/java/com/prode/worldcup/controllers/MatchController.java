@@ -1,7 +1,6 @@
 package com.prode.worldcup.controllers;
 
-import com.prode.worldcup.domain.dtos.MatchResponseDTO;
-import com.prode.worldcup.infrastructure.persistence.entity.MatchEntity;
+import com.prode.worldcup.domain.dtos.response.MatchResponseDTO;
 import com.prode.worldcup.services.matches.MatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
