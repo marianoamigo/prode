@@ -1,0 +1,15 @@
+package com.prode.worldcup.domain.dtos;
+
+import com.prode.worldcup.shared.MatchStage;
+import com.prode.worldcup.shared.MatchStatus;
+
+import java.util.UUID;
+
+public record MatchResponseDTO(
+        UUID id,
+        String homeTeam,
+        String awayTeam,
+        MatchStatus status,
+        MatchStage stage
+) {
+}
