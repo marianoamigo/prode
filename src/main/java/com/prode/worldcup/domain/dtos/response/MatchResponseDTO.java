@@ -9,6 +9,8 @@ public record MatchResponseDTO(
         UUID id,
         String homeTeam,
         String awayTeam,
+        Integer homeScore,
+        Integer awayScore,
         MatchStatus status,
         MatchStage stage
 ) {

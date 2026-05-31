@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -35,7 +36,7 @@ public class PredictionService {
                 .findById(request.matchId())
                 .orElseThrow();
 
-        if(match.getStatus() != MatchStatus.SCHEDULED) {
+        if (match.getStatus() != MatchStatus.SCHEDULED) {
             throw new RuntimeException(
                     "Partido comenzado"
             );
@@ -47,36 +48,54 @@ public class PredictionService {
                                 user.getId(),
                                 match.getId()
                         );
-    if(existing.isPresent()) {
+        if (existing.isPresent()) {
 
-        PredictionEntity prediction = existing.get();
+            PredictionEntity prediction = existing.get();
 
-        prediction.setPredictionHomeScore(
-                request.homeScore());
+            prediction.setPredictionHomeScore(
+                    request.homeScore());
 
-        prediction.setPredictionAwayScore(
-                request.awayScore());
+            prediction.setPredictionAwayScore(
+                    request.awayScore());
 
-        predictionRepository.save(prediction);
+            predictionRepository.save(prediction);
 
-    } else {
+        } else {
 
-        PredictionEntity prediction = PredictionEntity.builder()
-                        .user(user)
-                        .match(match)
-                        .predictionHomeScore(
-                                request.homeScore())
-                        .predictionAwayScore(
-                                request.awayScore())
-                        .createdAt(LocalDateTime.now())
-                        .build();
+            PredictionEntity prediction = PredictionEntity.builder()
+                    .user(user)
+                    .match(match)
+                    .predictionHomeScore(
+                            request.homeScore())
+                    .predictionAwayScore(
+                            request.awayScore())
+                    .createdAt(LocalDateTime.now())
+                    .build();
 
-        predictionRepository.save(prediction);
+            predictionRepository.save(prediction);
+
+        }
 
     }
 
-    }
 
+    public List<PredictionResponseDTO> getMyPredictions(String googleId) {
+        UserEntity user = userRepository
+                .findByGoogleId(googleId)
+                .orElseThrow();
+
+        List<PredictionEntity> predictions = predictionRepository.findByUserId(user.getId());
+
+        return predictions.stream()
+                .map(prediction -> new PredictionResponseDTO(
+                        prediction.getId(),
+                        prediction.getMatch().getId(),
+                        prediction.getMatch().getHomeTeam().getName(),
+                        prediction.getMatch().getAwayTeam().getName(),
+                        prediction.getPredictionHomeScore(),
+                        prediction.getPredictionAwayScore()
+                )).toList();
+    }
 
 
 }
