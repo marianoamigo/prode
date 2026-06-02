@@ -1,0 +1,18 @@
+body {
+    background-color: #121212;
+    color: white;
+}
+
+.match-card {
+    margin-bottom: 20px;
+}
+
+.card {
+    background-color: #1f1f1f;
+    color: white;
+}
+
+.match-status {
+    font-size: 0.8rem;
+    color: #b0b0b0;
+}

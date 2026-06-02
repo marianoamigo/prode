@@ -20,8 +20,11 @@ public class MatchService {
                         match.getId(),
                         match.getHomeTeam().getName(),
                         match.getAwayTeam().getName(),
+                        match.getHomeScore(),
+                        match.getAwayScore(),
                         match.getStatus(),
-                        match.getStage()
+                        match.getStage(),
+                        match.getDateTime()
                 ))
                 .toList();
     }

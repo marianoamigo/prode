@@ -3,6 +3,7 @@ package com.prode.worldcup.domain.dtos.response;
 import com.prode.worldcup.shared.MatchStage;
 import com.prode.worldcup.shared.MatchStatus;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record MatchResponseDTO(
@@ -12,6 +13,7 @@ public record MatchResponseDTO(
         Integer homeScore,
         Integer awayScore,
         MatchStatus status,
-        MatchStage stage
+        MatchStage stage,
+        LocalDateTime dateTime
 ) {
 }

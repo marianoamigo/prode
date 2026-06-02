@@ -30,7 +30,13 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        .requestMatchers("/", "/error")
+                        .requestMatchers("/",
+                                "/error",
+                                "/index.html",
+                                "/css/**",
+                                "/js/**",
+                                "/api/auth/me",
+                                "/api/matches/**")
                         .permitAll()
 
                         .requestMatchers("/api/admin/**")
@@ -45,6 +51,10 @@ public class SecurityConfig {
                                 userInfoEndpointConfig
                                         .oidcUserService(customOidcUserService)
                         )
+                )
+
+                .logout(logout -> logout
+                        .logoutSuccessUrl("/")
                 );
 
         return http.build();
