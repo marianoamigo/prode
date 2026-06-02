@@ -7,6 +7,9 @@ async function init() {
 
     renderNavbar(null);
 
+    document
+        .getElementById("saveAllButton")
+        .addEventListener("click",saveAllPredictions);
         const matches = await loadMatches();
         renderMatches( matches,[],null);
 
@@ -109,7 +112,7 @@ function renderMatches(matches,predictions, currentUser) {
 
             let predictionHtml = "";
 
-            if(currentUser && match.status === "SCHEDULED"){
+            if(currentUser && canEditPrediction(match)){
 
                 predictionHtml = `
 
@@ -156,15 +159,6 @@ function renderMatches(matches,predictions, currentUser) {
                         </div>
 
                     </div>
-
-                    <button
-                        class="btn btn-primary mt-2"
-                        onclick="savePrediction('${match.id}')">
-
-                        Guardar
-
-                    </button>
-
                 `;
             }
 
@@ -295,7 +289,21 @@ function getStageLabel(stage){
 
 function getMatchStatus(match){
 
-    if(match.status === "SCHEDULED"){
+    const now =
+            new Date();
+
+        const kickoff =
+            new Date(match.dateTime);
+
+        if(
+            match.status === "SCHEDULED"
+            &&
+            now >= kickoff
+        ){
+            return "EN JUEGO";
+        }
+
+        if(match.status === "SCHEDULED"){
             return formatMatchDate(
                 match.dateTime
             );
@@ -325,4 +333,76 @@ function formatMatchDate(dateTime){
             minute: '2-digit'
         }
     );
+}
+
+async function saveAllPredictions() {
+
+    const inputs =
+        document.querySelectorAll(
+            '[id^="home-"]'
+        );
+
+    for(const input of inputs){
+
+        const matchId =
+            input.id.replace(
+                "home-",
+                ""
+            );
+
+        const homeScore =
+            document.getElementById(
+                `home-${matchId}`
+            ).value;
+
+        const awayScore =
+            document.getElementById(
+                `away-${matchId}`
+            ).value;
+
+        if(
+            homeScore === ""
+            ||
+            awayScore === ""
+        ){
+            continue;
+        }
+
+        await fetch(
+            '/api/predictions/register',
+            {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+
+                body: JSON.stringify({
+
+                    matchId,
+
+                    predictedHomeScore:
+                        Number(homeScore),
+
+                    predictedAwayScore:
+                        Number(awayScore)
+
+                })
+            }
+        );
+    }
+
+    window.location.reload();
+}
+
+function canEditPrediction(match){
+
+    const now =
+        new Date();
+
+    const kickoff =
+        new Date(match.dateTime);
+
+    return now < kickoff;
 }
