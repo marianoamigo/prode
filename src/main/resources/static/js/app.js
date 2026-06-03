@@ -94,25 +94,31 @@ async function savePrediction(matchId){
     window.location.reload();
 }
 
-function renderMatches(matches,predictions, currentUser) {
+function renderMatches(
+    matches,
+    predictions,
+    currentUser
+) {
 
     const container =
-            document.getElementById(
-                "matchesContainer"
+        document.getElementById(
+            "matchesContainer"
+        );
+
+    container.innerHTML = "";
+
+    matches.forEach(match => {
+
+        const prediction =
+            predictions.find(
+                p => p.matchId === match.id
             );
 
-        container.innerHTML = "";
+        let predictionHtml = "";
 
-        matches.forEach(match => {
+        if(currentUser){
 
-            const prediction =
-                predictions.find(
-                    p => p.matchId === match.id
-                );
-
-            let predictionHtml = "";
-
-            if(currentUser && canEditPrediction(match)){
+            if(canEditPrediction(match)){
 
                 predictionHtml = `
 
@@ -159,64 +165,102 @@ function renderMatches(matches,predictions, currentUser) {
                         </div>
 
                     </div>
+
+                `;
+
+            } else {
+
+                predictionHtml = `
+
+                    <hr>
+
+                    <div class="mt-3">
+
+                        <strong>
+                            TU PRONÓSTICO
+                        </strong>
+
+                    </div>
+
+                    <div>
+
+                        ${
+                            prediction
+                                ? `${prediction.predictedHomeScore}
+                                   -
+                                   ${prediction.predictedAwayScore}`
+                                : "-"
+                        }
+
+                    </div>
+
+                    <div class="text-success mt-2">
+
+                        ${
+                            prediction
+                                ? prediction.pointsScored
+                                : 0
+                        } puntos
+
+                    </div>
+
                 `;
             }
+        }
 
-            container.innerHTML += `
+        container.innerHTML += `
 
-                <div class="card match-card">
+            <div class="card match-card">
 
-                    <div class="card-header">
+                <div class="card-header">
 
-                        ${getStageLabel(match.stage)}
-
-                    </div>
-
-                    <div class="card-body">
-
-                        <div class="row text-center">
-
-                            <div class="col">
-
-                                ${match.homeTeam}
-
-                            </div>
-
-                            <div class="col">
-
-                                ${match.homeScore ?? "-"}
-
-                                -
-
-                                ${match.awayScore ?? "-"}
-
-                            </div>
-
-                            <div class="col">
-
-                                ${match.awayTeam}
-
-                            </div>
-
-                        </div>
-
-                        <div class="mt-3 match-status">
-
-                            ${getMatchStatus(match)}
-
-                        </div>
-
-
-
-                        ${predictionHtml}
-
-                    </div>
+                    ${getStageLabel(match.stage)}
 
                 </div>
 
-            `;
-        });
-    }
+                <div class="card-body">
+
+                    <div class="row text-center">
+
+                        <div class="col">
+
+                            ${match.homeTeam}
+
+                        </div>
+
+                        <div class="col">
+
+                            ${match.homeScore ?? "-"}
+
+                            -
+
+                            ${match.awayScore ?? "-"}
+
+                        </div>
+
+                        <div class="col">
+
+                            ${match.awayTeam}
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-3 match-status">
+
+                        ${getMatchStatus(match)}
+
+                    </div>
+
+                    ${predictionHtml}
+
+                </div>
+
+            </div>
+
+        `;
+    });
+}
 
 function renderNavbar(currentUser){
 

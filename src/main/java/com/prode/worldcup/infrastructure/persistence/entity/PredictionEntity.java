@@ -34,6 +34,8 @@ public class PredictionEntity {
     private MatchEntity match;
     private Integer predictionHomeScore;
     private Integer predictionAwayScore;
-    private Integer pointsScored;
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer pointsScored = 0;
     private LocalDateTime createdAt;
 }

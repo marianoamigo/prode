@@ -14,9 +14,10 @@ public interface PredictionRepository extends JpaRepository<PredictionEntity, UU
     Optional<PredictionEntity>
     findByUserIdAndMatchId(UUID userId, UUID matchId);
 
-    List<PredictionEntity>
-    findByUserId(UUID userId);
+    List<PredictionEntity> findByUserId(UUID userId);
 
     List<PredictionEntity>
     findByMatchId(UUID matchId);
+
+
 }

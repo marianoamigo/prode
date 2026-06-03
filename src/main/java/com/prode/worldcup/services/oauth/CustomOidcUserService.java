@@ -5,13 +5,18 @@ import com.prode.worldcup.infrastructure.persistence.repository.UserRepository;
 import com.prode.worldcup.shared.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Slf4j
 @Service
@@ -53,6 +58,26 @@ public class CustomOidcUserService extends OidcUserService {
                 });
         log.info("[" + CustomOidcUserService.class.getSimpleName()+ "]" + " Usuario persistido correctamente. ID: {}", user.getId());
 
-        return oidcUser;
+        Collection<GrantedAuthority> authorities =
+                new ArrayList<>(
+                        oidcUser.getAuthorities()
+                );
+
+        authorities.add(
+                new SimpleGrantedAuthority(
+                        "ROLE_" + user.getRole().name()
+                )
+        );
+
+        log.info(
+                "Authorities: {}",
+                authorities
+        );
+
+        return new DefaultOidcUser(
+                authorities,
+                oidcUser.getIdToken(),
+                oidcUser.getUserInfo(),
+                "sub");
     }
 }

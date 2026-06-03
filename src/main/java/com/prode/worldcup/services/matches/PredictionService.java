@@ -97,6 +97,48 @@ public class PredictionService {
                 )).toList();
     }
 
+    private int calculatePoints(PredictionEntity prediction,MatchEntity match) {
+
+        if (
+                prediction.getPredictionHomeScore()
+                        .equals(match.getHomeScore())
+                        &&
+                        prediction.getPredictionAwayScore()
+                                .equals(match.getAwayScore())
+        ) {
+            return 3;
+        }
+
+        int predictedResult =
+                Integer.compare(
+                        prediction.getPredictionHomeScore(),
+                        prediction.getPredictionAwayScore()
+                );
+
+        int actualResult =
+                Integer.compare(
+                        match.getHomeScore(),
+                        match.getAwayScore()
+                );
+
+        if (predictedResult == actualResult) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public void recalculatePointsForMatch(MatchEntity match) {
+
+        List<PredictionEntity> predictions = predictionRepository.findByMatchId(match.getId() );
+
+        for (PredictionEntity prediction : predictions) {
+
+            prediction.setPointsScored( calculatePoints(prediction, match ));
+
+            predictionRepository.save( prediction );
+        }
+    }
 
 }
 
