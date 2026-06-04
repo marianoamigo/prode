@@ -24,7 +24,7 @@ public class PredictionService {
     private final UserRepository userRepository;
     private final MatchRepository matchRepository;
 
-    public /*PredictionResponseDTO*/ void saveOrUpdatePrediction(
+    public PredictionResponseDTO saveOrUpdatePrediction(
             String googleId,
             PredictionRequestDTO request
     ) {
@@ -42,6 +42,7 @@ public class PredictionService {
             );
         }
 
+        PredictionEntity prediction;
         Optional<PredictionEntity> existing =
                 predictionRepository
                         .findByUserIdAndMatchId(
@@ -50,7 +51,7 @@ public class PredictionService {
                         );
         if (existing.isPresent()) {
 
-            PredictionEntity prediction = existing.get();
+            prediction = existing.get();
 
             prediction.setPredictionHomeScore(
                     request.homeScore());
@@ -58,11 +59,10 @@ public class PredictionService {
             prediction.setPredictionAwayScore(
                     request.awayScore());
 
-            predictionRepository.save(prediction);
 
         } else {
 
-            PredictionEntity prediction = PredictionEntity.builder()
+            prediction = PredictionEntity.builder()
                     .user(user)
                     .match(match)
                     .predictionHomeScore(
@@ -72,9 +72,20 @@ public class PredictionService {
                     .createdAt(LocalDateTime.now())
                     .build();
 
-            predictionRepository.save(prediction);
 
         }
+
+        prediction = predictionRepository.save(prediction);
+
+        return new PredictionResponseDTO(
+                prediction.getId(),
+                prediction.getMatch().getId(),
+                prediction.getMatch().getHomeTeam().getName(),
+                prediction.getMatch().getAwayTeam().getName(),
+                prediction.getPredictionHomeScore(),
+                prediction.getPredictionAwayScore(),
+                prediction.getPointsScored()
+        );
 
     }
 
@@ -93,7 +104,8 @@ public class PredictionService {
                         prediction.getMatch().getHomeTeam().getName(),
                         prediction.getMatch().getAwayTeam().getName(),
                         prediction.getPredictionHomeScore(),
-                        prediction.getPredictionAwayScore()
+                        prediction.getPredictionAwayScore(),
+                        prediction.getPointsScored()
                 )).toList();
     }
 

@@ -8,6 +8,7 @@ public record PredictionResponseDTO(
         String homeTeam,
         String awayTeam,
         Integer predictedHomeScore,
-        Integer predictedAwayScore
+        Integer predictedAwayScore,
+        Integer pointsScored
 ) {
 }

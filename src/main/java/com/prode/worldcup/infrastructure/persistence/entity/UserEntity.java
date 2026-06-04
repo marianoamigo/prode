@@ -35,4 +35,6 @@ public class UserEntity {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+    @Builder.Default
+    private Integer totalPoints = 0;
 }

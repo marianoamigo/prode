@@ -43,42 +43,42 @@ public class DataLoader implements CommandLineRunner {
 
         // ===== GROUP =====
 
-        GroupEntity groupA = GroupEntity.builder()
-                .name("A")
+        GroupEntity groupB = GroupEntity.builder()
+                .name("B")
                 .build();
 
-        groupA = groupRepository.save(groupA);
+        groupB = groupRepository.save(groupB);
 
         // ===== TEAMS =====
 
-        TeamEntity argentina = TeamEntity.builder()
-                .name("Argentina")
-                .code("ARG")
-                .group(groupA)
+        TeamEntity espana = TeamEntity.builder()
+                .name("España")
+                .code("ESP")
+                .group(groupB)
                 .build();
 
-        TeamEntity brasil = TeamEntity.builder()
-                .name("Brasil")
-                .code("BRA")
-                .group(groupA)
+        TeamEntity francia = TeamEntity.builder()
+                .name("Francia")
+                .code("FRA")
+                .group(groupB)
                 .build();
 
-        argentina = teamRepository.save(argentina);
-        brasil = teamRepository.save(brasil);
+        espana = teamRepository.save(espana);
+        francia = teamRepository.save(francia);
 
         // ===== MATCH =====
 
-        MatchEntity argentinaVsBrasil = MatchEntity.builder()
-                .homeTeam(argentina)
-                .awayTeam(brasil)
+        MatchEntity espanaVsFrancia = MatchEntity.builder()
+                .homeTeam(espana)
+                .awayTeam(francia)
                 .stage(MatchStage.GROUP_STAGE)
                 .status(MatchStatus.SCHEDULED)
                 .homeScore(null)
                 .awayScore(null)
-                .dateTime(LocalDateTime.now().plusDays(1))
+                .dateTime(LocalDateTime.now().plusDays(3))
                 .build();
 
-        matchRepository.save(argentinaVsBrasil);
+        matchRepository.save(espanaVsFrancia);
 
         log.info("[{}] Datos cargados correctamente.",
                 DataLoader.class.getSimpleName());

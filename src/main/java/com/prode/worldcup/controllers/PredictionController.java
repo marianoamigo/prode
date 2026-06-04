@@ -24,12 +24,12 @@ public class PredictionController {
             @AuthenticationPrincipal OidcUser user,
             @RequestBody PredictionRequestDTO request
     ){
-        predictionService.saveOrUpdatePrediction(
+        PredictionResponseDTO response = predictionService.saveOrUpdatePrediction(
                 user.getSubject(),
                 request
         );
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/mine")

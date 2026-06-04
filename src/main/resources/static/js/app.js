@@ -18,6 +18,9 @@ async function init() {
 
         if(currentUser) {
 
+        document
+            .getElementById("saveAllButton")
+            .classList.remove("d-none");
         renderNavbar(currentUser);
         const predictions = await loadPredictions();
 
@@ -412,6 +415,12 @@ async function saveAllPredictions() {
             continue;
         }
 
+        console.log({
+            matchId,
+            homeScore,
+            awayScore
+        });
+
         await fetch(
             '/api/predictions/register',
             {
@@ -426,10 +435,10 @@ async function saveAllPredictions() {
 
                     matchId,
 
-                    predictedHomeScore:
+                    homeScore:
                         Number(homeScore),
 
-                    predictedAwayScore:
+                    awayScore:
                         Number(awayScore)
 
                 })
