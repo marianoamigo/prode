@@ -52,6 +52,7 @@ public class CustomOidcUserService extends OidcUserService {
                                             ? Role.ADMIN
                                             : Role.USER)
                                     .createdAt(LocalDateTime.now())
+                                    .totalPoints(0)
                                     .build();
 
                     return userRepository.save(newUser);

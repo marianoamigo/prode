@@ -1,5 +1,6 @@
 package com.prode.worldcup.services.group;
 
+import com.prode.worldcup.domain.dtos.request.GroupRankingResponseDTO;
 import com.prode.worldcup.domain.dtos.request.PrivateGroupRequestDTO;
 import com.prode.worldcup.domain.dtos.response.PrivateGroupResponseDTO;
 import com.prode.worldcup.infrastructure.persistence.entity.PrivateGroupEntity;
@@ -11,8 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -104,4 +104,67 @@ public class PrivateGroupService {
         log.info("[{}] Usuario {} se unió al grupo {}",PrivateGroupService.class.getSimpleName(),user.getEmail(), group.getName());
     }
 
+    public List<PrivateGroupResponseDTO> getMyGroups(
+            String googleId
+    ) {
+
+        UserEntity user = userRepository
+                .findByGoogleId(googleId)
+                .orElseThrow();
+
+
+
+        return user.getGroups()
+                .stream()
+                .map(group ->
+                        new PrivateGroupResponseDTO(
+                                group.getId(),
+                                group.getName(),
+                                group.getInviteCode(),
+                                JOIN_PATH + group.getInviteCode()
+                        )
+                )
+                .toList();
+    }
+
+
+    public Object getGroupRanking(UUID groupId) {
+
+        PrivateGroupEntity group =
+                privateGroupRepository
+                        .findById(groupId)
+                        .orElseThrow();
+        return group.getUsers()
+                .stream()
+                .sorted(
+                        Comparator.comparing(
+                                UserEntity::getTotalPoints
+                        ).reversed()
+                )
+                .map(user ->
+                        new GroupRankingResponseDTO(
+                                user.getId(),
+                                user.getName(),
+                                user.getTotalPoints()
+                        )
+                )
+                .toList();
+    }
+
+    public PrivateGroupResponseDTO getGroup(
+            UUID groupId
+    ) {
+
+        PrivateGroupEntity group =
+                privateGroupRepository
+                        .findById(groupId)
+                        .orElseThrow();
+
+        return new PrivateGroupResponseDTO(
+                group.getId(),
+                group.getName(),
+                group.getInviteCode(),
+                JOIN_PATH + group.getInviteCode()
+        );
+    }
 }

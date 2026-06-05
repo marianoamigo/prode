@@ -1,9 +1,11 @@
 package com.prode.worldcup.domain.model;
 
+import com.prode.worldcup.services.group.PrivateGroupService;
 import com.prode.worldcup.shared.Role;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -19,4 +21,5 @@ public class UserModel {
     private Role role;
     private LocalDateTime createdAt;
     private Integer totalPoints;
+    private List<PrivateGroupModel> groups;
 }

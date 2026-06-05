@@ -9,6 +9,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/private")
@@ -35,5 +37,43 @@ public class PrivateGroupController {
         );
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/my-groups")
+    public ResponseEntity<?> myGroups(
+            @AuthenticationPrincipal
+            OidcUser user
+    ) {
+
+        return ResponseEntity.ok(
+                privateGroupService.getMyGroups(
+                        user.getSubject()
+                )
+        );
+    }
+
+    @GetMapping("/{groupId}/ranking")
+    public ResponseEntity<?> ranking(
+            @PathVariable UUID groupId
+    ) {
+
+        return ResponseEntity.ok(
+                privateGroupService
+                        .getGroupRanking(
+                                groupId
+                        )
+        );
+    }
+
+    @GetMapping("/{groupId}")
+    public ResponseEntity<?> getGroup(
+            @PathVariable UUID groupId
+    ) {
+
+        return ResponseEntity.ok(
+                privateGroupService.getGroup(
+                        groupId
+                )
+        );
     }
 }

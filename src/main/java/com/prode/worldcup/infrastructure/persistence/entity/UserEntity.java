@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -37,4 +38,6 @@ public class UserEntity {
     private LocalDateTime createdAt;
     @Builder.Default
     private Integer totalPoints = 0;
+    @ManyToMany(mappedBy = "users")
+    private List<PrivateGroupEntity> groups;
 }

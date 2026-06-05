@@ -32,19 +32,6 @@ async function init() {
         }
 }
 
-async function loadCurrentUser() {
-
-    try {
-        const response = await fetch('/api/auth/me');
-        const user = await response.json();
-        console.log("USER", user);
-        return user;
-        } catch (error) {
-        console.log(error);
-        return null;
-        }
-}
-
 async function loadMatches() {
 
     const response =
@@ -97,11 +84,7 @@ async function savePrediction(matchId){
     window.location.reload();
 }
 
-function renderMatches(
-    matches,
-    predictions,
-    currentUser
-) {
+function renderMatches(matches, predictions, currentUser) {
 
     const container =
         document.getElementById(
@@ -263,61 +246,6 @@ function renderMatches(
 
         `;
     });
-}
-
-function renderNavbar(currentUser){
-
-    const userSection =
-        document.getElementById(
-            "userSection"
-        );
-
-    if(!currentUser){
-
-        userSection.innerHTML = `
-
-            <a
-                href="/oauth2/authorization/google"
-                class="btn btn-outline-light">
-
-                Login Google
-
-            </a>
-
-        `;
-
-        return;
-    }
-
-    userSection.innerHTML = `
-
-        <div class="d-flex align-items-center gap-3">
-
-            <a
-                href="#"
-                class="text-white text-decoration-none">
-
-                Mis Pronósticos
-
-            </a>
-
-            <span class="text-white">
-
-                👤 ${currentUser.name}
-
-            </span>
-
-            <a
-                href="/logout"
-                class="btn btn-outline-light">
-
-                Salir
-
-            </a>
-
-        </div>
-
-    `;
 }
 
 function getStageLabel(stage){
