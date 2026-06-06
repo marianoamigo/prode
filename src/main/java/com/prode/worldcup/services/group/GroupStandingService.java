@@ -1,5 +1,6 @@
 package com.prode.worldcup.services.group;
 
+import com.prode.worldcup.domain.dtos.response.GroupStandingResponseDTO;
 import com.prode.worldcup.infrastructure.persistence.entity.GroupEntity;
 import com.prode.worldcup.infrastructure.persistence.entity.GroupStandingEntity;
 import com.prode.worldcup.infrastructure.persistence.entity.MatchEntity;
@@ -120,13 +121,9 @@ public class GroupStandingService {
                         .comparingInt(
                                 StandingAccumulator::getPoints
                         )
-                        .reversed()
-
                         .thenComparingInt(
                                 StandingAccumulator::getGoalDifference
                         )
-                        .reversed()
-
                         .thenComparingInt(
                                 StandingAccumulator::getGoalsFor
                         )
@@ -203,8 +200,51 @@ public class GroupStandingService {
         }
     }
 
-    private void applyHeadToHeadIfNeeded(List<StandingAccumulator> ordered, List<MatchEntity> matches
+    public List<GroupStandingResponseDTO>
+    findByGroupId(
+            UUID groupId
     ) {
+
+        return groupStandingRepository
+                .findByGroupIdOrderByPosition(
+                        groupId
+                )
+                .stream()
+                .map(standing ->
+
+                        new GroupStandingResponseDTO(
+
+                                standing.getPosition(),
+
+                                standing.getTeam()
+                                        .getName(),
+
+                                "https://flagcdn.com/24x18/"
+                                        + standing.getTeam()
+                                        .getCode()
+                                        + ".png",
+
+                                standing.getPlayed(),
+
+                                standing.getWins(),
+
+                                standing.getDraws(),
+
+                                standing.getLosses(),
+
+                                standing.getGoalsFor(),
+
+                                standing.getGoalsAgainst(),
+
+                                standing.getGoalDifference(),
+
+                                standing.getPoints()
+                        )
+                )
+                .toList();
+    }
+
+    private void applyHeadToHeadIfNeeded(List<StandingAccumulator> ordered, List<MatchEntity> matches) {
 
         if (matches.size() < 3) {
             return;
