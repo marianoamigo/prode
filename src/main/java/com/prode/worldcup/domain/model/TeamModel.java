@@ -13,6 +13,5 @@ public class TeamModel {
     private UUID id; //UUID
     private String code;
     private String name;
-    private String flagUrl;
     private String group;
 }

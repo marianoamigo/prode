@@ -84,6 +84,46 @@ async function savePrediction(matchId){
     window.location.reload();
 }
 
+async function updateMatchResult(matchId,finished){
+
+    const homeScore =
+            document.getElementById(
+                    `admin-home-${matchId}`
+            ).value;
+
+    const awayScore =
+            document.getElementById(
+                    `admin-away-${matchId}`
+            ).value;
+
+    await fetch(
+            "/api/matches/result",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                            "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    matchId,
+
+                    homeScore:
+                            Number(homeScore),
+
+                    awayScore:
+                            Number(awayScore),
+
+                    finished
+                })
+            }
+    );
+
+    window.location.reload();
+}
+
 function renderMatches(matches, predictions, currentUser) {
 
     const container =
@@ -101,6 +141,7 @@ function renderMatches(matches, predictions, currentUser) {
             );
 
         let predictionHtml = "";
+        let adminButtons = "";
 
         if(currentUser){
 
@@ -194,6 +235,89 @@ function renderMatches(matches, predictions, currentUser) {
             }
         }
 
+        if(
+                currentUser?.role === "ADMIN"
+        ){
+
+            adminButtons = `
+
+                <hr>
+
+                <div class="mt-3">
+
+                    <strong>
+
+                        ADMIN
+
+                    </strong>
+
+                </div>
+
+                <div class="row mt-2">
+
+                    <div class="col">
+
+                        <input
+                            id="admin-home-${match.id}"
+                            type="number"
+                            min="0"
+                            class="form-control"
+                            value="${match.homeScore ?? 0}"
+                        >
+
+                    </div>
+
+                    <div class="col">
+
+                        <input
+                            id="admin-away-${match.id}"
+                            type="number"
+                            min="0"
+                            class="form-control"
+                            value="${match.awayScore ?? 0}"
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="mt-2">
+
+                    <button
+                        class="btn btn-warning btn-sm"
+
+                        onclick="
+                            updateMatchResult(
+                                '${match.id}',
+                                false
+                            )
+                        ">
+
+                        Actualizar
+
+                    </button>
+
+                    <button
+                        class="btn btn-danger btn-sm ms-2"
+
+                        onclick="
+                            updateMatchResult(
+                                '${match.id}',
+                                true
+                            )
+                        ">
+
+                        Finalizar
+
+                    </button>
+
+                </div>
+
+            `;
+        }
+
+
+
         container.innerHTML += `
 
             <div class="card match-card">
@@ -210,7 +334,24 @@ function renderMatches(matches, predictions, currentUser) {
 
                         <div class="col">
 
-                            ${match.homeTeam}
+                            <div
+                                class="d-flex
+                                       align-items-center
+                                       justify-content-center
+                                       gap-2">
+
+                                <img
+                                    src="${match.homeFlagUrl}"
+                                    width="24"
+                                    alt="">
+
+                                <span>
+
+                                    ${match.homeTeam}
+
+                                </span>
+
+                            </div>
 
                         </div>
 
@@ -226,7 +367,24 @@ function renderMatches(matches, predictions, currentUser) {
 
                         <div class="col">
 
-                            ${match.awayTeam}
+                            <div
+                                class="d-flex
+                                       align-items-center
+                                       justify-content-center
+                                       gap-2">
+
+                                <img
+                                    src="${match.awayFlagUrl}"
+                                    width="24"
+                                    alt="">
+
+                                <span>
+
+                                    ${match.awayTeam}
+
+                                </span>
+
+                            </div>
 
                         </div>
 
@@ -239,6 +397,7 @@ function renderMatches(matches, predictions, currentUser) {
                     </div>
 
                     ${predictionHtml}
+                    ${adminButtons}
 
                 </div>
 

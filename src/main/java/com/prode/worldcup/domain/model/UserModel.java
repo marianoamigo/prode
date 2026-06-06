@@ -22,4 +22,5 @@ public class UserModel {
     private LocalDateTime createdAt;
     private Integer totalPoints;
     private List<PrivateGroupModel> groups;
+    private String pictureUrl;
 }

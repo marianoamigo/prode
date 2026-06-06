@@ -9,7 +9,9 @@ import java.util.UUID;
 public record MatchResponseDTO(
         UUID id,
         String homeTeam,
+        String homeFlagUrl,
         String awayTeam,
+        String awayFlagUrl,
         Integer homeScore,
         Integer awayScore,
         MatchStatus status,

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -35,8 +36,9 @@ public class CustomOidcUserService extends OidcUserService {
         String googleId = oidcUser.getSubject();
         String email = oidcUser.getEmail();
         String name = oidcUser.getFullName();
+        String pictureUrl = oidcUser.getAttribute("picture");
         log.info("[" + CustomOidcUserService.class.getSimpleName()+ "]" + " Usuario autenticado: {}", email);
-
+        log.info("Picture: {}",pictureUrl);
         UserEntity user = userRepository
                 .findByGoogleId(googleId)
                 .orElseGet(() -> {
@@ -53,10 +55,24 @@ public class CustomOidcUserService extends OidcUserService {
                                             : Role.USER)
                                     .createdAt(LocalDateTime.now())
                                     .totalPoints(0)
+                                    .pictureUrl(pictureUrl)
                                     .build();
 
                     return userRepository.save(newUser);
                 });
+        if (
+                !Objects.equals(
+                        user.getPictureUrl(),
+                        pictureUrl
+                )
+        ) {
+
+            user.setPictureUrl(
+                    pictureUrl
+            );
+
+            userRepository.save(user);
+        }
         log.info("[" + CustomOidcUserService.class.getSimpleName()+ "]" + " Usuario persistido correctamente. ID: {}", user.getId());
 
         Collection<GrantedAuthority> authorities =

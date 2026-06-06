@@ -15,7 +15,6 @@ import java.util.List;
 public class RankingService {
 
     private final UserRepository userRepository;
-    private final PredictionRepository predictionRepository;
 
     public List<GlobalRankingResponseDTO>
     getGlobalRanking() {
@@ -24,24 +23,13 @@ public class RankingService {
                 .findAll()
                 .stream()
 
-                .map(user -> {
-
-                    int totalPoints =
-                            predictionRepository
-                                    .findByUserId(
-                                            user.getId()
-                                    )
-                                    .stream()
-
-                                    .mapToInt(PredictionEntity::getPointsScored
-                                    )
-                                    .sum();
-
-                    return new GlobalRankingResponseDTO(
-                            user.getName(),
-                            totalPoints
-                    );
-                })
+                .map(user ->
+                        new GlobalRankingResponseDTO(
+                                user.getName(),
+                                user.getTotalPoints(),
+                                user.getPictureUrl()
+                        )
+                )
 
                 .sorted(
                         Comparator.comparing(

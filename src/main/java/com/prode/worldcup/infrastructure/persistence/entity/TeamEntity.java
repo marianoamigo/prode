@@ -24,6 +24,7 @@ public class TeamEntity {
     @Column(nullable = false, unique = true)
     private String code;
 
+
     @ManyToOne
     @JoinColumn(name = "group_id")
     private GroupEntity group;

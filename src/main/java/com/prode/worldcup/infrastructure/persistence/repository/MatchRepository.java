@@ -21,4 +21,7 @@ public interface MatchRepository extends JpaRepository<MatchEntity, UUID> {
     List<MatchEntity> findByStatus(MatchStatus status);
 
     List<MatchEntity> findByStage(MatchStage stage);
+
+    List<MatchEntity>
+    findByStageAndStatus(MatchStage stage,MatchStatus status);
 }

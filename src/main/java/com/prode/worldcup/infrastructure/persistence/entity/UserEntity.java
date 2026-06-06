@@ -40,4 +40,6 @@ public class UserEntity {
     private Integer totalPoints = 0;
     @ManyToMany(mappedBy = "users")
     private List<PrivateGroupEntity> groups;
+    @Column
+    private String pictureUrl;
 }

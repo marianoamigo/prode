@@ -48,6 +48,14 @@ function renderNavbar(currentUser){
             </a>
 
             <a
+                href="/html/ranking.html"
+                class="text-white text-decoration-none">
+
+                Ranking Global
+
+            </a>
+
+            <a
                 href="/html/privategroups.html"
                 class="text-white text-decoration-none">
 
@@ -57,7 +65,16 @@ function renderNavbar(currentUser){
 
             <span class="text-white">
 
-                👤 ${currentUser.name}
+                <span class="text-white">
+                                    ${currentUser.name}
+                </span>
+                <img
+                    src="${currentUser.pictureUrl}"
+                    width="40"
+                    height="40"
+                    class="rounded-circle">
+
+
 
             </span>
 

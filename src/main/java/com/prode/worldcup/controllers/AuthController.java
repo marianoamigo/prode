@@ -24,7 +24,17 @@ public class AuthController {
         return ResponseEntity.ok(
                 Map.of(
                         "name", user.getAttribute("name"),
-                        "email", user.getAttribute("email")
+                        "email", user.getAttribute("email"),
+                        "pictureUrl", user.getAttribute("picture"),
+                        "role",
+                        user.getAuthorities()
+                                .stream()
+                                .anyMatch(a ->
+                                        a.getAuthority()
+                                                .equals("ROLE_ADMIN")
+                                )
+                                ? "ADMIN"
+                                : "USER"
                 )
         );
     }

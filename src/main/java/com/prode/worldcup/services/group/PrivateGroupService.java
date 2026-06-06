@@ -1,6 +1,6 @@
 package com.prode.worldcup.services.group;
 
-import com.prode.worldcup.domain.dtos.request.GroupRankingResponseDTO;
+import com.prode.worldcup.domain.dtos.response.GroupRankingResponseDTO;
 import com.prode.worldcup.domain.dtos.request.PrivateGroupRequestDTO;
 import com.prode.worldcup.domain.dtos.response.PrivateGroupResponseDTO;
 import com.prode.worldcup.infrastructure.persistence.entity.PrivateGroupEntity;
@@ -145,7 +145,8 @@ public class PrivateGroupService {
                         new GroupRankingResponseDTO(
                                 user.getId(),
                                 user.getName(),
-                                user.getTotalPoints()
+                                user.getTotalPoints(),
+                                user.getPictureUrl()
                         )
                 )
                 .toList();

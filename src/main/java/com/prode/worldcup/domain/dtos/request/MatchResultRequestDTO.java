@@ -5,5 +5,6 @@ import java.util.UUID;
 public record MatchResultRequestDTO (
         UUID matchId,
         Integer homeScore,
-        Integer awayScore
+        Integer awayScore,
+        Boolean finished
 ){}

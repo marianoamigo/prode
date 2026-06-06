@@ -53,13 +53,13 @@ public class DataLoader implements CommandLineRunner {
 
         TeamEntity espana = TeamEntity.builder()
                 .name("España")
-                .code("ESP")
+                .code("es")
                 .group(groupB)
                 .build();
 
         TeamEntity francia = TeamEntity.builder()
                 .name("Francia")
-                .code("FRA")
+                .code("fr")
                 .group(groupB)
                 .build();
 
