@@ -12,14 +12,6 @@ async function init(){
             currentUser
     );
 
-    document
-        .getElementById(
-            "groupSelect"
-        )
-        .addEventListener(
-            "change",
-            loadGroupTeams
-        );
 
     await loadGroups();
 }
@@ -34,35 +26,24 @@ async function loadGroups(){
     const groups =
         await response.json();
 
-    const select =
+    const container =
         document.getElementById(
-            "groupSelect"
+            "groupPredictionContainer"
         );
 
-    groups.forEach(group => {
+    container.innerHTML = "";
 
-        select.innerHTML += `
+    for(const group of groups){
 
-            <option
-                value="${group.id}">
-
-                ${group.name}
-
-            </option>
-
-        `;
-    });
-
-    await loadGroupTeams();
+        await renderGroup(
+            group.id,
+            group.name
+        );
+    }
 }
 
-async function loadGroupTeams(){
-    const groupId =
-        document
-            .getElementById(
-                "groupSelect"
-            )
-            .value;
+async function renderGroup(groupId,groupName){
+
     const response =
         await fetch(
             `/api/group/${groupId}`
@@ -79,104 +60,163 @@ async function loadGroupTeams(){
     const savedPredictions =
         await predictionResponse.json();
 
+        const orderedTeams =
+            [...group.teams]
+                .sort((a,b) => {
+
+                    const posA =
+                        savedPredictions.find(
+                            p => p.teamId === a.id
+                        )?.position ?? 999;
+
+                    const posB =
+                        savedPredictions.find(
+                            p => p.teamId === b.id
+                        )?.position ?? 999;
+
+                    return posA - posB;
+                });
+
+                const teamsToRender =
+                    savedPredictions.length > 0
+                        ? orderedTeams
+                        : group.teams;
+
     const container =
         document.getElementById(
             "groupPredictionContainer"
         );
 
-container.innerHTML = "";
+    container.innerHTML += `
 
-group.teams.forEach(team,index) => {
-    const saved =
-        savedPredictions.find(
-            p => p.team.id === team.id
-        );
+        <hr>
+
+        <h4>
+            ${groupName}
+        </h4>
+
+    `;
+
+    orderedTeams.forEach((team,index) => {
+
+        const saved =
+            savedPredictions.find(
+                p => p.teamId === team.id
+            );
+
         const selectedPosition =
             saved
                 ? saved.position
                 : index + 1;
-    container.innerHTML += `
 
-        <div
-            class="row mb-2">
+        container.innerHTML += `
 
-            <div class="col-4">
+            <div class="row mb-2">
 
-                ${team.name}
+                <div class="col-4">
+
+                    ${team.name}
+
+                </div>
+
+                <div class="col-4">
+
+                    <select
+                        class="form-select prediction-position"
+
+                        data-group-id="${groupId}"
+
+                        data-team-id="${team.id}">
+
+                        <option value="1" ${selectedPosition === 1 ? "selected" : ""}>1</option>
+                        <option value="2" ${selectedPosition === 2 ? "selected" : ""}>2</option>
+                        <option value="3" ${selectedPosition === 3 ? "selected" : ""}>3</option>
+                        <option value="4" ${selectedPosition === 4 ? "selected" : ""}>4</option>
+
+                    </select>
+
+                </div>
 
             </div>
 
-            <div class="col-4">
-
-                <select
-                    class="form-select prediction-position"
-
-                    data-team-id="${team.id}">
-
-                    <option value="1" ${selectedPosition  === 1 ? "selected" : ""}>1</option>
-                    <option value="2" ${selectedPosition  === 2 ? "selected" : ""}>2</option>
-                    <option value="3" ${selectedPosition  === 3 ? "selected" : ""}>3</option>
-                    <option value="4" ${selectedPosition  === 4 ? "selected" : ""}>4</option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-    `;
-});
-
-
+        `;
+    });
 }
 
-async function saveGroupPrediction(){
+async function saveAllPredictions(){
 
-const groupId =
+    const groupsMap = {};
+
     document
-        .getElementById(
-            "groupSelect"
+        .querySelectorAll(
+            ".prediction-position"
         )
-        .value;
+        .forEach(select => {
 
-const predictions =
-    [];
-document
-    .querySelectorAll(
-        ".prediction-position"
-    )
-    .forEach(select => {
-    predictions.push({
+            const groupId =
+                select.dataset.groupId;
 
-        teamId:
-            select.dataset.teamId,
+            const teamId =
+                select.dataset.teamId;
 
-        position:
-            Number(
-                select.value
-            )
-    });
-    });
+            const position =
+                Number(
+                    select.value
+                );
 
-    const positions =
-            predictions.map(
+            if(
+                !groupsMap[groupId]
+            ){
+                groupsMap[groupId] = [];
+            }
+
+            groupsMap[groupId].push({
+
+                teamId,
+
+                position
+            });
+        });
+
+    for(
+        const groupId
+        in groupsMap
+    ){
+
+        const positions =
+            groupsMap[groupId]
+                .map(
                     p => p.position
+                );
+
+        if(
+            new Set(
+                positions
+            ).size !== 4
+        ){
+            alert(
+                "Hay posiciones repetidas en un grupo"
             );
 
-    if(
-            new Set(
-                    positions
-            ).size !== 4
-    ){
-        alert(
-            "Las posiciones no pueden repetirse"
-        );
-
-        return;
+            return;
+        }
     }
 
+    const groups =
+        Object.entries(
+            groupsMap
+        )
+        .map(
+            ([groupId,predictions]) => ({
+
+                groupId,
+
+                predictions
+            })
+        );
+
     await fetch(
-        "/api/group-predictions",
+        "/api/group-predictions/save-all",
         {
             method: "POST",
 
@@ -186,12 +226,12 @@ document
             },
 
             body: JSON.stringify({
-
-                groupId,
-
-                predictions
-
+                groups
             })
         }
+    );
+
+    alert(
+        "Pronósticos guardados"
     );
 }

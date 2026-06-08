@@ -1,7 +1,9 @@
 package com.prode.worldcup.services.group;
 
 import com.prode.worldcup.domain.dtos.request.GroupPredictionRequestDTO;
+import com.prode.worldcup.domain.dtos.request.GroupPredictionSaveAllRequestDTO;
 import com.prode.worldcup.domain.dtos.request.GroupPredictionSaveRequestDTO;
+import com.prode.worldcup.domain.dtos.response.GroupPredictionResponseDTO;
 import com.prode.worldcup.infrastructure.persistence.entity.*;
 import com.prode.worldcup.infrastructure.persistence.repository.*;
 import jakarta.transaction.Transactional;
@@ -37,6 +39,7 @@ public class GroupPredictionService {
                         user.getId(),
                         request.groupId()
                 );
+        groupPredictionRepository.flush();
         GroupEntity group =
                 groupRepository
                         .findById(
@@ -72,8 +75,27 @@ public class GroupPredictionService {
 
     }
 
-    public List<GroupPredictionEntity>
-    findByGroup(String googleId,UUID groupId) {
+    @Transactional
+    public void saveAllPredictions(
+
+            String googleId,
+
+            GroupPredictionSaveAllRequestDTO request
+    ){
+        for(
+                GroupPredictionSaveRequestDTO groupPrediction :
+
+                request.groups()
+        ){
+
+            savePrediction(
+                    googleId,
+                    groupPrediction
+            );
+        }
+    }
+    public List<GroupPredictionResponseDTO>
+    findByGroupId(String googleId,UUID groupId) {
         UserEntity user =
                 userRepository
                         .findByGoogleId(
@@ -84,7 +106,21 @@ public class GroupPredictionService {
                 .findByUserIdAndGroupId(
                         user.getId(),
                         groupId
-                );
+                )
+                .stream()
+                .map(prediction ->
+
+                        new GroupPredictionResponseDTO(
+
+                                prediction
+                                        .getTeam()
+                                        .getId(),
+
+                                prediction
+                                        .getPosition()
+                        )
+                )
+                .toList();
     }
 
     @Transactional
@@ -100,6 +136,9 @@ public class GroupPredictionService {
         if(totalPlayed < 12){
             return;
         }
+
+        log.debug("[{}] ---> GRUPO COMPLETADO, ENTRANDO A SUMAR PUNTOS DEL GRUPO",GroupPredictionService.class.getSimpleName());
+
         List<GroupPredictionEntity>
                 predictions =
 
@@ -171,8 +210,23 @@ public class GroupPredictionService {
                             .getPointsScored();
 
             if(alreadyAwarded > 0){
+
+                log.info(
+                        "[{}] ---> GRUPO {} YA PROCESADO PARA {}",
+                        GroupPredictionService.class.getSimpleName(),
+                        groupId,
+                        user.getName()
+                );
                 continue;
             }
+
+            log.info(
+                    "[{}] ---> GROUP {} USER {} SUMA {} PUNTOS",
+                    GroupPredictionService.class.getSimpleName(),
+                    groupId,
+                    user.getName(),
+                    points
+            );
 
             user.setTotalPoints(
                     user.getTotalPoints()
