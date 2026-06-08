@@ -5,6 +5,15 @@ info:
 server:
   port: 8080
 
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/worldcup
+    username: postgres
+    password: mariano
+    driver-class-name: org.postgresql.Driver
+
+
 logging:
   level:
     org.springframework.security.oauth2: TRACE
+

@@ -134,7 +134,7 @@ function renderGroup(group){
 async function copyInviteLink(){
 
     const inviteLink =
-        `${window.location.origin}/join/${currentGroup.inviteCode}`;
+        `${window.location.origin}/html/join.html?code=${currentGroup.inviteCode}`
 
     await navigator.clipboard.writeText(
         inviteLink

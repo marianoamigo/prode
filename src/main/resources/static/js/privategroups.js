@@ -70,3 +70,39 @@ function openGroup(groupId){
     window.location.href =
         `/html/privategroup.html?id=${groupId}`;
 }
+
+async function createGroup(){
+
+    const name =
+        document.getElementById(
+            "groupName"
+        ).value;
+
+    if(!name){
+        alert("Ingresá un nombre");
+        return;
+    }
+
+    const response =
+        await fetch(
+            "/api/private/create",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+                    name
+                })
+            }
+        );
+
+    const group =
+        await response.json();
+
+    window.location.href =
+        `/html/privategroup.html?id=${group.id}`;
+}

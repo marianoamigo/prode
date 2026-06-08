@@ -63,6 +63,14 @@ function renderNavbar(currentUser){
 
             </a>
 
+            <a
+                href="/html/group-prediction.html"
+                class="text-white text-decoration-none">
+
+                Pronóstico de Grupos
+
+            </a>
+
             <span class="text-white">
 
                 <span class="text-white">
