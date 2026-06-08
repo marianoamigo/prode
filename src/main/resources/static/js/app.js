@@ -145,6 +145,12 @@ async function nextDay(){
 }
 
 async function loadPredictions() {
+    const currentUser =
+            await loadCurrentUser();
+
+        if(!currentUser){
+            return [];
+        }
     const response = await fetch('/api/predictions/mine');
     return await response.json();
 }
