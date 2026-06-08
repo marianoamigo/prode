@@ -19,4 +19,9 @@ public interface GroupPredictionRepository extends JpaRepository<GroupPrediction
             UUID userId,
             UUID groupId
     );
+
+    List<GroupPredictionEntity>
+    findByGroupId(
+            UUID groupId
+    );
 }

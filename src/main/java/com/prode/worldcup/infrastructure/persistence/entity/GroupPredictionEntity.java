@@ -41,5 +41,7 @@ public class GroupPredictionEntity {
     TeamEntity team;
 
     Integer position;
+    @Builder.Default
+    Integer pointsScored = 0;
 
 }

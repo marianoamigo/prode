@@ -24,6 +24,7 @@ public class GroupStandingService {
     private final MatchRepository matchRepository;
     private final GroupStandingRepository groupStandingRepository;
     private final GroupRepository groupRepository;
+    private final GroupPredictionService groupPredictionService;
 
     public void recalculateGroup(UUID groupId) {
 
@@ -198,6 +199,10 @@ public class GroupStandingService {
                             .build()
             );
         }
+        groupPredictionService
+                .recalculatePoints(
+                        groupId
+                );
     }
 
     public List<GroupStandingResponseDTO>

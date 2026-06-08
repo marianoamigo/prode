@@ -12,6 +12,15 @@ async function init(){
             currentUser
     );
 
+    document
+        .getElementById(
+            "groupSelect"
+        )
+        .addEventListener(
+            "change",
+            loadGroupTeams
+        );
+
     await loadGroups();
 }
 
@@ -19,7 +28,7 @@ async function loadGroups(){
 
     const response =
         await fetch(
-            "/api/groups"
+            "/api/group/all"
         );
 
     const groups =
@@ -47,15 +56,6 @@ async function loadGroups(){
     await loadGroupTeams();
 }
 
-document
-    .getElementById(
-        "groupSelect"
-    )
-    .addEventListener(
-        "change",
-        loadGroupTeams
-    );
-
 async function loadGroupTeams(){
     const groupId =
         document
@@ -65,20 +65,36 @@ async function loadGroupTeams(){
             .value;
     const response =
         await fetch(
-            `/api/groups/${groupId}`
+            `/api/group/${groupId}`
         );
 
     const group =
         await response.json();
-const container =
-    document.getElementById(
-        "groupPredictionContainer"
-    );
+
+    const predictionResponse =
+        await fetch(
+            `/api/group-predictions/${groupId}`
+        );
+
+    const savedPredictions =
+        await predictionResponse.json();
+
+    const container =
+        document.getElementById(
+            "groupPredictionContainer"
+        );
 
 container.innerHTML = "";
 
-group.teams.forEach(team => {
-
+group.teams.forEach(team,index) => {
+    const saved =
+        savedPredictions.find(
+            p => p.team.id === team.id
+        );
+        const selectedPosition =
+            saved
+                ? saved.position
+                : index + 1;
     container.innerHTML += `
 
         <div
@@ -97,10 +113,10 @@ group.teams.forEach(team => {
 
                     data-team-id="${team.id}">
 
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
+                    <option value="1" ${selectedPosition  === 1 ? "selected" : ""}>1</option>
+                    <option value="2" ${selectedPosition  === 2 ? "selected" : ""}>2</option>
+                    <option value="3" ${selectedPosition  === 3 ? "selected" : ""}>3</option>
+                    <option value="4" ${selectedPosition  === 4 ? "selected" : ""}>4</option>
 
                 </select>
 
