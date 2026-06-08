@@ -30,4 +30,12 @@ public class GroupStandingController {
                         groupId
                 );
     }
+
+    @GetMapping("/all")
+    public List<GroupStandingResponseDTO>
+    findAll(){
+
+        return groupStandingService
+                .findAll();
+    }
 }

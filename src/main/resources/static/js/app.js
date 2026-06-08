@@ -1,3 +1,5 @@
+let selectedDate = new Date();
+
 document.addEventListener(
     "DOMContentLoaded",
     init
@@ -10,8 +12,14 @@ async function init() {
     document
         .getElementById("saveAllButton")
         .addEventListener("click",saveAllPredictions);
-        const matches = await loadMatches();
-        renderMatches( matches,[],null);
+        const matches =
+                await loadMatchesByDate();
+
+        renderMatches(
+                matches,
+                [],
+                null
+        );
 
         const currentUser = await loadCurrentUser();
 
@@ -22,12 +30,16 @@ async function init() {
             .getElementById("saveAllButton")
             .classList.remove("d-none");
         renderNavbar(currentUser);
-        const predictions = await loadPredictions();
+        const matchesWithDate =
+                await loadMatchesByDate();
+
+        const predictions =
+                await loadPredictions();
 
         renderMatches(
-            matches,
-            predictions,
-            currentUser
+                matchesWithDate,
+                predictions,
+                currentUser
         );
         }
 }
@@ -38,6 +50,98 @@ async function loadMatches() {
         await fetch("/api/matches/all");
 
     return await response.json();
+}
+
+async function loadMatchesByDate(){
+
+    const formattedDate =
+        selectedDate
+            .toISOString()
+            .split("T")[0];
+
+    const response =
+        await fetch(
+            `/api/matches/date/${formattedDate}`
+        );
+
+    const matches =
+        await response.json();
+
+    renderDateTitle();
+
+    return matches;
+}
+
+function renderDateTitle(){
+
+    const today =
+        new Date();
+
+    const isToday =
+        today.toDateString()
+        ===
+        selectedDate.toDateString();
+
+    document
+        .getElementById(
+            "matchesDateTitle"
+        )
+        .innerText =
+
+        isToday
+
+        ? "PARTIDOS DE HOY"
+
+        : `PARTIDOS DEL ${
+            selectedDate
+                .toLocaleDateString(
+                    "es-AR"
+                )
+        }`;
+}
+
+async function previousDay(){
+
+    selectedDate.setDate(
+        selectedDate.getDate() - 1
+    );
+
+    const matches =
+        await loadMatchesByDate();
+
+    const predictions =
+        await loadPredictions();
+
+    const currentUser =
+        await loadCurrentUser();
+
+    renderMatches(
+        matches,
+        predictions,
+        currentUser
+    );
+}
+
+async function nextDay(){
+
+    selectedDate.setDate(
+        selectedDate.getDate() + 1
+    );
+
+    const matches =
+        await loadMatchesByDate();
+
+    const predictions =
+        await loadPredictions();
+
+    const currentUser =
+        await loadCurrentUser();
+
+    renderMatches(
+        matches,
+        predictions,
+        currentUser
+    );
 }
 
 async function loadPredictions() {

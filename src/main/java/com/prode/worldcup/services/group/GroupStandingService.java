@@ -219,6 +219,51 @@ public class GroupStandingService {
 
                         new GroupStandingResponseDTO(
 
+                                standing.getGroup().getName(),
+
+                                standing.getPosition(),
+
+                                standing.getTeam()
+                                        .getName(),
+
+                                "https://flagcdn.com/24x18/"
+                                        + standing.getTeam()
+                                        .getCode()
+                                        + ".png",
+
+                                standing.getPlayed(),
+
+                                standing.getWins(),
+
+                                standing.getDraws(),
+
+                                standing.getLosses(),
+
+                                standing.getGoalsFor(),
+
+                                standing.getGoalsAgainst(),
+
+                                standing.getGoalDifference(),
+
+                                standing.getPoints()
+                        )
+                )
+                .toList();
+    }
+
+    public List<GroupStandingResponseDTO>
+    findAll(){
+
+        return groupStandingRepository
+                .findAll()
+                .stream()
+                .map(standing ->
+
+                        new GroupStandingResponseDTO(
+
+                                standing.getGroup()
+                                        .getName(),
+
                                 standing.getPosition(),
 
                                 standing.getTeam()

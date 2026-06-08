@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -27,5 +28,14 @@ public class MatchController {
     public ResponseEntity<?> updateResult(@RequestBody MatchResultRequestDTO request){
         matchService.updateResult(request);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/date/{date}")
+    public List<MatchResponseDTO> getMatchesByDate(
+            @PathVariable LocalDate date
+    ){
+        return matchService.getMatchesByDate(
+                date
+        );
     }
 }

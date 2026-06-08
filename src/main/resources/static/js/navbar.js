@@ -71,6 +71,14 @@ function renderNavbar(currentUser){
 
             </a>
 
+            <a
+                href="/html/group-standings.html"
+                class="text-white text-decoration-none">
+
+                Posiciones Grupos
+
+            </a>
+
             <span class="text-white">
 
                 <span class="text-white">

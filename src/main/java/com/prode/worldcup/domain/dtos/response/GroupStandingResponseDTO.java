@@ -1,6 +1,8 @@
 package com.prode.worldcup.domain.dtos.response;
 
 public record  GroupStandingResponseDTO(
+
+        String groupName,
         Integer position,
 
         String teamName,

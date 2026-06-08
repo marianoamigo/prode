@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -90,6 +91,36 @@ public class MatchService {
         matchRepository.save(match);
 
 
+    }
+
+    public List<MatchResponseDTO> getMatchesByDate(
+            LocalDate date
+    ){
+        return matchRepository
+                .findAll()
+                .stream()
+                .filter(match ->
+                        match.getDateTime()
+                                .toLocalDate()
+                                .equals(date)
+                )
+                .map(match -> new MatchResponseDTO(
+                        match.getId(),
+                        match.getHomeTeam().getName(),
+                        "https://flagcdn.com/24x18/"
+                                + match.getHomeTeam().getCode()
+                                + ".png",
+                        match.getAwayTeam().getName(),
+                        "https://flagcdn.com/24x18/"
+                                + match.getAwayTeam().getCode()
+                                + ".png",
+                        match.getHomeScore(),
+                        match.getAwayScore(),
+                        match.getStatus(),
+                        match.getStage(),
+                        match.getDateTime()
+                ))
+                .toList();
     }
 
 }
