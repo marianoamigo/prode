@@ -2,6 +2,9 @@ info:
   app:
     environment: "PROD"
 
+server:
+  forward-headers-strategy: framework
+
 spring:
   datasource:
     url: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
