@@ -17,26 +17,17 @@ import java.util.UUID;
 public class PrivateGroupController {
 
     private final PrivateGroupService privateGroupService;
+
     @PostMapping("/create")
     public ResponseEntity<?> create(
             @AuthenticationPrincipal OidcUser user,
             @RequestBody PrivateGroupRequestDTO request
-            ) {
-        try{
-
-            PrivateGroupResponseDTO response =
-                    privateGroupService.createGroup(
-                            user.getSubject(),
-                            request
-                    );
-
+    ) {
+        try {
+            PrivateGroupResponseDTO response = privateGroupService.createGroup(user.getSubject(), request);
             return ResponseEntity.ok(response);
-
-        }catch(IllegalArgumentException e){
-
-            return ResponseEntity
-                    .badRequest()
-                    .body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -45,64 +36,56 @@ public class PrivateGroupController {
             @AuthenticationPrincipal OidcUser user,
             @PathVariable String inviteCode
     ) {
-        privateGroupService.joinGroup(
-                user.getSubject(),
-                inviteCode
-        );
-
+        privateGroupService.joinGroup(user.getSubject(), inviteCode);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/my-groups")
-    public ResponseEntity<?> myGroups(
-            @AuthenticationPrincipal
-            OidcUser user
+    @PostMapping("/{groupId}/leave")
+    public ResponseEntity<?> leave(
+            @PathVariable UUID groupId,
+            @AuthenticationPrincipal OidcUser user
     ) {
+        try {
+            privateGroupService.leaveGroup(groupId, user.getSubject());
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
-        return ResponseEntity.ok(
-                privateGroupService.getMyGroups(
-                        user.getSubject()
-                )
-        );
+    @GetMapping("/my-groups")
+    public ResponseEntity<?> myGroups(@AuthenticationPrincipal OidcUser user) {
+        return ResponseEntity.ok(privateGroupService.getMyGroups(user.getSubject()));
     }
 
     @GetMapping("/{groupId}/ranking")
-    public ResponseEntity<?> ranking(
-            @PathVariable UUID groupId
-    ) {
-
-        return ResponseEntity.ok(
-                privateGroupService
-                        .getGroupRanking(
-                                groupId
-                        )
-        );
+    public ResponseEntity<?> ranking(@PathVariable UUID groupId) {
+        return ResponseEntity.ok(privateGroupService.getGroupRanking(groupId));
     }
 
     @GetMapping("/{groupId}")
     public ResponseEntity<?> getGroup(
-            @PathVariable UUID groupId
+            @PathVariable UUID groupId,
+            @AuthenticationPrincipal OidcUser user
     ) {
+        return ResponseEntity.ok(privateGroupService.getGroup(groupId, user.getSubject()));
+    }
 
-        return ResponseEntity.ok(
-                privateGroupService.getGroup(
-                        groupId
-                )
-        );
+    @GetMapping("/invite/{inviteCode}")
+    public ResponseEntity<?> getGroupByInviteCode(@PathVariable String inviteCode) {
+        try {
+            return ResponseEntity.ok(privateGroupService.getGroupByInviteCode(inviteCode));
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{groupId}")
     public ResponseEntity<?> delete(
             @PathVariable UUID groupId,
             @AuthenticationPrincipal OidcUser user
-    ){
-
-        privateGroupService.deleteGroup(
-                groupId,
-                user.getSubject()
-        );
-
-        return ResponseEntity.noContent()
-                .build();
+    ) {
+        privateGroupService.deleteGroup(groupId, user.getSubject());
+        return ResponseEntity.noContent().build();
     }
 }

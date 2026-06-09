@@ -32,11 +32,17 @@ public class SecurityConfig {
 
                         .requestMatchers("/",
                                 "/error",
+                                "/error.html",
                                 "/index.html",
+                                "/sw.js",
+                                "/manifest.json",
+                                "/icons/**",
+                                "/pages/**",
                                 "/css/**",
                                 "/js/**",
                                 "/api/auth/me",
-                                "/api/matches/**")
+                                "/api/matches/**",
+                                "/api/private/invite/**")
                         .permitAll()
 
                         .requestMatchers("/api/admin/**")

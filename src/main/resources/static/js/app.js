@@ -1,535 +1,367 @@
 let selectedDate = new Date();
+let activeTab = 'hoy';
+let calOpen = false;
+let modalMatchId = null;
+let modalScores = [0, 0];
 
-document.addEventListener(
-    "DOMContentLoaded",
-    init
-);
+document.addEventListener("DOMContentLoaded", init);
+
+function toDateStr(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function updateCalLabel() {
+    const label = document.getElementById('calDateLabel');
+    if (!label) return;
+    const todayStr = toDateStr(new Date());
+    const sel = toDateStr(selectedDate);
+    const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const tomorrowStr = toDateStr(tomorrowDate);
+    const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    if (sel === todayStr) label.textContent = 'Hoy';
+    else if (sel === tomorrowStr) label.textContent = 'Mañana';
+    else label.textContent = `${dias[selectedDate.getDay()]} ${selectedDate.getDate()} ${meses[selectedDate.getMonth()]}`;
+}
+
+function toggleCalendar() {
+    calOpen = !calOpen;
+    const strip = document.getElementById('dateStrip');
+    const arrow = document.getElementById('calArrow');
+    if (!strip) return;
+    if (calOpen) {
+        strip.classList.add('open');
+        if (arrow) arrow.textContent = '▴';
+        renderDateStrip();
+    } else {
+        strip.classList.remove('open');
+        if (arrow) arrow.textContent = '▾';
+    }
+}
+
+function renderDateStrip() {
+    const strip = document.getElementById('dateStrip');
+    if (!strip) return;
+
+    const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const selStr = toDateStr(selectedDate);
+    const startMs = new Date('2026-06-11T12:00:00').getTime();
+    const endMs   = new Date('2026-07-19T12:00:00').getTime();
+    const dayMs   = 86400000;
+
+    let html = '';
+    let idx = 0, selIdx = 0;
+    for (let ms = startMs; ms <= endMs; ms += dayMs) {
+        const d = new Date(ms);
+        const dateStr = toDateStr(d);
+        const active = dateStr === selStr;
+        if (active) selIdx = idx;
+        html += `<div class="date-chip${active ? ' active' : ''}" onclick="selectDate('${dateStr}')">
+            <span class="chip-day">${dias[d.getDay()]}</span>
+            <span class="chip-num">${d.getDate()}</span>
+            <span class="chip-month">${meses[d.getMonth()]}</span>
+        </div>`;
+        idx++;
+    }
+    strip.innerHTML = html;
+
+    setTimeout(() => {
+        const chips = strip.querySelectorAll('.date-chip');
+        if (chips[selIdx]) chips[selIdx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }, 50);
+}
+
+async function selectDate(dateStr) {
+    selectedDate = new Date(dateStr + 'T12:00:00');
+    activeTab = 'fecha';
+
+    // Cerrar calendario
+    calOpen = false;
+    const strip = document.getElementById('dateStrip');
+    const arrow = document.getElementById('calArrow');
+    if (strip) strip.classList.remove('open');
+    if (arrow) arrow.textContent = '▾';
+
+    // Sync tabs
+    const todayStr = toDateStr(new Date());
+    const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const tomorrowStr = toDateStr(tomorrowDate);
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    if (dateStr === todayStr) document.querySelector('[data-tab="hoy"]')?.classList.add('active');
+    else if (dateStr === tomorrowStr) document.querySelector('[data-tab="manana"]')?.classList.add('active');
+
+    updateCalLabel();
+
+    const matches = await loadMatchesByDate();
+    const predictions = await loadPredictions();
+    const currentUser = await loadCurrentUser();
+    renderMatches(matches, predictions, currentUser);
+}
 
 async function init() {
+    // After OAuth login, redirect back to a pending group invite if one was saved
+    const pendingJoinCode = localStorage.getItem('pendingJoinCode');
+    if (pendingJoinCode) {
+        const currentUser = await loadCurrentUser();
+        if (currentUser) {
+            localStorage.removeItem('pendingJoinCode');
+            window.location.href = `/pages/join.html?code=${pendingJoinCode}`;
+            return;
+        }
+    }
 
     renderNavbar(null);
+    updateCalLabel();
 
-    document
-        .getElementById("saveAllButton")
-        .addEventListener("click",saveAllPredictions);
-        const matches =
-                await loadMatchesByDate();
+    const saveBtn = document.getElementById("saveAllButton");
+    if (saveBtn) saveBtn.addEventListener("click", saveAllPredictions);
 
-        renderMatches(
-                matches,
-                [],
-                null
-        );
+    const matches = await loadMatchesByDate();
+    renderMatches(matches, [], null);
 
-        const currentUser = await loadCurrentUser();
+    const currentUser = await loadCurrentUser();
 
-
-        if(currentUser) {
-
-        document
-            .getElementById("saveAllButton")
-            .classList.remove("d-none");
+    if (currentUser) {
         renderNavbar(currentUser);
-        const matchesWithDate =
-                await loadMatchesByDate();
-
-        const predictions =
-                await loadPredictions();
-
-        renderMatches(
-                matchesWithDate,
-                predictions,
-                currentUser
-        );
-        }
+        const matchesWithDate = await loadMatchesByDate();
+        const predictions = await loadPredictions();
+        renderMatches(matchesWithDate, predictions, currentUser);
+    }
 }
 
 async function loadMatches() {
-
-    const response =
-        await fetch("/api/matches/all");
-
+    const response = await fetch("/api/matches/all");
     return await response.json();
 }
 
-async function loadMatchesByDate(){
-
-    const year =
-        selectedDate.getFullYear();
-
-    const month =
-        String(
-            selectedDate.getMonth() + 1
-        ).padStart(2,"0");
-
-    const day =
-        String(
-            selectedDate.getDate()
-        ).padStart(2,"0");
-
-    const formattedDate =
-        `${year}-${month}-${day}`;
-
-    const response =
-        await fetch(
-            `/api/matches/date/${formattedDate}`
-        );
-
-    const matches =
-        await response.json();
-
+async function loadMatchesByDate() {
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(selectedDate.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+    const response = await fetch(`/api/matches/date/${formattedDate}`);
+    const matches = await response.json();
     renderDateTitle();
-
     return matches;
 }
 
-function renderDateTitle(){
-
-    const today =
-        new Date();
-
-    const isToday =
-        today.toDateString()
-        ===
-        selectedDate.toDateString();
-
-    document
-        .getElementById(
-            "matchesDateTitle"
-        )
-        .innerText =
-
-        isToday
-
+function renderDateTitle() {
+    const el = document.getElementById("matchesDateTitle");
+    if (!el) return;
+    const today = new Date();
+    const isToday = today.toDateString() === selectedDate.toDateString();
+    el.innerText = isToday
         ? "PARTIDOS DE HOY"
-
-        : `PARTIDOS DEL ${
-            selectedDate
-                .toLocaleDateString(
-                    "es-AR"
-                )
-        }`;
+        : `PARTIDOS DEL ${selectedDate.toLocaleDateString("es-AR")}`;
 }
 
-async function previousDay(){
-
-    selectedDate.setDate(
-        selectedDate.getDate() - 1
-    );
-
-    const matches =
-        await loadMatchesByDate();
-
-    const predictions =
-        await loadPredictions();
-
-    const currentUser =
-        await loadCurrentUser();
-
-    renderMatches(
-        matches,
-        predictions,
-        currentUser
-    );
+async function previousDay() {
+    selectedDate.setDate(selectedDate.getDate() - 1);
+    const matches = await loadMatchesByDate();
+    const predictions = await loadPredictions();
+    const currentUser = await loadCurrentUser();
+    renderMatches(matches, predictions, currentUser);
 }
 
-async function nextDay(){
-
-    selectedDate.setDate(
-        selectedDate.getDate() + 1
-    );
-
-    const matches =
-        await loadMatchesByDate();
-
-    const predictions =
-        await loadPredictions();
-
-    const currentUser =
-        await loadCurrentUser();
-
-    renderMatches(
-        matches,
-        predictions,
-        currentUser
-    );
+async function nextDay() {
+    selectedDate.setDate(selectedDate.getDate() + 1);
+    const matches = await loadMatchesByDate();
+    const predictions = await loadPredictions();
+    const currentUser = await loadCurrentUser();
+    renderMatches(matches, predictions, currentUser);
 }
 
 async function loadPredictions() {
-    const currentUser =
-            await loadCurrentUser();
-
-        if(!currentUser){
-            return [];
-        }
+    const currentUser = await loadCurrentUser();
+    if (!currentUser) return [];
     const response = await fetch('/api/predictions/mine');
     return await response.json();
 }
 
-async function savePrediction(matchId){
+async function savePrediction(matchId) {
+    const homeInput = document.getElementById(`home-${matchId}`);
+    const awayInput = document.getElementById(`away-${matchId}`);
+    if (!homeInput || !awayInput) return;
 
-    const homeScore =
-        document.getElementById(
-            `home-${matchId}`
-        ).value;
+    const homeScore = homeInput.value;
+    const awayScore = awayInput.value;
 
-    const awayScore =
-        document.getElementById(
-            `away-${matchId}`
-        ).value;
+    const response = await fetch('/api/predictions/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            matchId: matchId,
+            homeScore: Number(homeScore),
+            awayScore: Number(awayScore)
+        })
+    });
 
-    await fetch(
-        '/api/predictions',
-        {
-            method: 'POST',
-
-            headers: {
-                'Content-Type':
-                    'application/json'
-            },
-
-            body: JSON.stringify({
-
+    if (response.ok) {
+        let saved;
+        try {
+            saved = await response.json();
+        } catch (e) {
+            saved = {
                 matchId: matchId,
-
-                predictedHomeScore:
-                    Number(homeScore),
-
-                predictedAwayScore:
-                    Number(awayScore)
-
-            })
+                predictedHomeScore: Number(homeScore),
+                predictedAwayScore: Number(awayScore)
+            };
         }
-    );
+        if (!window._predictions) window._predictions = [];
+        const idx = window._predictions.findIndex(p => String(p.matchId) === String(matchId));
+        if (idx >= 0) window._predictions[idx] = saved;
+        else window._predictions.push(saved);
+
+        updateMatchCard(matchId);
+    }
+}
+
+function updateMatchCard(matchId) {
+    const match = (window._allMatches || []).find(m => String(m.id) === String(matchId));
+    if (!match) return;
+    const prediction = (window._predictions || []).find(p => String(p.matchId) === String(matchId));
+    const canEdit = canEditPrediction(match);
+    const newHtml = buildMatchCard(match, prediction, window._currentUser, canEdit);
+    const card = document.getElementById(`card-${matchId}`);
+    if (card) card.outerHTML = newHtml;
+}
+
+async function updateMatchResult(matchId, finished) {
+    const homeScore = document.getElementById(`admin-home-${matchId}`).value;
+    const awayScore = document.getElementById(`admin-away-${matchId}`).value;
+
+    await fetch("/api/matches/result", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchId, homeScore: Number(homeScore), awayScore: Number(awayScore), finished })
+    });
 
     window.location.reload();
 }
 
-async function updateMatchResult(matchId,finished){
+function formatDateLabel(dateStr) {
+    const dias = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+    const meses = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+    const d = new Date(dateStr + 'T12:00:00');
+    return `${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}`;
+}
 
-    const homeScore =
-            document.getElementById(
-                    `admin-home-${matchId}`
-            ).value;
+function formatTime(dt) {
+    if (!dt) return '';
+    const d = new Date(dt);
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
 
-    const awayScore =
-            document.getElementById(
-                    `admin-away-${matchId}`
-            ).value;
+function buildMatchCard(match, prediction, currentUser, canEdit) {
+    const hasPred = !!prediction;
+    const matchTime = formatTime(match.dateTime);
 
-    await fetch(
-            "/api/matches/result",
-            {
-                method: "POST",
+    // VS block: solo muestra el resultado real, nunca el pronóstico del usuario
+    const hasRealScore = match.homeScore !== null && match.homeScore !== undefined;
+    const vsInner = hasRealScore
+        ? `<span class="score-display">${match.homeScore}–${match.awayScore}</span>`
+        : `<span class="vs-text">VS</span>`;
 
-                headers: {
-                    "Content-Type":
-                            "application/json"
-                },
+    let actionSection = '';
+    if (currentUser) {
+        if (canEdit) {
+            actionSection = `
+                <button class="btn-pronosticar ${hasPred ? 'done' : ''}"
+                        onclick="openPredictionModal('${match.id}')">
+                    ${hasPred ? 'Modificar pronóstico' : 'Pronosticar'}
+                </button>`;
+        } else {
+            actionSection = `
+                <div class="prediction-result">
+                    <span class="prediction-score">${hasPred ? `${prediction.predictedHomeScore} – ${prediction.predictedAwayScore}` : '—'}</span>
+                    ${hasPred ? `<span class="prediction-pts">${prediction.pointsScored ?? 0} pts</span>` : ''}
+                </div>`;
+        }
+    }
 
-                body: JSON.stringify({
+    let adminSection = '';
+    if (currentUser?.role === 'ADMIN') {
+        adminSection = `
+            <div class="admin-section">
+                <div class="admin-label">ADMIN</div>
+                <div class="admin-inputs">
+                    <input id="admin-home-${match.id}" type="number" min="0" class="admin-input" value="${match.homeScore ?? 0}">
+                    <span style="color:#5a6e90;">–</span>
+                    <input id="admin-away-${match.id}" type="number" min="0" class="admin-input" value="${match.awayScore ?? 0}">
+                </div>
+                <div class="admin-btns">
+                    <button class="admin-btn update" onclick="updateMatchResult('${match.id}', false)">Actualizar</button>
+                    <button class="admin-btn finish" onclick="updateMatchResult('${match.id}', true)">Finalizar</button>
+                </div>
+            </div>`;
+    }
 
-                    matchId,
-
-                    homeScore:
-                            Number(homeScore),
-
-                    awayScore:
-                            Number(awayScore),
-
-                    finished
-                })
-            }
-    );
-
-    window.location.reload();
+    return `
+        <div class="match-card" id="card-${match.id}">
+            <div class="match-card-header">
+                <span class="match-time">⏰ ${matchTime} hs</span>
+                <span class="match-status-badge">${getMatchStatus(match)}</span>
+            </div>
+            <div class="match-teams">
+                <div class="team">
+                    ${match.homeFlagUrl ? `<img src="${match.homeFlagUrl}" class="team-flag-img" alt="${match.homeTeam || ''}">` : ''}
+                    <div class="team-name">${match.homeTeam || ''}</div>
+                </div>
+                <div class="vs-block">
+                    ${vsInner}
+                </div>
+                <div class="team">
+                    ${match.awayFlagUrl ? `<img src="${match.awayFlagUrl}" class="team-flag-img" alt="${match.awayTeam || ''}">` : ''}
+                    <div class="team-name">${match.awayTeam || ''}</div>
+                </div>
+            </div>
+            ${actionSection}
+            ${adminSection}
+            <input type="hidden" id="home-${match.id}" value="${prediction?.predictedHomeScore ?? ''}">
+            <input type="hidden" id="away-${match.id}" value="${prediction?.predictedAwayScore ?? ''}">
+        </div>`;
 }
 
 function renderMatches(matches, predictions, currentUser) {
-
-    const container =
-        document.getElementById(
-            "matchesContainer"
-        );
-
+    const container = document.getElementById("matchesContainer");
     container.innerHTML = "";
 
+    window._allMatches = matches;
+    window._predictions = predictions;
+    window._currentUser = currentUser;
+
+    if (!matches || matches.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div style="font-size:40px;margin-bottom:12px;">📅</div>
+                <div>No hay partidos este día</div>
+            </div>`;
+        return;
+    }
+
+    const byDate = {};
     matches.forEach(match => {
-
-        const prediction =
-            predictions.find(
-                p => p.matchId === match.id
-            );
-
-        let predictionHtml = "";
-        let adminButtons = "";
-
-        if(currentUser){
-
-            if(canEditPrediction(match)){
-
-                predictionHtml = `
-
-                    <hr>
-
-                    <div class="mt-3">
-
-                        <strong>
-                            TU PRONÓSTICO
-                        </strong>
-
-                    </div>
-
-                    <div class="row mt-2 align-items-center">
-
-                        <div class="col">
-
-                            <input
-                                id="home-${match.id}"
-                                type="number"
-                                min="0"
-                                class="form-control"
-                                value="${prediction?.predictedHomeScore ?? ''}"
-                            >
-
-                        </div>
-
-                        <div class="col-auto">
-
-                            -
-
-                        </div>
-
-                        <div class="col">
-
-                            <input
-                                id="away-${match.id}"
-                                type="number"
-                                min="0"
-                                class="form-control"
-                                value="${prediction?.predictedAwayScore ?? ''}"
-                            >
-
-                        </div>
-
-                    </div>
-
-                `;
-
-            } else {
-
-                predictionHtml = `
-
-                    <hr>
-
-                    <div class="mt-3">
-
-                        <strong>
-                            TU PRONÓSTICO
-                        </strong>
-
-                    </div>
-
-                    <div>
-
-                        ${
-                            prediction
-                                ? `${prediction.predictedHomeScore}
-                                   -
-                                   ${prediction.predictedAwayScore}`
-                                : "-"
-                        }
-
-                    </div>
-
-                    <div class="text-success mt-2">
-
-                        ${
-                            prediction
-                                ? prediction.pointsScored
-                                : 0
-                        } puntos
-
-                    </div>
-
-                `;
-            }
-        }
-
-        if(
-                currentUser?.role === "ADMIN"
-        ){
-
-            adminButtons = `
-
-                <hr>
-
-                <div class="mt-3">
-
-                    <strong>
-
-                        ADMIN
-
-                    </strong>
-
-                </div>
-
-                <div class="row mt-2">
-
-                    <div class="col">
-
-                        <input
-                            id="admin-home-${match.id}"
-                            type="number"
-                            min="0"
-                            class="form-control"
-                            value="${match.homeScore ?? 0}"
-                        >
-
-                    </div>
-
-                    <div class="col">
-
-                        <input
-                            id="admin-away-${match.id}"
-                            type="number"
-                            min="0"
-                            class="form-control"
-                            value="${match.awayScore ?? 0}"
-                        >
-
-                    </div>
-
-                </div>
-
-                <div class="mt-2">
-
-                    <button
-                        class="btn btn-warning btn-sm"
-
-                        onclick="
-                            updateMatchResult(
-                                '${match.id}',
-                                false
-                            )
-                        ">
-
-                        Actualizar
-
-                    </button>
-
-                    <button
-                        class="btn btn-danger btn-sm ms-2"
-
-                        onclick="
-                            updateMatchResult(
-                                '${match.id}',
-                                true
-                            )
-                        ">
-
-                        Finalizar
-
-                    </button>
-
-                </div>
-
-            `;
-        }
-
-
-
-        container.innerHTML += `
-
-            <div class="card match-card">
-
-                <div class="card-header">
-
-                    ${getStageLabel(match.stage)}
-
-                </div>
-
-                <div class="card-body">
-
-                    <div class="row text-center">
-
-                        <div class="col">
-
-                            <div
-                                class="d-flex
-                                       align-items-center
-                                       justify-content-center
-                                       gap-2">
-
-                                <span>
-
-                                    ${match.homeTeam}
-
-                                </span>
-
-                                <img
-                                    src="${match.homeFlagUrl}"
-                                    width="24"
-                                    alt="">
-
-                            </div>
-
-                        </div>
-
-                        <div class="col">
-
-                            ${match.homeScore ?? "-"}
-
-                            -
-
-                            ${match.awayScore ?? "-"}
-
-                        </div>
-
-                        <div class="col">
-
-                            <div
-                                class="d-flex
-                                       align-items-center
-                                       justify-content-center
-                                       gap-2">
-
-                                <img
-                                    src="${match.awayFlagUrl}"
-                                    width="24"
-                                    alt="">
-
-                                <span>
-
-                                    ${match.awayTeam}
-
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <div class="mt-3 match-status">
-
-                        ${getMatchStatus(match)}
-
-                    </div>
-
-                    ${predictionHtml}
-                    ${adminButtons}
-
-                </div>
-
-            </div>
-
-        `;
+        const dateKey = match.dateTime ? match.dateTime.split('T')[0] : 'unknown';
+        if (!byDate[dateKey]) byDate[dateKey] = [];
+        byDate[dateKey].push(match);
     });
+
+    let html = '';
+    const showDatePills = activeTab === 'fixture';
+
+    Object.keys(byDate).sort().forEach(dateKey => {
+        if (showDatePills) html += `<div class="date-pill">${formatDateLabel(dateKey)}</div>`;
+        byDate[dateKey].forEach(match => {
+            const prediction = predictions.find(p => String(p.matchId) === String(match.id));
+            html += buildMatchCard(match, prediction, currentUser, canEditPrediction(match));
+        });
+    });
+
+    container.innerHTML = html;
 }
 
-function getStageLabel(stage){
-
+function getStageLabel(stage) {
     const stages = {
         GROUP_STAGE: "FASE DE GRUPOS",
         ROUND_OF_16: "OCTAVOS",
@@ -538,136 +370,112 @@ function getStageLabel(stage){
         THIRD_PLACE: "TERCER PUESTO",
         FINAL: "FINAL"
     };
-
     return stages[stage] || stage;
 }
 
-function getMatchStatus(match){
-
-    const now =
-            new Date();
-
-        const kickoff =
-            new Date(match.dateTime);
-
-        if(
-            match.status === "SCHEDULED"
-            &&
-            now >= kickoff
-        ){
-            return "EN JUEGO";
-        }
-
-        if(match.status === "SCHEDULED"){
-            return formatMatchDate(
-                match.dateTime
-            );
-        }
-
-        if(match.status === "LIVE"){
-            return "EN JUEGO";
-        }
-
-        if(match.status === "FINISHED"){
-            return "FINALIZADO";
-        }
-
-        return match.status;
+function getMatchStatus(match) {
+    const now = new Date();
+    const kickoff = new Date(match.dateTime);
+    if (match.status === "SCHEDULED" && now >= kickoff) return "EN JUEGO";
+    if (match.status === "SCHEDULED") return getStageLabel(match.stage);
+    if (match.status === "LIVE") return "EN JUEGO";
+    if (match.status === "FINISHED") return "FINALIZADO";
+    return match.status;
 }
 
-function formatMatchDate(dateTime){
-
+function formatMatchDate(dateTime) {
     const date = new Date(dateTime);
-
-    return date.toLocaleString(
-        'es-AR',
-        {
-            day: '2-digit',
-            month: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        }
-    );
+    return date.toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
 async function saveAllPredictions() {
-
-    const inputs =
-        document.querySelectorAll(
-            '[id^="home-"]'
-        );
-
-    for(const input of inputs){
-
-        const matchId =
-            input.id.replace(
-                "home-",
-                ""
-            );
-
-        const homeScore =
-            document.getElementById(
-                `home-${matchId}`
-            ).value;
-
-        const awayScore =
-            document.getElementById(
-                `away-${matchId}`
-            ).value;
-
-        if(
-            homeScore === ""
-            ||
-            awayScore === ""
-        ){
-            continue;
-        }
-
-        console.log({
-            matchId,
-            homeScore,
-            awayScore
+    const inputs = document.querySelectorAll('[id^="home-"]');
+    for (const input of inputs) {
+        const matchId = input.id.replace("home-", "");
+        const homeScore = document.getElementById(`home-${matchId}`)?.value;
+        const awayScore = document.getElementById(`away-${matchId}`)?.value;
+        if (!homeScore || !awayScore) continue;
+        await fetch('/api/predictions/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ matchId, homeScore: Number(homeScore), awayScore: Number(awayScore) })
         });
-
-        await fetch(
-            '/api/predictions/register',
-            {
-                method: 'POST',
-
-                headers: {
-                    'Content-Type':
-                        'application/json'
-                },
-
-                body: JSON.stringify({
-
-                    matchId,
-
-                    homeScore:
-                        Number(homeScore),
-
-                    awayScore:
-                        Number(awayScore)
-
-                })
-            }
-        );
     }
-
-    alert(
-        "✅ Pronósticos guardados"
-    );
-
+    alert("✅ Pronósticos guardados");
     await init();
 }
 
-function canEditPrediction(match){
+async function switchTab(btn, tab) {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTab = tab;
 
-    const now =
-        new Date();
+    const currentUser = await loadCurrentUser();
+    let matches;
 
-    const kickoff =
-        new Date(match.dateTime);
+    if (tab === 'hoy') {
+        selectedDate = new Date();
+        matches = await loadMatchesByDate();
+        updateCalLabel();
+    } else if (tab === 'manana') {
+        selectedDate = new Date();
+        selectedDate.setDate(selectedDate.getDate() + 1);
+        matches = await loadMatchesByDate();
+        updateCalLabel();
+    } else {
+        matches = await loadMatches();
+    }
 
+    const predictions = await loadPredictions();
+    renderMatches(matches, predictions, currentUser);
+}
+
+// ── MODAL ──
+function openPredictionModal(matchId) {
+    modalMatchId = matchId;
+    const match = (window._allMatches || []).find(m => String(m.id) === String(matchId));
+    if (!match) return;
+
+    const pred = (window._predictions || []).find(p => String(p.matchId) === String(matchId));
+    modalScores = pred ? [pred.predictedHomeScore, pred.predictedAwayScore] : [0, 0];
+
+    document.getElementById('modal-flag1').src = match.homeFlagUrl;
+    document.getElementById('modal-flag2').src = match.awayFlagUrl;
+    document.getElementById('modal-team1').textContent = match.homeTeam;
+    document.getElementById('modal-team2').textContent = match.awayTeam;
+    document.getElementById('modal-score0').textContent = modalScores[0];
+    document.getElementById('modal-score1').textContent = modalScores[1];
+
+    document.getElementById('predModal').classList.add('open');
+}
+
+function closeModal() {
+    document.getElementById('predModal').classList.remove('open');
+    modalMatchId = null;
+}
+
+function closeModalOutside(e) {
+    if (e.target === document.getElementById('predModal')) closeModal();
+}
+
+function changeModalScore(idx, delta) {
+    modalScores[idx] = Math.max(0, modalScores[idx] + delta);
+    document.getElementById('modal-score' + idx).textContent = modalScores[idx];
+}
+
+async function confirmPrediction() {
+    if (!modalMatchId) return;
+    const id = modalMatchId;
+    const homeInput = document.getElementById(`home-${id}`);
+    const awayInput = document.getElementById(`away-${id}`);
+    if (homeInput) homeInput.value = modalScores[0];
+    if (awayInput) awayInput.value = modalScores[1];
+    closeModal();
+    await savePrediction(id);
+}
+
+function canEditPrediction(match) {
+    const now = new Date();
+    const kickoff = new Date(match.dateTime);
     return now < kickoff;
 }

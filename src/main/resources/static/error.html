@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Error — ORSAI</title>
+  <meta name="theme-color" content="#0d0f1a">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/ORSAI.png">
+  <link rel="icon" href="/icons/ORSAI.png" type="image/png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <a class="brand-logo" href="/">ORSAI</a>
+  </nav>
+
+  <main class="page-container" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 52px - 64px);text-align:center;padding:40px 24px;">
+
+    <div style="font-size:72px;margin-bottom:16px;line-height:1;">⚠️</div>
+
+    <h2 id="errorTitle" style="margin-bottom:8px;color:var(--accent);">Algo salió mal</h2>
+
+    <p id="errorMsg" style="color:var(--text-secondary);font-size:.95rem;font-weight:300;margin-bottom:32px;max-width:280px;">
+      No pudimos procesar tu solicitud. Intentá de nuevo o volvé al inicio.
+    </p>
+
+    <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px;">
+      <button class="btn-confirmar" onclick="window.location.href='/'">
+        Volver al Inicio
+      </button>
+      <button class="btn-cancelar" onclick="history.back()">
+        Volver atrás
+      </button>
+    </div>
+
+  </main>
+
+  <script src="/js/bottomNav.js"></script>
+
+  <script>
+    // Detectar código de error desde la URL si viene con ?status=404
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('status');
+    const titleEl = document.getElementById('errorTitle');
+    const msgEl = document.getElementById('errorMsg');
+
+    if (status === '404') {
+      titleEl.textContent = '404 — Página no encontrada';
+      msgEl.textContent = 'La página que buscás no existe o fue movida.';
+    } else if (status === '403') {
+      titleEl.textContent = '403 — Sin acceso';
+      msgEl.textContent = 'No tenés permiso para ver esta página. Iniciá sesión para continuar.';
+    } else if (status === '500') {
+      titleEl.textContent = '500 — Error del servidor';
+      msgEl.textContent = 'Ocurrió un error interno. Intentá de nuevo en unos instantes.';
+    }
+  </script>
+
+</body>
+</html>

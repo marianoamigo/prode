@@ -35,3 +35,6 @@ build/
 ### OAuth2 / secrets
 src/main/resources/google-oauth-client.json
 
+### Local files
+orsai-prode.html
+

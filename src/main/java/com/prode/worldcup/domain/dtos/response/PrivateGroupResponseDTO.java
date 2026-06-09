@@ -6,6 +6,8 @@ public record PrivateGroupResponseDTO(
         UUID id,
         String name,
         String inviteCode,
-        String inviteLink
+        String inviteLink,
+        boolean isOwner,
+        boolean isMember
 ) {
 }

@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Grupo — ORSAI</title>
   <meta name="theme-color" content="#0d0f1a">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/ORSAI.png">
+  <link rel="icon" href="/icons/ORSAI.png" type="image/png">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -29,8 +32,11 @@
       <button id="copyInviteButton" class="btn btn-secondary" style="flex:1;">
         📋 Copiar invitación
       </button>
-      <button id="deleteGroupButton" class="btn btn-danger d-none">
+      <button id="deleteGroupButton" class="btn btn-danger" style="display:none;">
         Eliminar grupo
+      </button>
+      <button id="leaveGroupButton" class="btn btn-secondary" style="display:none;">
+        Salir del grupo
       </button>
     </div>
 

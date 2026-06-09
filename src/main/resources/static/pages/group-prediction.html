@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Pronósticos — ORSAI</title>
   <meta name="theme-color" content="#0d0f1a">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <link rel="manifest" href="/manifest.json">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+  <link rel="apple-touch-icon" href="/icons/ORSAI.png">
+  <link rel="icon" href="/icons/ORSAI.png" type="image/png">
   <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
@@ -19,15 +20,33 @@
   </nav>
 
   <main class="page-container">
-    <h2 style="margin-bottom:16px;">Pronósticos de Grupos</h2>
 
-    <div id="groupPredictionContainer">
-      <p class="text-muted" style="font-size:.85rem;text-align:center;padding:24px 0;">Cargando partidos...</p>
+    <div class="tabs mb-3">
+      <button class="tab active" onclick="switchPronoTab(this, 'partidos')">Partidos</button>
+      <button class="tab" onclick="switchPronoTab(this, 'grupos')">Grupos</button>
     </div>
 
-    <button class="btn btn-primary mt-3" onclick="saveAllPredictions()">
-      Guardar pronósticos
-    </button>
+    <!-- TAB PARTIDOS -->
+    <div id="partidosContainer">
+      <div class="empty-state">
+        <div style="font-size:32px;margin-bottom:10px;">⏳</div>
+        <div>Cargando partidos...</div>
+      </div>
+    </div>
+
+    <!-- TAB GRUPOS -->
+    <div id="gruposContainer" style="display:none;">
+      <div id="groupPredictionContainer">
+        <div class="empty-state">
+          <div style="font-size:32px;margin-bottom:10px;">⏳</div>
+          <div>Cargando grupos...</div>
+        </div>
+      </div>
+      <div style="margin-top:20px;padding-bottom:8px;">
+        <button class="btn-confirmar" onclick="saveAllPredictions()">Enviar Pronósticos</button>
+      </div>
+    </div>
+
   </main>
 
   <script src="/js/navbar.js"></script>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Reglas — ORSAI FC</title>
+  <meta name="theme-color" content="#0d0f1a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/ORSAI.png">
+  <link rel="icon" href="/icons/ORSAI.png" type="image/png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <a class="brand-logo" href="/">ORSAI</a>
+    <div id="userSection"></div>
+  </nav>
+
+  <main class="page-container" style="padding-bottom:96px;">
+
+    <div style="text-align:center;margin-bottom:28px;margin-top:8px;">
+      <div style="font-size:2.5rem;margin-bottom:10px;">⚽</div>
+      <h2 style="font-size:1rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">
+        Bienvenido al Prode del Mundial
+      </h2>
+      <p style="font-size:1.3rem;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:var(--text-primary);line-height:1.2;">
+        en ORSAI FC
+      </p>
+    </div>
+
+    <h3 style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;
+               color:var(--text-muted);margin-bottom:14px;border-bottom:1px solid var(--border);
+               padding-bottom:8px;">
+      REGLAS
+    </h3>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:28px;">
+
+      <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
+                  border:1px solid rgba(184,197,232,0.1);">
+        <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.6;">
+          Podés pronosticar <strong>resultados de partidos</strong> y
+          <strong>posiciones de los grupos</strong> en la sección
+          <span style="color:var(--accent);font-weight:700;">Pronósticos</span>.
+        </p>
+      </div>
+
+      <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
+                  border:1px solid rgba(184,197,232,0.1);">
+        <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.6;">
+          Cada partido puede pronosticarse <strong>hasta la hora de inicio del mismo</strong>.
+        </p>
+      </div>
+
+      <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
+                  border:1px solid rgba(184,197,232,0.1);">
+        <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.6;">
+          Las posiciones de los grupos pueden pronosticarse hasta el
+          <strong>horario de inicio del primer partido del grupo</strong>.
+        </p>
+      </div>
+
+    </div>
+
+    <h3 style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;
+               color:var(--text-muted);margin-bottom:14px;border-bottom:1px solid var(--border);
+               padding-bottom:8px;">
+      📋 TABLA DE PUNTAJES
+    </h3>
+
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:28px;">
+
+      <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
+                  border:1px solid rgba(184,197,232,0.1);">
+        <p style="margin:0 0 8px;font-size:.8rem;font-weight:700;letter-spacing:.06em;
+                  text-transform:uppercase;color:var(--accent);">Partidos</p>
+        <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.7;">
+          🥇 <strong>3 puntos</strong> por resultado exacto<br>
+          🎯 <strong>1 punto</strong> por acertar el ganador o el empate
+        </p>
+      </div>
+
+      <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
+                  border:1px solid rgba(184,197,232,0.1);">
+        <p style="margin:0 0 8px;font-size:.8rem;font-weight:700;letter-spacing:.06em;
+                  text-transform:uppercase;color:var(--accent);">Grupos</p>
+        <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.7;">
+          🏆 <strong>2 puntos</strong> por cada posición acertada de un país al finalizar el grupo
+        </p>
+      </div>
+
+      <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
+                  border:1px solid rgba(184,197,232,0.1);">
+        <p style="margin:0;font-size:.85rem;color:var(--text-secondary);line-height:1.6;
+                  font-style:italic;">
+          🔜 Próximamente se podrá pronosticar la fase final y los finalistas.
+        </p>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;padding-bottom:16px;">
+      <button class="btn-confirmar" style="max-width:260px;"
+              onclick="window.location.href='/'">
+        ¡A pronosticar!
+      </button>
+    </div>
+
+  </main>
+
+  <script src="/js/navbar.js"></script>
+  <script src="/js/bottomNav.js"></script>
+</body>
+</html>

@@ -21,54 +21,41 @@ public class PrivateGroupService {
 
     private final UserRepository userRepository;
     private final PrivateGroupRepository privateGroupRepository;
-    private static final String JOIN_PATH ="/join/";
+    private static final String JOIN_PATH = "/join/";
+
     public PrivateGroupResponseDTO createGroup(String googleId, PrivateGroupRequestDTO request) {
-        UserEntity owner = userRepository
-                .findByGoogleId(googleId)
-                .orElseThrow();
+        UserEntity owner = userRepository.findByGoogleId(googleId).orElseThrow();
 
         String inviteCode = generateInviteCode();
 
-        PrivateGroupEntity group =
-                PrivateGroupEntity.builder()
-                        .name(request.name())
-                        .inviteCode(inviteCode)
-                        .owner(owner)
-                        .users(new ArrayList<>())
-                        .createdAt(LocalDateTime.now())
-                        .build();
+        PrivateGroupEntity group = PrivateGroupEntity.builder()
+                .name(request.name())
+                .inviteCode(inviteCode)
+                .owner(owner)
+                .users(new ArrayList<>())
+                .createdAt(LocalDateTime.now())
+                .build();
 
         group.getUsers().add(owner);
 
-        if(privateGroupRepository.existsByName(request.name())){
-            throw new IllegalArgumentException(
-                    "Ya existe un grupo con ese nombre"
-            );
+        if (privateGroupRepository.existsByName(request.name())) {
+            throw new IllegalArgumentException("Ya existe un grupo con ese nombre");
         }
 
         group = privateGroupRepository.save(group);
 
-        return new PrivateGroupResponseDTO(
-                group.getId(),
-                group.getName(),
-                group.getInviteCode(),
-                JOIN_PATH
-                        + group.getInviteCode()
-        );
+        return toDTO(group, true, true);
     }
 
     private String generateInviteCode() {
         String code;
         do {
             code = randomCode();
-        } while (
-                privateGroupRepository.findByInviteCode(code).isPresent()
-        );
+        } while (privateGroupRepository.findByInviteCode(code).isPresent());
         return code;
     }
 
     private String randomCode() {
-
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         Random random = new Random();
         StringBuilder code = new StringBuilder();
@@ -78,136 +65,94 @@ public class PrivateGroupService {
         return code.toString();
     }
 
-    public void joinGroup(
-            String googleId,
-            String inviteCode
-    ) {
+    public void joinGroup(String googleId, String inviteCode) {
+        UserEntity user = userRepository.findByGoogleId(googleId).orElseThrow();
+        PrivateGroupEntity group = privateGroupRepository.findByInviteCode(inviteCode).orElseThrow();
 
-        UserEntity user = userRepository
-                .findByGoogleId(googleId)
-                .orElseThrow();
-
-        PrivateGroupEntity group =
-                privateGroupRepository
-                        .findByInviteCode(inviteCode)
-                        .orElseThrow();
-
-        boolean alreadyJoined =
-                group.getUsers()
-                        .stream()
-                        .anyMatch( member ->member.getId() .equals(user.getId())
-                        );
+        boolean alreadyJoined = group.getUsers().stream()
+                .anyMatch(member -> member.getId().equals(user.getId()));
 
         if (alreadyJoined) {
-            log.info("[{}] Usuario ya existe en grupo",PrivateGroupService.class.getSimpleName());
+            log.info("[{}] Usuario ya existe en grupo", PrivateGroupService.class.getSimpleName());
             return;
         }
 
         group.getUsers().add(user);
-
         privateGroupRepository.save(group);
 
-        log.info("[{}] Usuario {} se unió al grupo {}",PrivateGroupService.class.getSimpleName(),user.getEmail(), group.getName());
+        log.info("[{}] Usuario {} se unió al grupo {}",
+                PrivateGroupService.class.getSimpleName(), user.getEmail(), group.getName());
     }
 
-    public List<PrivateGroupResponseDTO> getMyGroups(
-            String googleId
-    ) {
+    public void leaveGroup(UUID groupId, String googleId) {
+        UserEntity user = userRepository.findByGoogleId(googleId).orElseThrow();
+        PrivateGroupEntity group = privateGroupRepository.findById(groupId).orElseThrow();
 
-        UserEntity user = userRepository
-                .findByGoogleId(googleId)
-                .orElseThrow();
+        if (group.getOwner().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("El owner no puede salir del grupo. Podés eliminarlo.");
+        }
 
+        group.getUsers().removeIf(member -> member.getId().equals(user.getId()));
+        privateGroupRepository.save(group);
 
+        log.info("[{}] Usuario {} salió del grupo {}",
+                PrivateGroupService.class.getSimpleName(), user.getEmail(), group.getName());
+    }
 
-        return user.getGroups()
-                .stream()
-                .map(group ->
-                        new PrivateGroupResponseDTO(
-                                group.getId(),
-                                group.getName(),
-                                group.getInviteCode(),
-                                JOIN_PATH + group.getInviteCode()
-                        )
-                )
+    public List<PrivateGroupResponseDTO> getMyGroups(String googleId) {
+        UserEntity user = userRepository.findByGoogleId(googleId).orElseThrow();
+        return user.getGroups().stream()
+                .map(group -> toDTO(group, group.getOwner().getId().equals(user.getId()), true))
                 .toList();
     }
 
+    public PrivateGroupResponseDTO getGroup(UUID groupId, String googleId) {
+        PrivateGroupEntity group = privateGroupRepository.findById(groupId).orElseThrow();
+        UserEntity user = userRepository.findByGoogleId(googleId).orElseThrow();
+
+        boolean isOwner = group.getOwner().getId().equals(user.getId());
+        boolean isMember = group.getUsers().stream().anyMatch(m -> m.getId().equals(user.getId()));
+
+        return toDTO(group, isOwner, isMember);
+    }
+
+    public PrivateGroupResponseDTO getGroupByInviteCode(String inviteCode) {
+        PrivateGroupEntity group = privateGroupRepository.findByInviteCode(inviteCode).orElseThrow();
+        return toDTO(group, false, false);
+    }
 
     public Object getGroupRanking(UUID groupId) {
-
-        PrivateGroupEntity group =
-                privateGroupRepository
-                        .findById(groupId)
-                        .orElseThrow();
-        return group.getUsers()
-                .stream()
-                .sorted(
-                        Comparator.comparing(
-                                UserEntity::getTotalPoints
-                        ).reversed()
-                )
-                .map(user ->
-                        new GroupRankingResponseDTO(
-                                user.getId(),
-                                user.getName(),
-                                user.getTotalPoints(),
-                                user.getPictureUrl()
-                        )
-                )
+        PrivateGroupEntity group = privateGroupRepository.findById(groupId).orElseThrow();
+        return group.getUsers().stream()
+                .sorted(Comparator.comparing(UserEntity::getTotalPoints).reversed())
+                .map(user -> new GroupRankingResponseDTO(
+                        user.getId(),
+                        user.getName(),
+                        user.getTotalPoints(),
+                        user.getPictureUrl()
+                ))
                 .toList();
     }
 
-    public PrivateGroupResponseDTO getGroup(
-            UUID groupId
-    ) {
+    public void deleteGroup(UUID groupId, String googleId) {
+        UserEntity user = userRepository.findByGoogleId(googleId).orElseThrow();
+        PrivateGroupEntity group = privateGroupRepository.findById(groupId).orElseThrow();
 
-        PrivateGroupEntity group =
-                privateGroupRepository
-                        .findById(groupId)
-                        .orElseThrow();
+        if (!group.getOwner().getId().equals(user.getId())) {
+            throw new RuntimeException("Solo el owner puede eliminar el grupo");
+        }
 
+        privateGroupRepository.delete(group);
+    }
+
+    private PrivateGroupResponseDTO toDTO(PrivateGroupEntity group, boolean isOwner, boolean isMember) {
         return new PrivateGroupResponseDTO(
                 group.getId(),
                 group.getName(),
                 group.getInviteCode(),
-                JOIN_PATH + group.getInviteCode()
-        );
-    }
-
-    public void deleteGroup(
-            UUID groupId,
-            String googleId
-    ){
-
-        UserEntity user =
-                userRepository
-                        .findByGoogleId(
-                                googleId
-                        )
-                        .orElseThrow();
-
-        PrivateGroupEntity group =
-                privateGroupRepository
-                        .findById(
-                                groupId
-                        )
-                        .orElseThrow();
-
-        if(
-                !group.getOwner()
-                        .getId()
-                        .equals(
-                                user.getId()
-                        )
-        ){
-            throw new RuntimeException(
-                    "Solo el owner puede eliminar el grupo"
-            );
-        }
-
-        privateGroupRepository.delete(
-                group
+                JOIN_PATH + group.getInviteCode(),
+                isOwner,
+                isMember
         );
     }
 }

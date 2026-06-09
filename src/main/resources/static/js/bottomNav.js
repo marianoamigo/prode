@@ -23,12 +23,6 @@
       icon: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>`
     },
     {
-      id: 'ranking',
-      label: 'Ranking',
-      href: '/pages/ranking.html',
-      icon: `<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`
-    },
-    {
       id: 'grupos',
       label: 'Mis Grupos',
       href: '/pages/privategroups.html',

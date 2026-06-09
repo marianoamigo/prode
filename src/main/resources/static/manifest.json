@@ -1,6 +1,6 @@
 {
-  "name": "ORSAI — Prode Mundial 2026",
-  "short_name": "ORSAI",
+  "name": "ORSAI FC — Prode Mundial 2026",
+  "short_name": "ORSAI FC",
   "description": "Tu prode. Tu pasión. Tu torneo.",
   "start_url": "/",
   "display": "standalone",
@@ -9,16 +9,10 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
+      "src": "/icons/ORSAI.png",
+      "sizes": "2481x2471",
       "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "categories": ["sports", "games"],
