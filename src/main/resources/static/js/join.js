@@ -37,7 +37,7 @@ async function init() {
     const alreadyMember = myGroups.some(g => String(g.id) === String(group.id));
 
     if (alreadyMember) {
-        window.location.href = `/pages/privategroup.html?id=${group.id}`;
+        window.location.href = `/pages/privategroup?id=${group.id}`;
         return;
     }
 
@@ -81,7 +81,7 @@ async function joinGroup(code, groupId) {
     try {
         const response = await fetch(`/api/private/join/${code}`, { method: 'POST' });
         if (response.ok) {
-            window.location.href = `/pages/privategroup.html?id=${groupId}`;
+            window.location.href = `/pages/privategroup?id=${groupId}`;
         } else {
             if (btn) { btn.disabled = false; btn.textContent = 'Unirme al grupo'; }
             alert('No se pudo unir al grupo. Intentá de nuevo.');

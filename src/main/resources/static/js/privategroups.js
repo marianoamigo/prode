@@ -35,7 +35,7 @@ function renderGroups(groups) {
 
     container.innerHTML += `
         <div style="margin-top:24px;padding-bottom:8px;">
-            <button class="btn-ranking-global" onclick="window.location.href='/pages/ranking.html'">
+            <button class="btn-ranking-global" onclick="window.location.href='/pages/ranking'">
                 🏆 RANKING GLOBAL
             </button>
         </div>
@@ -43,7 +43,7 @@ function renderGroups(groups) {
 }
 
 function openGroup(groupId) {
-    window.location.href = `/pages/privategroup.html?id=${groupId}`;
+    window.location.href = `/pages/privategroup?id=${groupId}`;
 }
 
 async function createGroup() {
@@ -88,7 +88,7 @@ function showCreatedSuccess(group) {
                 <button class="btn-cancelar" onclick="copyGroupInvite('${group.inviteCode}')">
                     📋 Copiar invitación
                 </button>
-                <button class="btn-confirmar" onclick="window.location.href='/pages/privategroup.html?id=${group.id}'">
+                <button class="btn-confirmar" onclick="window.location.href='/pages/privategroup?id=${group.id}'">
                     Ir al grupo
                 </button>
             </div>
@@ -97,7 +97,7 @@ function showCreatedSuccess(group) {
 }
 
 function copyGroupInvite(inviteCode) {
-    const link = `${window.location.origin}/pages/join.html?code=${inviteCode}`;
+    const link = `${window.location.origin}/pages/join?code=${inviteCode}`;
     navigator.clipboard.writeText(link);
     alert("✅ Invitación copiada");
 }

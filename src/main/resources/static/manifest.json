@@ -9,6 +9,18 @@
   "orientation": "portrait",
   "icons": [
     {
+      "src": "/icons/ORSAI-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/ORSAI-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
       "src": "/icons/ORSAI.png",
       "sizes": "2481x2471",
       "type": "image/png",

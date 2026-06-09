@@ -73,7 +73,7 @@ function renderRanking(ranking) {
 }
 
 async function copyInviteLink() {
-    const inviteLink = `${window.location.origin}/pages/join.html?code=${currentGroup.inviteCode}`;
+    const inviteLink = `${window.location.origin}/pages/join?code=${currentGroup.inviteCode}`;
     await navigator.clipboard.writeText(inviteLink);
     alert("✅ Invitación copiada");
 }
@@ -83,7 +83,7 @@ async function deleteGroup() {
 
     const response = await fetch(`/api/private/${currentGroup.id}`, { method: "DELETE" });
     if (response.ok || response.status === 204) {
-        window.location.href = "/pages/privategroups.html";
+        window.location.href = "/pages/privategroups";
     } else {
         alert("No se pudo eliminar el grupo.");
     }
@@ -94,7 +94,7 @@ async function leaveGroup() {
 
     const response = await fetch(`/api/private/${currentGroup.id}/leave`, { method: "POST" });
     if (response.ok) {
-        window.location.href = "/pages/privategroups.html";
+        window.location.href = "/pages/privategroups";
     } else {
         const msg = await response.text().catch(() => '');
         alert(msg || "No se pudo salir del grupo.");

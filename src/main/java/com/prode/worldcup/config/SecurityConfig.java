@@ -2,6 +2,7 @@ package com.prode.worldcup.config;
 
 import com.prode.worldcup.infrastructure.persistence.repository.UserRepository;
 import com.prode.worldcup.services.oauth.CustomOidcUserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -52,11 +53,22 @@ public class SecurityConfig {
                         .authenticated()
                 )
 
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            if (request.getRequestURI().startsWith("/api/")) {
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            } else {
+                                response.sendRedirect("/oauth2/authorization/google");
+                            }
+                        })
+                )
+
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfoEndpointConfig ->
                                 userInfoEndpointConfig
                                         .oidcUserService(customOidcUserService)
                         )
+                        .defaultSuccessUrl("/", true)
                 )
 
                 .logout(logout -> logout

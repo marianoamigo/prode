@@ -106,7 +106,7 @@ async function init() {
         const currentUser = await loadCurrentUser();
         if (currentUser) {
             localStorage.removeItem('pendingJoinCode');
-            window.location.href = `/pages/join.html?code=${pendingJoinCode}`;
+            window.location.href = `/pages/join?code=${pendingJoinCode}`;
             return;
         }
     }

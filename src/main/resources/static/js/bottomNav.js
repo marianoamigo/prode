@@ -13,19 +13,19 @@
     {
       id: 'pronosticos',
       label: 'Pronósticos',
-      href: '/pages/group-prediction.html',
+      href: '/pages/group-prediction',
       icon: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>`
     },
     {
       id: 'posiciones',
       label: 'Posiciones',
-      href: '/pages/group-standings.html',
+      href: '/pages/group-standings',
       icon: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>`
     },
     {
       id: 'grupos',
       label: 'Mis Grupos',
-      href: '/pages/privategroups.html',
+      href: '/pages/privategroups',
       icon: `<svg viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>`
     }
   ];
