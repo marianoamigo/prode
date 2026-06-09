@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mis Grupos — ORSAI</title>
+  <meta name="theme-color" content="#0d0f1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <a class="brand-logo" href="/">ORSAI</a>
+    <div id="userSection"></div>
+  </nav>
+
+  <main class="page-container">
+    <h2 style="margin-bottom:16px;">Mis Grupos</h2>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h3 style="font-size:.85rem;margin-bottom:12px;">Crear grupo nuevo</h3>
+        <div class="input-group">
+          <input
+            id="groupName"
+            type="text"
+            class="form-control"
+            placeholder="Nombre del grupo">
+          <button class="btn btn-success" onclick="createGroup()">Crear</button>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <div id="groupsContainer">
+      <p class="text-muted" style="font-size:.85rem;text-align:center;padding:24px 0;">Cargando tus grupos...</p>
+    </div>
+  </main>
+
+  <script src="/js/navbar.js"></script>
+  <script src="/js/privategroups.js"></script>
+  <script src="/js/bottomNav.js"></script>
+</body>
+</html>

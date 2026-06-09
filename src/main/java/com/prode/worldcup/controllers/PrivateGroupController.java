@@ -22,8 +22,22 @@ public class PrivateGroupController {
             @AuthenticationPrincipal OidcUser user,
             @RequestBody PrivateGroupRequestDTO request
             ) {
-        PrivateGroupResponseDTO response = privateGroupService.createGroup(user.getSubject(), request);
-        return ResponseEntity.ok(response);
+        try{
+
+            PrivateGroupResponseDTO response =
+                    privateGroupService.createGroup(
+                            user.getSubject(),
+                            request
+                    );
+
+            return ResponseEntity.ok(response);
+
+        }catch(IllegalArgumentException e){
+
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+        }
     }
 
     @PostMapping("/join/{inviteCode}")
@@ -75,5 +89,20 @@ public class PrivateGroupController {
                         groupId
                 )
         );
+    }
+
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<?> delete(
+            @PathVariable UUID groupId,
+            @AuthenticationPrincipal OidcUser user
+    ){
+
+        privateGroupService.deleteGroup(
+                groupId,
+                user.getSubject()
+        );
+
+        return ResponseEntity.noContent()
+                .build();
     }
 }

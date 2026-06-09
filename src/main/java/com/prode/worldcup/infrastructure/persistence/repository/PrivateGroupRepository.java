@@ -12,4 +12,6 @@ public interface PrivateGroupRepository extends JpaRepository<PrivateGroupEntity
 
     Optional<PrivateGroupEntity> findByInviteCode(String inviteCode);
 
+    boolean existsByName(String name);
+
 }

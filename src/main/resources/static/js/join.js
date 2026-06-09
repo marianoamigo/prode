@@ -1,62 +1,29 @@
-document.addEventListener(
-    "DOMContentLoaded",
-    init
-);
+document.addEventListener("DOMContentLoaded", init);
 
-function init(){
-
-    document
-        .getElementById(
-            "joinButton"
-        )
-        .addEventListener(
-            "click",
-            joinGroup
-        );
+function init() {
+    document.getElementById("joinButton")
+        .addEventListener("click", joinGroup);
 }
 
-async function joinGroup(){
+async function joinGroup() {
+    const params = new URLSearchParams(window.location.search);
+    const inviteCode = params.get("code");
 
-    const params =
-        new URLSearchParams(
-            window.location.search
-        );
+    try {
+        const response = await fetch(`/api/private/join/${inviteCode}`, {
+            method: "POST"
+        });
 
-    const inviteCode =
-        params.get("code");
-
-    try{
-
-        const response =
-            await fetch(
-                `/api/private/join/${inviteCode}`,
-                {
-                    method: "POST"
-                }
-            );
-
-        if(!response.ok){
-
-            alert(
-                "No fue posible unirse al grupo"
-            );
-
+        if (!response.ok) {
+            alert("No fue posible unirse al grupo");
             return;
         }
 
-        alert(
-            "Te uniste al grupo correctamente"
-        );
+        alert("✅ Te uniste al grupo correctamente");
+        window.location.href = "/pages/privategroups.html";
 
-        window.location.href =
-            "/html/privategroups.html";
-
-    }catch(error){
-
+    } catch (error) {
         console.error(error);
-
-        alert(
-            "Error al unirse al grupo"
-        );
+        alert("Error al unirse al grupo");
     }
 }

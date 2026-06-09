@@ -54,10 +54,21 @@ async function loadMatches() {
 
 async function loadMatchesByDate(){
 
+    const year =
+        selectedDate.getFullYear();
+
+    const month =
+        String(
+            selectedDate.getMonth() + 1
+        ).padStart(2,"0");
+
+    const day =
+        String(
+            selectedDate.getDate()
+        ).padStart(2,"0");
+
     const formattedDate =
-        selectedDate
-            .toISOString()
-            .split("T")[0];
+        `${year}-${month}-${day}`;
 
     const response =
         await fetch(
@@ -450,16 +461,16 @@ function renderMatches(matches, predictions, currentUser) {
                                        justify-content-center
                                        gap-2">
 
-                                <img
-                                    src="${match.homeFlagUrl}"
-                                    width="24"
-                                    alt="">
-
                                 <span>
 
                                     ${match.homeTeam}
 
                                 </span>
+
+                                <img
+                                    src="${match.homeFlagUrl}"
+                                    width="24"
+                                    alt="">
 
                             </div>
 
@@ -643,7 +654,11 @@ async function saveAllPredictions() {
         );
     }
 
-    window.location.reload();
+    alert(
+        "✅ Pronósticos guardados"
+    );
+
+    await init();
 }
 
 function canEditPrediction(match){

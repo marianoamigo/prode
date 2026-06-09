@@ -91,13 +91,15 @@ async function renderGroup(groupId,groupName){
 
         <hr>
 
-        <h4>
-            ${groupName}
-        </h4>
+        <h3 class="mb-3">
+
+            GRUPO ${groupName}
+
+        </h3>
 
     `;
 
-    orderedTeams.forEach((team,index) => {
+    teamsToRender.forEach((team,index) => {
 
         const saved =
             savedPredictions.find(
@@ -113,9 +115,25 @@ async function renderGroup(groupId,groupName){
 
             <div class="row mb-2">
 
-                <div class="col-4">
+                <div class="col-8">
 
-                    ${team.name}
+                    <div
+                        class="
+                        d-flex
+                        align-items-center
+                        gap-2">
+
+                        <img
+                            src="${team.flagUrl}"
+                            width="28">
+
+                        <span>
+
+                            ${team.name}
+
+                        </span>
+
+                    </div>
 
                 </div>
 

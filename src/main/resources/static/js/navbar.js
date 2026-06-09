@@ -1,123 +1,53 @@
 async function loadCurrentUser() {
-
     try {
         const response = await fetch('/api/auth/me');
+        if (!response.ok) return null;
         const user = await response.json();
-        console.log("USER", user);
         return user;
-        } catch (error) {
+    } catch (error) {
         console.log(error);
         return null;
-        }
+    }
 }
 
-function renderNavbar(currentUser){
+function renderNavbar(currentUser) {
+    const userSection = document.getElementById("userSection");
+    if (!userSection) return;
 
-    const userSection =
-        document.getElementById(
-            "userSection"
-        );
-
-    if(!currentUser){
-
+    if (!currentUser) {
         userSection.innerHTML = `
-
-            <a
-                href="/oauth2/authorization/google"
-                class="btn btn-outline-light">
-
-                Login Google
-
+            <a href="/oauth2/authorization/google"
+               style="font-size:.8rem;color:var(--text-secondary);text-decoration:none;
+                      border:1px solid var(--border);padding:6px 12px;border-radius:50px;
+                      font-family:var(--font-body);font-weight:500;text-transform:uppercase;
+                      letter-spacing:.05em;">
+                Ingresar
             </a>
-
         `;
-
         return;
     }
 
     userSection.innerHTML = `
-
-        <div class="d-flex align-items-center gap-3">
-
-            <a
-                href="/"
-                class="text-white text-decoration-none">
-
-                Partidos
-
-            </a>
-
-            <a
-                href="/html/ranking.html"
-                class="text-white text-decoration-none">
-
-                Ranking Global
-
-            </a>
-
-            <a
-                href="/html/privategroups.html"
-                class="text-white text-decoration-none">
-
-                Mis Grupos
-
-            </a>
-
-            <a
-                href="/html/group-prediction.html"
-                class="text-white text-decoration-none">
-
-                Pronóstico de Grupos
-
-            </a>
-
-            <a
-                href="/html/group-standings.html"
-                class="text-white text-decoration-none">
-
-                Posiciones Grupos
-
-            </a>
-
-            <span class="text-white">
-
-                <span class="text-white">
-                                    ${currentUser.name}
-                </span>
-                <img
-                    src="${currentUser.pictureUrl}"
-                    width="40"
-                    height="40"
-                    class="rounded-circle">
-
-
-
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:.85rem;color:var(--text-secondary);">
+                ${currentUser.name}
             </span>
-
-            <a
-                href="/logout"
-                class="btn btn-outline-light">
-
+            <img src="${currentUser.pictureUrl}"
+                 width="32" height="32"
+                 style="border-radius:50%;border:2px solid var(--border);"
+                 alt="${currentUser.name}">
+            <a href="/logout"
+               style="font-size:.75rem;color:var(--text-muted);text-decoration:none;">
                 Salir
-
             </a>
-
         </div>
-
     `;
 }
 
-document.addEventListener(
-    "DOMContentLoaded",
-    initNavbar
-);
+document.addEventListener("DOMContentLoaded", initNavbar);
 
 async function initNavbar() {
-
     renderNavbar(null);
-
-    const currentUser =
-        await loadCurrentUser();
-
+    const currentUser = await loadCurrentUser();
     renderNavbar(currentUser);
 }

@@ -1,108 +1,64 @@
-document.addEventListener(
-    "DOMContentLoaded",
-    init
-);
+document.addEventListener("DOMContentLoaded", init);
 
-async function init(){
-
-
-    const groups =
-        await loadGroups();
-
+async function init() {
+    const groups = await loadGroups();
     renderGroups(groups);
 }
 
-async function loadGroups(){
-
-    const response =
-        await fetch(
-            "/api/private/my-groups"
-        );
-
+async function loadGroups() {
+    const response = await fetch("/api/private/my-groups");
     return await response.json();
 }
 
-function renderGroups(groups){
-
-    const container =
-        document.getElementById(
-            "groupsContainer"
-        );
-
+function renderGroups(groups) {
+    const container = document.getElementById("groupsContainer");
     container.innerHTML = "";
 
+    if (!groups.length) {
+        container.innerHTML = `
+            <p style="color:var(--text-muted);font-size:.85rem;text-align:center;padding:24px 0;">
+                Todavía no tenés grupos. ¡Creá uno!
+            </p>
+        `;
+        return;
+    }
+
     groups.forEach(group => {
-
         container.innerHTML += `
-
-            <div class="card mb-3">
-
-                <div class="card-body">
-
-                    <h5>
-
-                        ${group.name}
-
-                    </h5>
-
-                    <button
-                        class="btn btn-primary"
-                        onclick="
-                            openGroup(
-                                '${group.id}'
-                            )
-                        ">
-
-                        Ver Ranking
-
-                    </button>
-
+            <div class="match-card" style="cursor:pointer;" onclick="openGroup('${group.id}')">
+                <div class="teams">
+                    <span>${group.name}</span>
+                    <span style="font-size:.8rem;color:var(--blue-pearl);">Ver ranking →</span>
                 </div>
-
             </div>
-
         `;
     });
 }
 
-function openGroup(groupId){
-
-    window.location.href =
-        `/html/privategroup.html?id=${groupId}`;
+function openGroup(groupId) {
+    window.location.href = `/pages/privategroup.html?id=${groupId}`;
 }
 
-async function createGroup(){
+async function createGroup() {
+    const name = document.getElementById("groupName").value;
 
-    const name =
-        document.getElementById(
-            "groupName"
-        ).value;
-
-    if(!name){
-        alert("Ingresá un nombre");
+    if (!name) {
+        alert("Ingresá un nombre para el grupo");
         return;
     }
 
-    const response =
-        await fetch(
-            "/api/private/create",
-            {
-                method: "POST",
+    const response = await fetch("/api/private/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+    });
 
-                headers: {
-                    "Content-Type":
-                        "application/json"
-                },
+    if (!response.ok) {
+        const error = await response.text();
+        alert(error);
+        return;
+    }
 
-                body: JSON.stringify({
-                    name
-                })
-            }
-        );
-
-    const group =
-        await response.json();
-
-    window.location.href =
-        `/html/privategroup.html?id=${group.id}`;
+    const group = await response.json();
+    window.location.href = `/pages/privategroup.html?id=${group.id}`;
 }

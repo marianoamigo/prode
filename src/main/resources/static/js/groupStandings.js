@@ -91,27 +91,41 @@ function renderStandings(
 
                         </div>
 
-                        <div
-                            class="card-body">
+                        <div class="card-body">
+
+                            <div class="standings-header">
+
+                                <span></span>
+                                <span></span>
+
+                                <span>PJ</span>
+                                <span>G</span>
+                                <span>E</span>
+                                <span>P</span>
+                                <span>GF</span>
+                                <span>GC</span>
+                                <span>DG</span>
+                                <span>PTS</span>
+
+                            </div>
 
                             ${teams.map(team => `
 
-                                <div
-                                    class="d-flex
-                                           justify-content-between
-                                           align-items-center
-                                           mb-2">
+                                <div class="standings-row">
 
-                                    <div
-                                        class="d-flex
-                                               align-items-center
-                                               gap-2">
+                                    <div class="standings-team">
 
-                                        <span>
-
-                                            ${team.position}
-
-                                        </span>
+                                        ${
+                                            team.position > 0
+                                                ? `
+                                                    <span class="standing-position">
+                                                        ${team.position}
+                                                    </span>
+                                                  `
+                                                : `
+                                                    <span class="standing-position"></span>
+                                                  `
+                                        }
 
                                         <img
                                             src="${team.flagUrl}"
@@ -119,18 +133,19 @@ function renderStandings(
                                             alt="">
 
                                         <span>
-
                                             ${team.teamName}
-
                                         </span>
 
                                     </div>
 
-                                    <span>
-
-                                        ${team.points} pts
-
-                                    </span>
+                                    <span>${team.played}</span>
+                                    <span>${team.wins}</span>
+                                    <span>${team.draws}</span>
+                                    <span>${team.losses}</span>
+                                    <span>${team.goalsFor}</span>
+                                    <span>${team.goalsAgainst}</span>
+                                    <span>${team.goalDifference}</span>
+                                    <span>${team.points}</span>
 
                                 </div>
 

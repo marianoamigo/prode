@@ -40,6 +40,12 @@ public class PrivateGroupService {
 
         group.getUsers().add(owner);
 
+        if(privateGroupRepository.existsByName(request.name())){
+            throw new IllegalArgumentException(
+                    "Ya existe un grupo con ese nombre"
+            );
+        }
+
         group = privateGroupRepository.save(group);
 
         return new PrivateGroupResponseDTO(
@@ -166,6 +172,42 @@ public class PrivateGroupService {
                 group.getName(),
                 group.getInviteCode(),
                 JOIN_PATH + group.getInviteCode()
+        );
+    }
+
+    public void deleteGroup(
+            UUID groupId,
+            String googleId
+    ){
+
+        UserEntity user =
+                userRepository
+                        .findByGoogleId(
+                                googleId
+                        )
+                        .orElseThrow();
+
+        PrivateGroupEntity group =
+                privateGroupRepository
+                        .findById(
+                                groupId
+                        )
+                        .orElseThrow();
+
+        if(
+                !group.getOwner()
+                        .getId()
+                        .equals(
+                                user.getId()
+                        )
+        ){
+            throw new RuntimeException(
+                    "Solo el owner puede eliminar el grupo"
+            );
+        }
+
+        privateGroupRepository.delete(
+                group
         );
     }
 }

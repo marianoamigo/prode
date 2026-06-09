@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Grupo — ORSAI</title>
+  <meta name="theme-color" content="#0d0f1a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <a class="brand-logo" href="/">ORSAI</a>
+    <div id="userSection"></div>
+  </nav>
+
+  <main class="page-container">
+    <!-- Encabezado del grupo -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+      <a href="/pages/privategroups.html" style="color:var(--text-muted);text-decoration:none;font-size:1.2rem;">←</a>
+      <h2 id="groupTitle" style="margin:0;">Grupo</h2>
+    </div>
+    <p class="text-muted" style="font-size:.8rem;margin-bottom:16px;">Ranking del grupo</p>
+
+    <!-- Acciones -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+      <button id="copyInviteButton" class="btn btn-secondary" style="flex:1;">
+        📋 Copiar invitación
+      </button>
+      <button id="deleteGroupButton" class="btn btn-danger d-none">
+        Eliminar grupo
+      </button>
+    </div>
+
+    <hr>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Usuario</th>
+          <th style="text-align:right;">Puntos</th>
+        </tr>
+      </thead>
+      <tbody id="rankingBody">
+        <tr><td colspan="3" class="text-muted" style="padding:24px;text-align:center;font-size:.85rem;">Cargando...</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <script src="/js/navbar.js"></script>
+  <script src="/js/privategroup.js"></script>
+  <script src="/js/bottomNav.js"></script>
+</body>
+</html>
