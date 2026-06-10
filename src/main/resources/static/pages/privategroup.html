@@ -21,11 +21,17 @@
 
   <main class="page-container">
     <!-- Encabezado del grupo -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
-      <a href="/pages/privategroups" style="color:var(--text-muted);text-decoration:none;font-size:1.2rem;">←</a>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
+      <a href="/pages/privategroups"
+         style="text-decoration:none;font-size:1.6rem;line-height:1;display:flex;align-items:center;">
+        🔙
+      </a>
       <h2 id="groupTitle" style="margin:0;">Grupo</h2>
     </div>
-    <p class="text-muted" style="font-size:.8rem;margin-bottom:16px;">Ranking del grupo</p>
+    <p class="text-muted" style="font-size:.8rem;margin-bottom:12px;">Ranking del grupo</p>
+
+    <!-- Posición del usuario -->
+    <div id="myPositionBanner" style="display:none;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
 
     <!-- Acciones -->
     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">

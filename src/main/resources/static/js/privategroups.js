@@ -1,8 +1,43 @@
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
+    const currentUser = await loadCurrentUser();
+    renderNavbar(currentUser);
+
+    if (!currentUser) {
+        document.querySelector('main.page-container').innerHTML = `
+            <div style="text-align:center;padding:60px 20px;">
+                <p style="font-size:1.05rem;font-weight:700;letter-spacing:.05em;margin-bottom:28px;color:var(--text-primary);line-height:1.5;">
+                    NECESITAS ESTAR LOGUEADO PARA PRONOSTICAR
+                </p>
+                <a href="/oauth2/authorization/google"
+                   style="display:inline-block;padding:14px 32px;background:var(--accent);color:#fff;
+                          border-radius:50px;font-weight:700;font-size:.85rem;letter-spacing:.08em;
+                          text-transform:uppercase;text-decoration:none;font-family:var(--font-body);">
+                    Loguearse
+                </a>
+            </div>
+        `;
+        return;
+    }
+
     const groups = await loadGroups();
-    renderGroups(groups);
+
+    // Load all group rankings + global ranking in parallel
+    const [rankingsArr, globalRanking] = await Promise.all([
+        Promise.all(groups.map(g =>
+            fetch(`/api/private/${g.id}/ranking`).then(r => r.ok ? r.json() : []).catch(() => [])
+        )),
+        fetch('/api/ranking/global').then(r => r.ok ? r.json() : []).catch(() => [])
+    ]);
+
+    const groupRankings = {};
+    groups.forEach((g, i) => { groupRankings[g.id] = rankingsArr[i]; });
+
+    const myGlobalIdx = globalRanking.findIndex(u => u.userName === currentUser.name);
+    const myGlobalPos = myGlobalIdx >= 0 ? myGlobalIdx + 1 : null;
+
+    renderGroups(groups, currentUser, groupRankings, myGlobalPos);
 }
 
 async function loadGroups() {
@@ -10,11 +45,11 @@ async function loadGroups() {
     return await response.json();
 }
 
-function renderGroups(groups) {
+function renderGroups(groups, currentUser, groupRankings, myGlobalPos) {
     const container = document.getElementById("groupsContainer");
     container.innerHTML = "";
 
-    if (!groups.length) {
+    if (!groups || !groups.length) {
         container.innerHTML = `
             <p style="color:var(--text-muted);font-size:.85rem;text-align:center;padding:24px 0;">
                 Todavía no tenés grupos. ¡Creá uno!
@@ -22,11 +57,17 @@ function renderGroups(groups) {
         `;
     } else {
         groups.forEach(group => {
+            const ranking = groupRankings?.[group.id] || [];
+            const myIdx = ranking.findIndex(u => u.userName === currentUser?.name);
+            const myPos = myIdx >= 0 ? myIdx + 1 : null;
+
             container.innerHTML += `
                 <div class="match-card" style="cursor:pointer;" onclick="openGroup('${group.id}')">
                     <div class="teams">
-                        <span>${group.name}</span>
-                        <span style="font-size:.8rem;color:var(--blue-pearl);">Ver ranking →</span>
+                        <span style="font-weight:600;">${group.name}</span>
+                        ${myPos
+                            ? `<span style="font-size:.82rem;color:var(--text-muted);">Tu posición: <strong style="color:var(--accent);">${myPos}°</strong></span>`
+                            : `<span style="font-size:.8rem;color:var(--text-muted);">Ver ranking</span>`}
                     </div>
                 </div>
             `;
@@ -35,8 +76,12 @@ function renderGroups(groups) {
 
     container.innerHTML += `
         <div style="margin-top:24px;padding-bottom:8px;">
-            <button class="btn-ranking-global" onclick="window.location.href='/pages/ranking'">
-                🏆 RANKING GLOBAL
+            <button class="btn-ranking-global" onclick="window.location.href='/pages/ranking'"
+                    style="display:flex;justify-content:space-between;align-items:center;">
+                <span>🏆 RANKING GLOBAL</span>
+                ${myGlobalPos
+                    ? `<span style="font-size:.85rem;font-weight:600;opacity:.9;">Tu posición: ${myGlobalPos}°</span>`
+                    : ''}
             </button>
         </div>
     `;

@@ -30,18 +30,22 @@ public class MatchService {
                 .map(match -> new MatchResponseDTO(
                         match.getId(),
                         match.getHomeTeam().getName(),
-                        "https://flagcdn.com/24x18/"
+                        "/images/flags/"
                                 + match.getHomeTeam().getCode()
-                                + ".png",
+                                + ".svg",
                         match.getAwayTeam().getName(),
-                        "https://flagcdn.com/24x18/"
+                        "/images/flags/"
                                 + match.getAwayTeam().getCode()
-                                + ".png",
+                                + ".svg",
                         match.getHomeScore(),
                         match.getAwayScore(),
                         match.getStatus(),
                         match.getStage(),
-                        match.getDateTime()
+                        match.getDateTime(),
+                        match.getMatchDay(),
+                        match.getStage() == MatchStage.GROUP_STAGE
+                                ? match.getHomeTeam().getGroup().getName()
+                                : null
                 ))
                 .toList();
     }
@@ -107,18 +111,22 @@ public class MatchService {
                 .map(match -> new MatchResponseDTO(
                         match.getId(),
                         match.getHomeTeam().getName(),
-                        "https://flagcdn.com/24x18/"
+                        "/images/flags/"
                                 + match.getHomeTeam().getCode()
-                                + ".png",
+                                + ".svg",
                         match.getAwayTeam().getName(),
-                        "https://flagcdn.com/24x18/"
+                        "/images/flags/"
                                 + match.getAwayTeam().getCode()
-                                + ".png",
+                                + ".svg",
                         match.getHomeScore(),
                         match.getAwayScore(),
                         match.getStatus(),
                         match.getStage(),
-                        match.getDateTime()
+                        match.getDateTime(),
+                        match.getMatchDay(),
+                        match.getStage() == MatchStage.GROUP_STAGE
+                                ? match.getHomeTeam().getGroup().getName()
+                                : null
                 ))
                 .toList();
     }

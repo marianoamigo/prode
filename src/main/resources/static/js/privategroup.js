@@ -14,8 +14,11 @@ async function init() {
     document.getElementById("deleteGroupButton").addEventListener("click", deleteGroup);
     document.getElementById("leaveGroupButton").addEventListener("click", leaveGroup);
 
-    const ranking = await loadRanking(groupId);
-    renderRanking(ranking);
+    const [ranking, globalRanking] = await Promise.all([
+        loadRanking(groupId),
+        fetch('/api/ranking/global').then(r => r.ok ? r.json() : []).catch(() => [])
+    ]);
+    renderRanking(ranking, currentUser, globalRanking);
 }
 
 function getGroupId() {
@@ -44,9 +47,23 @@ async function loadRanking(groupId) {
     return await response.json();
 }
 
-function renderRanking(ranking) {
+function renderRanking(ranking, currentUser, globalRanking) {
     const body = document.getElementById("rankingBody");
     body.innerHTML = "";
+
+    // Show current user's positions
+    if (currentUser) {
+        const myGroupIdx = ranking.findIndex(u => u.userName === currentUser.name);
+        const myGlobalIdx = (globalRanking || []).findIndex(u => u.userName === currentUser.name);
+        const banner = document.getElementById('myPositionBanner');
+        if (banner && (myGroupIdx >= 0 || myGlobalIdx >= 0)) {
+            banner.style.display = 'flex';
+            banner.innerHTML = `
+                ${myGroupIdx >= 0 ? `<span class="pos-pill">Tu posición en el grupo: <strong>${myGroupIdx + 1}°</strong></span>` : ''}
+                ${myGlobalIdx >= 0 ? `<span class="pos-pill">Ranking global: <strong>${myGlobalIdx + 1}°</strong></span>` : ''}
+            `;
+        }
+    }
 
     if (!ranking.length) {
         body.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text-muted);font-size:.85rem;">Sin miembros todavía</td></tr>`;
@@ -55,13 +72,14 @@ function renderRanking(ranking) {
 
     ranking.forEach((user, index) => {
         const badgeClass = index === 0 ? 'top-1' : index === 1 ? 'top-2' : index === 2 ? 'top-3' : '';
+        const isMe = currentUser && user.userName === currentUser.name;
         body.innerHTML += `
-            <tr>
+            <tr ${isMe ? 'style="background:rgba(232,64,10,0.08);"' : ''}>
                 <td><span class="rank-badge ${badgeClass}">${index + 1}</span></td>
                 <td>
                     <div style="display:flex;align-items:center;gap:8px;">
                         ${user.pictureUrl ? `<img src="${user.pictureUrl}" width="30" height="30" style="border-radius:50%;border:1px solid var(--border);" alt="">` : ''}
-                        <span>${user.userName}</span>
+                        <span ${isMe ? 'style="color:var(--accent);font-weight:600;"' : ''}>${user.userName}</span>
                     </div>
                 </td>
                 <td style="text-align:right;font-weight:600;color:var(--accent);">

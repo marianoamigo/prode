@@ -19,12 +19,25 @@
     <div id="userSection"></div>
   </nav>
 
-  <main class="page-container">
-
-    <div class="tabs mb-3">
+  <!-- TABS FIJOS -->
+  <div class="prono-sticky-header">
+    <div class="tabs">
       <button class="tab active" onclick="switchPronoTab(this, 'partidos')">Partidos</button>
       <button class="tab" onclick="switchPronoTab(this, 'grupos')">Grupos</button>
     </div>
+    <!-- Filtro de fecha: solo visible en tab Partidos -->
+    <div class="matchday-filter" id="matchdayFilterBar">
+      <button class="mdf-btn active" onclick="setPartidoFilter(null, this)">Todo</button>
+      <button class="mdf-btn" onclick="setPartidoFilter('md1', this)">Fecha 1</button>
+      <button class="mdf-btn" onclick="setPartidoFilter('md2', this)">Fecha 2</button>
+      <button class="mdf-btn" onclick="setPartidoFilter('md3', this)">Fecha 3</button>
+      <button class="mdf-btn" onclick="setPartidoFilter('r16', this)">Octavos</button>
+      <button class="mdf-btn" onclick="setPartidoFilter('qf', this)">Cuartos</button>
+      <button class="mdf-btn" onclick="setPartidoFilter('sf', this)">Semis/Final</button>
+    </div>
+  </div>
+
+  <main class="page-container" id="mainContent" style="padding-top:8px;">
 
     <!-- TAB PARTIDOS -->
     <div id="partidosContainer">
@@ -42,12 +55,42 @@
           <div>Cargando grupos...</div>
         </div>
       </div>
-      <div style="margin-top:20px;padding-bottom:8px;">
-        <button class="btn-confirmar" onclick="saveAllPredictions()">Enviar Pronósticos</button>
-      </div>
     </div>
 
   </main>
+
+  <!-- MODAL PRONÓSTICO PARTIDO -->
+  <div class="modal-overlay" id="gpModal" onclick="closeGPModalOutside(event)">
+    <div class="prode-modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">Ingresá tu pronóstico</div>
+      <div class="modal-teams-row">
+        <div style="text-align:center;">
+          <img id="gp-modal-flag1" src="" class="modal-flag-img" alt="">
+          <div class="modal-team-name" id="gp-modal-team1">—</div>
+        </div>
+        <div class="score-input-row-modal">
+          <div class="score-ctrl">
+            <button class="score-btn plus" onclick="changeGPModalScore(0, 1)">+</button>
+            <div class="score-num" id="gp-modal-score0">0</div>
+            <button class="score-btn minus" onclick="changeGPModalScore(0, -1)">−</button>
+          </div>
+          <span class="score-dash">:</span>
+          <div class="score-ctrl">
+            <button class="score-btn plus" onclick="changeGPModalScore(1, 1)">+</button>
+            <div class="score-num" id="gp-modal-score1">0</div>
+            <button class="score-btn minus" onclick="changeGPModalScore(1, -1)">−</button>
+          </div>
+        </div>
+        <div style="text-align:center;">
+          <img id="gp-modal-flag2" src="" class="modal-flag-img" alt="">
+          <div class="modal-team-name" id="gp-modal-team2">—</div>
+        </div>
+      </div>
+      <button class="btn-confirmar" onclick="confirmGPPrediction()">Confirmar Pronóstico</button>
+      <button class="btn-cancelar" onclick="closeGPModal()">Cancelar</button>
+    </div>
+  </div>
 
   <script src="/js/navbar.js"></script>
   <script src="/js/groupPrediction.js"></script>

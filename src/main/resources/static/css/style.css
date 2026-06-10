@@ -1186,6 +1186,110 @@ hr {
   font-family: var(--font-body);
 }
 
+/* ---- STICKY PRONO HEADER ---- */
+.prono-sticky-header {
+  position: sticky;
+  top: 52px;
+  z-index: 90;
+  background: var(--bg-base);
+  padding: 10px 16px 0;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ---- POSITION PILL (privategroup) ---- */
+.pos-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+}
+.pos-pill strong {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ---- MATCHDAY FILTER BAR ---- */
+.matchday-filter {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 8px 0 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.matchday-filter::-webkit-scrollbar { display: none; }
+
+.mdf-btn {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.mdf-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.mdf-btn:active { opacity: .8; }
+
+/* ---- GROUP PREDICTION BUTTONS ---- */
+.group-action-btns {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(14,22,40,0.06);
+}
+
+.btn-group-calc {
+  flex: 1;
+  padding: 9px 10px;
+  background: #1a2e55;
+  color: #b8c5e8;
+  border: none;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.btn-group-calc:active { opacity: .8; }
+
+.btn-group-save {
+  flex: 1;
+  padding: 9px 10px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+
+.btn-group-save:active { opacity: .8; }
+
 /* ---- TABLA / GROUP STANDINGS ---- */
 .tabla-card {
   background: #b8c5e8;
@@ -1308,6 +1412,9 @@ hr {
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
   font-family: var(--font-body);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .btn-ranking-global:hover { background: var(--accent-dark); }

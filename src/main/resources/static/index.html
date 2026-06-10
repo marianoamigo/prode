@@ -47,6 +47,17 @@
     </button>
     <div class="date-strip" id="dateStrip"></div>
 
+    <!-- Filtro de Fixture (visible solo en tab Fixture) -->
+    <div class="matchday-filter" id="fixtureFilterBar" style="display:none;">
+      <button class="mdf-btn active" onclick="setFixtureFilter(null, this)">Todo</button>
+      <button class="mdf-btn" onclick="setFixtureFilter('md1', this)">Fecha 1</button>
+      <button class="mdf-btn" onclick="setFixtureFilter('md2', this)">Fecha 2</button>
+      <button class="mdf-btn" onclick="setFixtureFilter('md3', this)">Fecha 3</button>
+      <button class="mdf-btn" onclick="setFixtureFilter('r16', this)">Octavos</button>
+      <button class="mdf-btn" onclick="setFixtureFilter('qf', this)">Cuartos</button>
+      <button class="mdf-btn" onclick="setFixtureFilter('sf', this)">Semis/Final</button>
+    </div>
+
     <h2 id="matchesDateTitle" style="display:none;"></h2>
 
     <div

@@ -38,11 +38,13 @@ public class SecurityConfig {
                                 "/sw.js",
                                 "/manifest.json",
                                 "/icons/**",
+                                "/images/**",
                                 "/pages/**",
                                 "/css/**",
                                 "/js/**",
                                 "/api/auth/me",
                                 "/api/matches/**",
+                                "/api/group-standings/**",
                                 "/api/private/invite/**")
                         .permitAll()
 

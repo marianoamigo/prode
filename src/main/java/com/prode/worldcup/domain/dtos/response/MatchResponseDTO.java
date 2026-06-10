@@ -16,6 +16,8 @@ public record MatchResponseDTO(
         Integer awayScore,
         MatchStatus status,
         MatchStage stage,
-        LocalDateTime dateTime
+        LocalDateTime dateTime,
+        Integer matchDay,
+        String groupName
 ) {
 }

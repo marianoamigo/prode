@@ -1,6 +1,9 @@
 let activePronoTab = 'partidos';
 let allMatches = [];
 let allPredictions = [];
+let currentGPModalMatchId = null;
+let activePartidoFilter = null;
+const groupTeamsMap = {};
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -8,10 +11,13 @@ async function init() {
     const currentUser = await loadCurrentUser();
     renderNavbar(currentUser);
 
-    if (currentUser) {
-        const predsRes = await fetch('/api/predictions/mine');
-        allPredictions = predsRes.ok ? await predsRes.json() : [];
+    if (!currentUser) {
+        showLoginRequired();
+        return;
     }
+
+    const predsRes = await fetch('/api/predictions/mine');
+    allPredictions = predsRes.ok ? await predsRes.json() : [];
 
     await Promise.all([
         loadAllMatchesForTab(),
@@ -19,7 +25,23 @@ async function init() {
     ]);
 }
 
-// ── TAB SWITCHING ──
+function showLoginRequired() {
+    document.getElementById('mainContent').innerHTML = `
+        <div style="text-align:center;padding:60px 20px;">
+            <p style="font-size:1.05rem;font-weight:700;letter-spacing:.05em;margin-bottom:28px;color:var(--text-primary);line-height:1.5;">
+                NECESITAS ESTAR LOGUEADO PARA PRONOSTICAR
+            </p>
+            <a href="/oauth2/authorization/google"
+               style="display:inline-block;padding:14px 32px;background:var(--accent);color:#fff;
+                      border-radius:50px;font-weight:700;font-size:.85rem;letter-spacing:.08em;
+                      text-transform:uppercase;text-decoration:none;font-family:var(--font-body);">
+                Loguearse
+            </a>
+        </div>
+    `;
+}
+
+// ── TABS ──
 function switchPronoTab(btn, tab) {
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -27,6 +49,27 @@ function switchPronoTab(btn, tab) {
 
     document.getElementById('partidosContainer').style.display = tab === 'partidos' ? 'block' : 'none';
     document.getElementById('gruposContainer').style.display = tab === 'grupos' ? 'block' : 'none';
+    const filterBar = document.getElementById('matchdayFilterBar');
+    if (filterBar) filterBar.style.display = tab === 'partidos' ? 'flex' : 'none';
+}
+
+// ── MATCHDAY FILTER ──
+function setPartidoFilter(key, btn) {
+    activePartidoFilter = key;
+    document.querySelectorAll('.mdf-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderPartidos();
+}
+
+function applyPartidoFilter(matches) {
+    if (!activePartidoFilter) return matches;
+    if (activePartidoFilter === 'md1') return matches.filter(m => m.matchDay === 1);
+    if (activePartidoFilter === 'md2') return matches.filter(m => m.matchDay === 2);
+    if (activePartidoFilter === 'md3') return matches.filter(m => m.matchDay === 3);
+    if (activePartidoFilter === 'r16') return matches.filter(m => m.stage === 'ROUND_OF_16');
+    if (activePartidoFilter === 'qf')  return matches.filter(m => m.stage === 'QUARTER_FINAL');
+    if (activePartidoFilter === 'sf')  return matches.filter(m => ['SEMI_FINAL','THIRD_PLACE','FINAL'].includes(m.stage));
+    return matches;
 }
 
 // ── TAB PARTIDOS ──
@@ -49,24 +92,27 @@ function getMatchStatusGP(match) {
     if (match.status === "SCHEDULED" && now >= kickoff) return "EN JUEGO";
     if (match.status === "LIVE") return "EN JUEGO";
     if (match.status === "FINISHED") return "FINALIZADO";
+    if (match.stage === "GROUP_STAGE") {
+        return match.groupName ? `FASE DE GRUPOS - GRUPO ${match.groupName}` : "FASE DE GRUPOS";
+    }
     const stages = {
-        GROUP_STAGE: "FASE DE GRUPOS", ROUND_OF_16: "OCTAVOS",
-        QUARTER_FINAL: "CUARTOS", SEMI_FINAL: "SEMIFINAL",
-        THIRD_PLACE: "TERCER PUESTO", FINAL: "FINAL"
+        ROUND_OF_16: "OCTAVOS", QUARTER_FINAL: "CUARTOS",
+        SEMI_FINAL: "SEMIFINAL", THIRD_PLACE: "TERCER PUESTO", FINAL: "FINAL"
     };
     return stages[match.stage] || "";
 }
 
 function renderPartidos() {
     const container = document.getElementById('partidosContainer');
+    const filtered = applyPartidoFilter(allMatches);
 
-    if (!allMatches.length) {
-        container.innerHTML = '<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">📅</div><div>No hay partidos</div></div>';
+    if (!filtered.length) {
+        container.innerHTML = '<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">📅</div><div>No hay partidos en esta fase</div></div>';
         return;
     }
 
     const byDate = {};
-    allMatches.forEach(m => {
+    filtered.forEach(m => {
         const dateKey = m.dateTime ? m.dateTime.split('T')[0] : 'unknown';
         if (!byDate[dateKey]) byDate[dateKey] = [];
         byDate[dateKey].push(m);
@@ -94,33 +140,17 @@ function buildPartidoCard(match, pred) {
     const hasPred = !!pred;
     const canEdit = new Date() < new Date(match.dateTime);
     const matchTime = formatTimeGP(match.dateTime);
-    const homeVal = hasPred ? pred.predictedHomeScore : 0;
-    const awayVal = hasPred ? pred.predictedAwayScore : 0;
 
-    const scoreBlock = canEdit
-        ? `<div class="inline-score-group">
-               <div class="score-ctrl">
-                   <button class="score-btn plus" onclick="changeInlineScore('prono-home-${match.id}', 1)">+</button>
-                   <div class="score-num" id="prono-home-${match.id}">${homeVal}</div>
-                   <button class="score-btn minus" onclick="changeInlineScore('prono-home-${match.id}', -1)">−</button>
-               </div>
-               <span class="score-sep">-</span>
-               <div class="score-ctrl">
-                   <button class="score-btn plus" onclick="changeInlineScore('prono-away-${match.id}', 1)">+</button>
-                   <div class="score-num" id="prono-away-${match.id}">${awayVal}</div>
-                   <button class="score-btn minus" onclick="changeInlineScore('prono-away-${match.id}', -1)">−</button>
-               </div>
-           </div>`
-        : `<div class="vs-block">
-               ${hasPred
-                   ? `<span class="score-display">${pred.predictedHomeScore}–${pred.predictedAwayScore}</span>`
-                   : `<span class="vs-text">VS</span>`}
-           </div>`;
+    const vsBlock = `
+        <div class="vs-block">
+            ${hasPred
+                ? `<span class="score-display" id="pred-display-${match.id}">${pred.predictedHomeScore}–${pred.predictedAwayScore}</span>`
+                : `<span class="vs-text" id="pred-display-${match.id}">VS</span>`}
+        </div>`;
 
     const actionBtn = canEdit
-        ? `<button class="btn-pronosticar ${hasPred ? 'done' : ''}"
-                   id="btn-${match.id}"
-                   onclick="saveMatchPrediction('${match.id}')">
+        ? `<button class="btn-pronosticar ${hasPred ? 'done' : ''}" id="btn-${match.id}"
+                   onclick="openGPModal('${match.id}')">
                ${hasPred ? 'Modificar pronóstico' : 'Pronosticar'}
            </button>`
         : `<div class="prediction-result">
@@ -139,7 +169,7 @@ function buildPartidoCard(match, pred) {
                     ${match.homeFlagUrl ? `<img src="${match.homeFlagUrl}" class="team-flag-img" alt="${match.homeTeam || ''}">` : ''}
                     <div class="team-name">${match.homeTeam || ''}</div>
                 </div>
-                ${scoreBlock}
+                ${vsBlock}
                 <div class="team">
                     ${match.awayFlagUrl ? `<img src="${match.awayFlagUrl}" class="team-flag-img" alt="${match.awayTeam || ''}">` : ''}
                     <div class="team-name">${match.awayTeam || ''}</div>
@@ -149,50 +179,81 @@ function buildPartidoCard(match, pred) {
         </div>`;
 }
 
-function changeInlineScore(elementId, delta) {
-    const el = document.getElementById(elementId);
-    if (!el) return;
-    const current = parseInt(el.textContent) || 0;
-    el.textContent = Math.max(0, current + delta);
+// ── MODAL PARTIDOS ──
+function openGPModal(matchId) {
+    const match = allMatches.find(m => String(m.id) === String(matchId));
+    if (!match) return;
+
+    const pred = allPredictions.find(p => String(p.matchId) === String(matchId));
+
+    document.getElementById('gp-modal-flag1').src = match.homeFlagUrl || '';
+    document.getElementById('gp-modal-team1').textContent = match.homeTeam || '';
+    document.getElementById('gp-modal-flag2').src = match.awayFlagUrl || '';
+    document.getElementById('gp-modal-team2').textContent = match.awayTeam || '';
+    document.getElementById('gp-modal-score0').textContent = pred ? pred.predictedHomeScore : 0;
+    document.getElementById('gp-modal-score1').textContent = pred ? pred.predictedAwayScore : 0;
+
+    currentGPModalMatchId = matchId;
+    document.getElementById('gpModal').classList.add('open');
 }
 
-async function saveMatchPrediction(matchId) {
-    const homeEl = document.getElementById(`prono-home-${matchId}`);
-    const awayEl = document.getElementById(`prono-away-${matchId}`);
+function closeGPModal() {
+    document.getElementById('gpModal').classList.remove('open');
+    currentGPModalMatchId = null;
+}
 
-    if (!homeEl || !awayEl) {
-        alert('Ingresá el resultado para este partido');
+function closeGPModalOutside(event) {
+    if (event.target === document.getElementById('gpModal')) closeGPModal();
+}
+
+function changeGPModalScore(idx, delta) {
+    const el = document.getElementById(`gp-modal-score${idx}`);
+    if (!el) return;
+    el.textContent = Math.max(0, parseInt(el.textContent) + delta);
+}
+
+async function confirmGPPrediction() {
+    if (!currentGPModalMatchId) return;
+
+    const match = allMatches.find(m => String(m.id) === String(currentGPModalMatchId));
+    if (match && new Date() >= new Date(match.dateTime)) {
+        closeGPModal();
+        alert("El partido ya comenzó, no se puede pronosticar");
         return;
     }
+
+    const homeScore = parseInt(document.getElementById('gp-modal-score0').textContent) || 0;
+    const awayScore = parseInt(document.getElementById('gp-modal-score1').textContent) || 0;
+    const matchId = currentGPModalMatchId;
 
     const response = await fetch('/api/predictions/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            matchId,
-            homeScore: parseInt(homeEl.textContent) || 0,
-            awayScore: parseInt(awayEl.textContent) || 0
-        })
+        body: JSON.stringify({ matchId, homeScore, awayScore })
     });
 
     if (response.ok) {
         let saved;
         try { saved = await response.json(); } catch (e) {
-            saved = {
-                matchId,
-                predictedHomeScore: parseInt(homeEl.textContent) || 0,
-                predictedAwayScore: parseInt(awayEl.textContent) || 0
-            };
+            saved = { matchId, predictedHomeScore: homeScore, predictedAwayScore: awayScore };
         }
         const idx = allPredictions.findIndex(p => String(p.matchId) === String(matchId));
         if (idx >= 0) allPredictions[idx] = saved;
         else allPredictions.push(saved);
 
+        const display = document.getElementById(`pred-display-${matchId}`);
+        if (display) {
+            display.textContent = `${homeScore}–${awayScore}`;
+            display.className = 'score-display';
+        }
         const btn = document.getElementById(`btn-${matchId}`);
         if (btn) {
             btn.classList.add('done');
             btn.textContent = 'Modificar pronóstico';
         }
+
+        closeGPModal();
+        alert('Pronósticos guardados');
     }
 }
 
@@ -218,6 +279,8 @@ async function renderGroup(groupId, groupName) {
     const group = await groupRes.json();
     const savedPredictions = await predRes.json();
 
+    groupTeamsMap[groupId] = group.teams;
+
     const orderedTeams = [...group.teams].sort((a, b) => {
         const posA = savedPredictions.find(p => p.teamId === a.id)?.position ?? 999;
         const posB = savedPredictions.find(p => p.teamId === b.id)?.position ?? 999;
@@ -229,15 +292,15 @@ async function renderGroup(groupId, groupName) {
     const container = document.getElementById("groupPredictionContainer");
 
     container.innerHTML += `
-        <div class="tabla-card" style="margin-bottom:14px;">
+        <div class="tabla-card" id="group-card-${groupId}" style="margin-bottom:14px;">
             <div class="tabla-header">GRUPO ${groupName}</div>
             ${teamsToRender.map((team, index) => {
                 const saved = savedPredictions.find(p => p.teamId === team.id);
                 const selectedPos = saved ? saved.position : index + 1;
-                const flagUrl = team.code ? `https://flagcdn.com/24x18/${team.code}.png` : null;
+                const flagUrl = team.code ? `/images/flags/${team.code}.svg` : null;
                 const isTop = selectedPos <= 2;
                 return `
-                    <div class="tabla-row">
+                    <div class="tabla-row" id="group-row-${team.id}">
                         <span class="tabla-pos group-pos-display ${isTop ? 'top' : ''}" id="pos-display-${team.id}">${selectedPos}</span>
                         <div class="tabla-team">
                             ${flagUrl ? `<img src="${flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${team.name || ''}">` : ''}
@@ -254,6 +317,14 @@ async function renderGroup(groupId, groupName) {
                         </select>
                     </div>`;
             }).join('')}
+            <div class="group-action-btns">
+                <button class="btn-group-calc" onclick="calculateGroupStandings('${groupId}')">
+                    Calcular con pronósticos
+                </button>
+                <button class="btn-group-save" onclick="saveGroupPrediction('${groupId}')">
+                    Guardar grupo
+                </button>
+            </div>
         </div>`;
 }
 
@@ -265,33 +336,122 @@ function updatePosDisplay(select, teamId) {
     }
 }
 
-async function saveAllPredictions() {
-    const groupsMap = {};
-
-    document.querySelectorAll(".prediction-position").forEach(select => {
-        const groupId = select.dataset.groupId;
-        const teamId = select.dataset.teamId;
-        const position = Number(select.value);
-
-        if (!groupsMap[groupId]) groupsMap[groupId] = [];
-        groupsMap[groupId].push({ teamId, position });
-    });
-
-    for (const groupId in groupsMap) {
-        const positions = groupsMap[groupId].map(p => p.position);
-        if (new Set(positions).size !== 4) {
-            alert("Hay posiciones repetidas en un grupo");
-            return;
+// ── GUARDAR PRONÓSTICO POR GRUPO ──
+async function saveGroupPrediction(groupId) {
+    // Validate deadline: cannot save after first match of this group starts
+    const teams = groupTeamsMap[groupId];
+    if (teams) {
+        const teamNames = new Set(teams.map(t => t.name));
+        const groupMatches = allMatches.filter(m =>
+            m.stage === 'GROUP_STAGE' && teamNames.has(m.homeTeam) && teamNames.has(m.awayTeam)
+        );
+        if (groupMatches.length > 0) {
+            const firstMatchTime = Math.min(...groupMatches.map(m => new Date(m.dateTime).getTime()));
+            if (Date.now() >= firstMatchTime) {
+                alert("No se puede pronosticar este grupo: el primer partido ya comenzó");
+                return;
+            }
         }
     }
 
-    const groups = Object.entries(groupsMap).map(([groupId, predictions]) => ({ groupId, predictions }));
+    const selects = document.querySelectorAll(`.prediction-position[data-group-id="${groupId}"]`);
+    const predictions = [];
+    const positions = [];
 
-    await fetch("/api/group-predictions/save-all", {
+    selects.forEach(select => {
+        positions.push(Number(select.value));
+        predictions.push({ teamId: select.dataset.teamId, position: Number(select.value) });
+    });
+
+    if (new Set(positions).size !== positions.length) {
+        alert("Hay posiciones repetidas en el grupo");
+        return;
+    }
+
+    await fetch("/api/group-predictions/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ groups })
+        body: JSON.stringify({ groupId, predictions })
     });
 
     alert("Pronósticos guardados");
+}
+
+// ── CALCULAR POSICIONES CON PRONÓSTICOS DE PARTIDOS ──
+function calculateGroupStandings(groupId) {
+    const teams = groupTeamsMap[groupId];
+    if (!teams) return;
+
+    const teamNames = new Set(teams.map(t => t.name));
+    const groupMatches = allMatches.filter(m =>
+        m.stage === 'GROUP_STAGE' && teamNames.has(m.homeTeam) && teamNames.has(m.awayTeam)
+    );
+
+    const missingPreds = groupMatches.filter(m =>
+        !allPredictions.find(p => String(p.matchId) === String(m.id))
+    );
+
+    if (missingPreds.length > 0) {
+        alert(`Faltan pronosticar ${missingPreds.length} partido${missingPreds.length !== 1 ? 's' : ''} de este grupo`);
+        return;
+    }
+
+    const accs = {};
+    for (const team of teams) {
+        accs[team.name] = {
+            name: team.name, id: team.id,
+            played: 0, wins: 0, draws: 0, losses: 0,
+            goalsFor: 0, goalsAgainst: 0, points: 0
+        };
+    }
+
+    for (const match of groupMatches) {
+        const pred = allPredictions.find(p => String(p.matchId) === String(match.id));
+        const home = accs[match.homeTeam];
+        const away = accs[match.awayTeam];
+
+        home.played++;
+        away.played++;
+        home.goalsFor += pred.predictedHomeScore;
+        home.goalsAgainst += pred.predictedAwayScore;
+        away.goalsFor += pred.predictedAwayScore;
+        away.goalsAgainst += pred.predictedHomeScore;
+
+        if (pred.predictedHomeScore > pred.predictedAwayScore) {
+            home.wins++; home.points += 3; away.losses++;
+        } else if (pred.predictedAwayScore > pred.predictedHomeScore) {
+            away.wins++; away.points += 3; home.losses++;
+        } else {
+            home.draws++; away.draws++; home.points++; away.points++;
+        }
+    }
+
+    const sorted = Object.values(accs).sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        const dgA = a.goalsFor - a.goalsAgainst;
+        const dgB = b.goalsFor - b.goalsAgainst;
+        if (dgB !== dgA) return dgB - dgA;
+        return b.goalsFor - a.goalsFor;
+    });
+
+    sorted.forEach((team, i) => {
+        const pos = i + 1;
+        const posDisplay = document.getElementById(`pos-display-${team.id}`);
+        if (posDisplay) {
+            posDisplay.textContent = pos;
+            posDisplay.classList.toggle('top', pos <= 2);
+        }
+        const select = document.querySelector(`.prediction-position[data-team-id="${team.id}"]`);
+        if (select) select.value = pos;
+    });
+
+    // Reorder rows in DOM to reflect new standings
+    const card = document.getElementById(`group-card-${groupId}`);
+    if (card) {
+        const btnsDiv = card.querySelector('.group-action-btns');
+        sorted.forEach(team => {
+            const row = document.getElementById(`group-row-${team.id}`);
+            if (row && btnsDiv) card.insertBefore(row, btnsDiv);
+        });
+    }
 }

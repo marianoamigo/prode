@@ -3,6 +3,7 @@ let activeTab = 'hoy';
 let calOpen = false;
 let modalMatchId = null;
 let modalScores = [0, 0];
+let activeFixtureFilter = null;
 
 document.addEventListener("DOMContentLoaded", init);
 
@@ -361,23 +362,22 @@ function renderMatches(matches, predictions, currentUser) {
     container.innerHTML = html;
 }
 
-function getStageLabel(stage) {
+function getStageLabel(match) {
+    if (match.stage === "GROUP_STAGE") {
+        return match.groupName ? `FASE DE GRUPOS - GRUPO ${match.groupName}` : "FASE DE GRUPOS";
+    }
     const stages = {
-        GROUP_STAGE: "FASE DE GRUPOS",
-        ROUND_OF_16: "OCTAVOS",
-        QUARTER_FINAL: "CUARTOS",
-        SEMI_FINAL: "SEMIFINAL",
-        THIRD_PLACE: "TERCER PUESTO",
-        FINAL: "FINAL"
+        ROUND_OF_16: "OCTAVOS", QUARTER_FINAL: "CUARTOS",
+        SEMI_FINAL: "SEMIFINAL", THIRD_PLACE: "TERCER PUESTO", FINAL: "FINAL"
     };
-    return stages[stage] || stage;
+    return stages[match.stage] || match.stage;
 }
 
 function getMatchStatus(match) {
     const now = new Date();
     const kickoff = new Date(match.dateTime);
     if (match.status === "SCHEDULED" && now >= kickoff) return "EN JUEGO";
-    if (match.status === "SCHEDULED") return getStageLabel(match.stage);
+    if (match.status === "SCHEDULED") return getStageLabel(match);
     if (match.status === "LIVE") return "EN JUEGO";
     if (match.status === "FINISHED") return "FINALIZADO";
     return match.status;
@@ -410,6 +410,9 @@ async function switchTab(btn, tab) {
     btn.classList.add('active');
     activeTab = tab;
 
+    const filterBar = document.getElementById('fixtureFilterBar');
+    if (filterBar) filterBar.style.display = tab === 'fixture' ? 'flex' : 'none';
+
     const currentUser = await loadCurrentUser();
     let matches;
 
@@ -423,11 +426,54 @@ async function switchTab(btn, tab) {
         matches = await loadMatchesByDate();
         updateCalLabel();
     } else {
+        activeFixtureFilter = null;
+        document.querySelectorAll('#fixtureFilterBar .mdf-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
         matches = await loadMatches();
+        window._fixtureAllMatches = matches;
     }
 
     const predictions = await loadPredictions();
     renderMatches(matches, predictions, currentUser);
+}
+
+function setFixtureFilter(key, btn) {
+    activeFixtureFilter = key;
+    document.querySelectorAll('#fixtureFilterBar .mdf-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const all = window._fixtureAllMatches || window._allMatches || [];
+    const filtered = applyFixtureFilter(all);
+    const container = document.getElementById("matchesContainer");
+    container.innerHTML = "";
+    if (!filtered.length) {
+        container.innerHTML = `<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">📅</div><div>No hay partidos en esta fase</div></div>`;
+        return;
+    }
+    const byDate = {};
+    filtered.forEach(m => {
+        const key2 = m.dateTime ? m.dateTime.split('T')[0] : 'unknown';
+        if (!byDate[key2]) byDate[key2] = [];
+        byDate[key2].push(m);
+    });
+    let html = '';
+    Object.keys(byDate).sort().forEach(dateKey => {
+        html += `<div class="date-pill">${formatDateLabel(dateKey)}</div>`;
+        byDate[dateKey].forEach(m => {
+            const pred = (window._predictions || []).find(p => String(p.matchId) === String(m.id));
+            html += buildMatchCard(m, pred, window._currentUser, canEditPrediction(m));
+        });
+    });
+    container.innerHTML = html;
+}
+
+function applyFixtureFilter(matches) {
+    if (!activeFixtureFilter) return matches;
+    if (activeFixtureFilter === 'md1') return matches.filter(m => m.matchDay === 1);
+    if (activeFixtureFilter === 'md2') return matches.filter(m => m.matchDay === 2);
+    if (activeFixtureFilter === 'md3') return matches.filter(m => m.matchDay === 3);
+    if (activeFixtureFilter === 'r16') return matches.filter(m => m.stage === 'ROUND_OF_16');
+    if (activeFixtureFilter === 'qf')  return matches.filter(m => m.stage === 'QUARTER_FINAL');
+    if (activeFixtureFilter === 'sf')  return matches.filter(m => ['SEMI_FINAL','THIRD_PLACE','FINAL'].includes(m.stage));
+    return matches;
 }
 
 // ── MODAL ──
@@ -465,6 +511,12 @@ function changeModalScore(idx, delta) {
 
 async function confirmPrediction() {
     if (!modalMatchId) return;
+    const match = (window._allMatches || []).find(m => String(m.id) === String(modalMatchId));
+    if (match && new Date() >= new Date(match.dateTime)) {
+        closeModal();
+        alert("El partido ya comenzó, no se puede pronosticar");
+        return;
+    }
     const id = modalMatchId;
     const homeInput = document.getElementById(`home-${id}`);
     const awayInput = document.getElementById(`away-${id}`);

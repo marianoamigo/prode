@@ -32,6 +32,7 @@ public class MatchEntity {
     private Integer homeScore;
     private Integer awayScore;
     private LocalDateTime dateTime;
+    private Integer matchDay;
 
     //antes del partido: status=SCHEDULED, home/away Score=null, durante partido: status=LIVE, post=FINISHED
 }

@@ -226,10 +226,10 @@ public class GroupStandingService {
                                 standing.getTeam()
                                         .getName(),
 
-                                "https://flagcdn.com/24x18/"
+                                "/images/flags/"
                                         + standing.getTeam()
                                         .getCode()
-                                        + ".png",
+                                        + ".svg",
 
                                 standing.getPlayed(),
 
@@ -269,10 +269,10 @@ public class GroupStandingService {
                                 standing.getTeam()
                                         .getName(),
 
-                                "https://flagcdn.com/24x18/"
+                                "/images/flags/"
                                         + standing.getTeam()
                                         .getCode()
-                                        + ".png",
+                                        + ".svg",
 
                                 standing.getPlayed(),
 
