@@ -966,6 +966,12 @@ hr {
   color: #2ecc71;
 }
 
+.prediction-pts-live {
+  font-size: 12px;
+  font-weight: 700;
+  color: #e74c3c;
+}
+
 /* ---- DATE PILL ---- */
 .date-pill {
   display: inline-block;

@@ -22,10 +22,8 @@ async function init() {
     const predsRes = await fetch('/api/predictions/mine');
     allPredictions = predsRes.ok ? await predsRes.json() : [];
 
-    await Promise.all([
-        loadAllMatchesForTab(),
-        loadGroups()
-    ]);
+    await loadAllMatchesForTab();
+    await loadGroups();
 }
 
 function showLoginRequired() {
@@ -139,10 +137,19 @@ function formatTimeGP(dt) {
     return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
 }
 
+function calculateLivePoints(prediction, match) {
+    if (!prediction || match.homeScore === null || match.homeScore === undefined) return null;
+    if (prediction.predictedHomeScore === match.homeScore && prediction.predictedAwayScore === match.awayScore) return 3;
+    const predResult = Math.sign(prediction.predictedHomeScore - prediction.predictedAwayScore);
+    const actualResult = Math.sign(match.homeScore - match.awayScore);
+    return predResult === actualResult ? 1 : 0;
+}
+
 function buildPartidoCard(match, pred) {
     const hasPred = !!pred;
     const canEdit = new Date() < new Date(match.dateTime);
     const matchTime = formatTimeGP(match.dateTime);
+    const isLive = match.status === 'LIVE';
 
     const vsBlock = `
         <div class="vs-block">
@@ -151,15 +158,26 @@ function buildPartidoCard(match, pred) {
                 : `<span class="vs-text" id="pred-display-${match.id}">VS</span>`}
         </div>`;
 
-    const actionBtn = canEdit
-        ? `<button class="btn-pronosticar ${hasPred ? 'done' : ''}" id="btn-${match.id}"
+    let actionBtn;
+    if (canEdit) {
+        actionBtn = `<button class="btn-pronosticar ${hasPred ? 'done' : ''}" id="btn-${match.id}"
                    onclick="openGPModal('${match.id}')">
                ${hasPred ? 'Modificar pronóstico' : 'Pronosticar'}
-           </button>`
-        : `<div class="prediction-result">
-               <span class="prediction-score">${hasPred ? `${pred.predictedHomeScore} – ${pred.predictedAwayScore}` : '—'}</span>
-               ${hasPred ? `<span class="prediction-pts">${pred.pointsScored ?? 0} pts</span>` : ''}
-           </div>`;
+           </button>`;
+    } else {
+        const livePoints = (isLive && hasPred) ? calculateLivePoints(pred, match) : null;
+        const ptsHtml = isLive
+            ? (livePoints !== null ? `<span class="prediction-pts-live">${livePoints} pts</span>` : '')
+            : (hasPred ? `<span class="prediction-pts">${pred.pointsScored ?? 0} pts</span>` : '');
+        actionBtn = `
+            <div style="text-align:center;font-size:11px;font-weight:700;color:#5a6e90;letter-spacing:.08em;margin-top:4px;">
+                PRONÓSTICO CERRADO
+            </div>
+            <div class="prediction-result">
+                <span class="prediction-score">${isLive ? 'TU PRONÓSTICO: ' : ''}${hasPred ? `${pred.predictedHomeScore} – ${pred.predictedAwayScore}` : '—'}</span>
+                ${ptsHtml}
+            </div>`;
+    }
 
     return `
         <div class="match-card" id="prono-card-${match.id}">
@@ -284,6 +302,13 @@ async function renderGroup(groupId, groupName) {
 
     groupTeamsMap[groupId] = group.teams;
 
+    const teamNames = new Set(group.teams.map(t => t.name));
+    const groupMatches = allMatches.filter(m =>
+        m.stage === 'GROUP_STAGE' && teamNames.has(m.homeTeam) && teamNames.has(m.awayTeam)
+    );
+    const groupLocked = groupMatches.length > 0 &&
+        Date.now() >= Math.min(...groupMatches.map(m => new Date(m.dateTime).getTime()));
+
     const orderedTeams = [...group.teams].sort((a, b) => {
         const posA = savedPredictions.find(p => p.teamId === a.id)?.position ?? 999;
         const posB = savedPredictions.find(p => p.teamId === b.id)?.position ?? 999;
@@ -312,7 +337,8 @@ async function renderGroup(groupId, groupName) {
                         <select class="group-pos-select prediction-position"
                                 data-group-id="${groupId}"
                                 data-team-id="${team.id}"
-                                onchange="updatePosDisplay(this, '${team.id}')">
+                                onchange="updatePosDisplay(this, '${team.id}')"
+                                ${groupLocked ? 'disabled' : ''}>
                             <option value="1" ${selectedPos === 1 ? 'selected' : ''}>1°</option>
                             <option value="2" ${selectedPos === 2 ? 'selected' : ''}>2°</option>
                             <option value="3" ${selectedPos === 3 ? 'selected' : ''}>3°</option>
@@ -324,11 +350,14 @@ async function renderGroup(groupId, groupName) {
                 <button class="btn-group-calc" onclick="calculateGroupStandings('${groupId}')">
                     Calcular con pronósticos
                 </button>
-                <button class="${savedPredictions.length > 0 ? 'btn-group-save' : 'btn-group-predict'}"
-                        id="btn-group-save-${groupId}"
-                        onclick="saveGroupPrediction('${groupId}')">
-                    ${savedPredictions.length > 0 ? 'EDITAR PRONÓSTICO' : 'PRONOSTICAR'}
-                </button>
+                ${groupLocked
+                    ? `<div style="text-align:center;font-size:11px;font-weight:700;color:#5a6e90;letter-spacing:.08em;padding:10px 0;">PRONÓSTICO CERRADO</div>`
+                    : `<button class="${savedPredictions.length > 0 ? 'btn-group-save' : 'btn-group-predict'}"
+                               id="btn-group-save-${groupId}"
+                               onclick="saveGroupPrediction('${groupId}')">
+                           ${savedPredictions.length > 0 ? 'EDITAR PRONÓSTICO' : 'PRONOSTICAR'}
+                       </button>`
+                }
             </div>
         </div>`;
 }

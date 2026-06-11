@@ -280,6 +280,13 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
                         onclick="openPredictionModal('${match.id}')">
                     ${hasPred ? 'Modificar pronóstico' : 'Pronosticar'}
                 </button>`;
+        } else if (match.status === 'LIVE') {
+            const livePoints = hasPred ? calculateLivePoints(prediction, match) : null;
+            actionSection = `
+                <div class="prediction-result">
+                    <span class="prediction-score">TU PRONÓSTICO: ${hasPred ? `${prediction.predictedHomeScore} – ${prediction.predictedAwayScore}` : '—'}</span>
+                    ${livePoints !== null ? `<span class="prediction-pts-live">${livePoints} pts</span>` : ''}
+                </div>`;
         } else {
             actionSection = `
                 <div class="prediction-result">
@@ -544,4 +551,12 @@ function canEditPrediction(match) {
     const now = new Date();
     const kickoff = new Date(match.dateTime);
     return now < kickoff;
+}
+
+function calculateLivePoints(prediction, match) {
+    if (!prediction || match.homeScore === null || match.homeScore === undefined) return null;
+    if (prediction.predictedHomeScore === match.homeScore && prediction.predictedAwayScore === match.awayScore) return 3;
+    const predResult = Math.sign(prediction.predictedHomeScore - prediction.predictedAwayScore);
+    const actualResult = Math.sign(match.homeScore - match.awayScore);
+    return predResult === actualResult ? 1 : 0;
 }
