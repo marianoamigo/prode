@@ -181,8 +181,15 @@ function buildPartidoCard(match, pred) {
                 PRONÓSTICO CERRADO
             </div>
             <div class="prediction-result">
-                <span class="prediction-score">RESULTADO REAL: ${hasReal ? `${match.homeScore}–${match.awayScore}` : '—'}</span>
+                <span class="prediction-score">RESULTADO PARCIAL: ${hasReal ? `${match.homeScore}–${match.awayScore}` : '—'}</span>
                 ${livePoints !== null ? `<span class="prediction-pts-live">${livePoints} pts</span>` : ''}
+            </div>`;
+    } else if (match.status === 'FINISHED') {
+        const hasReal = match.homeScore !== null && match.homeScore !== undefined;
+        actionBtn = `
+            <div class="prediction-result">
+                <span class="prediction-score">RESULTADO FINAL: ${hasReal ? `${match.homeScore}–${match.awayScore}` : '—'}</span>
+                ${hasPred ? `<span class="prediction-pts">${pred.pointsScored ?? 0} pts</span>` : ''}
             </div>`;
     } else {
         actionBtn = `
@@ -190,7 +197,7 @@ function buildPartidoCard(match, pred) {
                 PRONÓSTICO CERRADO
             </div>
             <div class="prediction-result">
-                <span class="prediction-score">${hasPred ? `${pred.predictedHomeScore} – ${pred.predictedAwayScore}` : '—'}</span>
+                <span class="prediction-score">${hasPred ? `TU PRONÓSTICO: ${pred.predictedHomeScore} – ${pred.predictedAwayScore}` : '—'}</span>
                 ${hasPred ? `<span class="prediction-pts">${pred.pointsScored ?? 0} pts</span>` : ''}
             </div>`;
     }

@@ -287,11 +287,16 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
                     <span class="prediction-score">TU PRONÓSTICO: ${hasPred ? `${prediction.predictedHomeScore} – ${prediction.predictedAwayScore}` : '—'}</span>
                     ${livePoints !== null ? `<span class="prediction-pts-live">${livePoints} pts</span>` : ''}
                 </div>`;
+        } else if (match.status === 'FINISHED') {
+            actionSection = `
+                <div class="prediction-result">
+                    <span class="prediction-score">${hasPred ? `TU PRONÓSTICO: ${prediction.predictedHomeScore} – ${prediction.predictedAwayScore}` : '—'}</span>
+                    ${hasPred ? `<span class="prediction-pts">${prediction.pointsScored ?? 0} pts</span>` : ''}
+                </div>`;
         } else {
             actionSection = `
                 <div class="prediction-result">
-                    <span class="prediction-score">${hasPred ? `${prediction.predictedHomeScore} – ${prediction.predictedAwayScore}` : '—'}</span>
-                    ${hasPred ? `<span class="prediction-pts">${prediction.pointsScored ?? 0} pts</span>` : ''}
+                    <span class="prediction-score">${hasPred ? `TU PRONÓSTICO: ${prediction.predictedHomeScore} – ${prediction.predictedAwayScore}` : '—'}</span>
                 </div>`;
         }
     }

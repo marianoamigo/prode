@@ -55,12 +55,24 @@ function renderRanking(ranking, currentUser, globalRanking) {
     if (currentUser) {
         const myGroupIdx = ranking.findIndex(u => u.userName === currentUser.name);
         const myGlobalIdx = (globalRanking || []).findIndex(u => u.userName === currentUser.name);
+
+        const calcPos = (list, idx) => {
+            if (idx < 0) return null;
+            let pos = 1;
+            for (let i = 0; i <= idx; i++) {
+                if (i > 0 && list[i].totalPoints < list[i - 1].totalPoints) pos = i + 1;
+            }
+            return pos;
+        };
+
         const banner = document.getElementById('myPositionBanner');
         if (banner && (myGroupIdx >= 0 || myGlobalIdx >= 0)) {
+            const groupPos = calcPos(ranking, myGroupIdx);
+            const globalPos = calcPos(globalRanking || [], myGlobalIdx);
             banner.style.display = 'flex';
             banner.innerHTML = `
-                ${myGroupIdx >= 0 ? `<span class="pos-pill">Tu posición en el grupo: <strong>${myGroupIdx + 1}°</strong></span>` : ''}
-                ${myGlobalIdx >= 0 ? `<span class="pos-pill">Ranking global: <strong>${myGlobalIdx + 1}°</strong></span>` : ''}
+                ${groupPos ? `<span class="pos-pill">Tu posición en el grupo: <strong>${groupPos}°</strong></span>` : ''}
+                ${globalPos ? `<span class="pos-pill">Ranking global: <strong>${globalPos}°</strong></span>` : ''}
             `;
         }
     }
@@ -70,12 +82,14 @@ function renderRanking(ranking, currentUser, globalRanking) {
         return;
     }
 
+    let pos = 1;
     ranking.forEach((user, index) => {
-        const badgeClass = index === 0 ? 'top-1' : index === 1 ? 'top-2' : index === 2 ? 'top-3' : '';
+        if (index > 0 && user.totalPoints < ranking[index - 1].totalPoints) pos = index + 1;
+        const badgeClass = pos === 1 ? 'top-1' : pos === 2 ? 'top-2' : pos === 3 ? 'top-3' : '';
         const isMe = currentUser && user.userName === currentUser.name;
         body.innerHTML += `
             <tr ${isMe ? 'style="background:rgba(232,64,10,0.08);"' : ''}>
-                <td><span class="rank-badge ${badgeClass}">${index + 1}</span></td>
+                <td><span class="rank-badge ${badgeClass}">${pos}</span></td>
                 <td>
                     <div style="display:flex;align-items:center;gap:8px;">
                         ${user.pictureUrl ? `<img src="${user.pictureUrl}" width="30" height="30" style="border-radius:50%;border:1px solid var(--border);" alt="">` : ''}
