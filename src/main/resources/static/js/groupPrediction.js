@@ -87,12 +87,20 @@ function formatDateLabelGP(dateStr) {
     return `${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}`;
 }
 
-function getMatchStatusGP(match) {
-    const now = new Date();
-    const kickoff = new Date(match.dateTime);
-    if (match.status === "SCHEDULED" && now >= kickoff) return "EN JUEGO";
-    if (match.status === "LIVE") return "EN JUEGO";
-    if (match.status === "FINISHED") return "FINALIZADO";
+function getMatchLeftLabelGP(match) {
+    if (match.status === 'LIVE') {
+        const elapsed = match.timeElapsed && match.timeElapsed.toLowerCase() !== 'notstarted'
+            ? (match.timeElapsed.toLowerCase() === 'ht' ? ' - ENTRETIEMPO' : ` - ${match.timeElapsed}'`)
+            : '';
+        return { text: `EN JUEGO${elapsed}`, css: 'match-status-live' };
+    }
+    if (match.status === 'FINISHED') {
+        return { text: 'FINALIZADO', css: 'match-time' };
+    }
+    return { text: `⏰ ${formatTimeGP(match.dateTime)} hs`, css: 'match-time' };
+}
+
+function getStageLabelGP(match) {
     if (match.stage === "GROUP_STAGE") {
         return match.groupName ? `FASE DE GRUPOS - GRUPO ${match.groupName}` : "FASE DE GRUPOS";
     }
@@ -148,8 +156,8 @@ function calculateLivePoints(prediction, match) {
 function buildPartidoCard(match, pred) {
     const hasPred = !!pred;
     const canEdit = new Date() < new Date(match.dateTime);
-    const matchTime = formatTimeGP(match.dateTime);
     const isLive = match.status === 'LIVE';
+    const leftLabel = getMatchLeftLabelGP(match);
 
     const vsBlock = `
         <div class="vs-block">
@@ -164,26 +172,33 @@ function buildPartidoCard(match, pred) {
                    onclick="openGPModal('${match.id}')">
                ${hasPred ? 'Modificar pronóstico' : 'Pronosticar'}
            </button>`;
-    } else {
-        const livePoints = (isLive && hasPred) ? calculateLivePoints(pred, match) : null;
-        const ptsHtml = isLive
-            ? (livePoints !== null ? `<span class="prediction-pts-live">${livePoints} pts</span>` : '')
-            : (hasPred ? `<span class="prediction-pts">${pred.pointsScored ?? 0} pts</span>` : '');
+    } else if (isLive) {
+        const hasReal = match.homeScore !== null && match.homeScore !== undefined;
+        const livePoints = hasPred ? calculateLivePoints(pred, match) : null;
         actionBtn = `
             <div style="text-align:center;font-size:11px;font-weight:700;color:#5a6e90;letter-spacing:.08em;margin-top:4px;">
                 PRONÓSTICO CERRADO
             </div>
             <div class="prediction-result">
-                <span class="prediction-score">${isLive ? 'TU PRONÓSTICO: ' : ''}${hasPred ? `${pred.predictedHomeScore} – ${pred.predictedAwayScore}` : '—'}</span>
-                ${ptsHtml}
+                <span class="prediction-score">RESULTADO REAL: ${hasReal ? `${match.homeScore}–${match.awayScore}` : '—'}</span>
+                ${livePoints !== null ? `<span class="prediction-pts-live">${livePoints} pts</span>` : ''}
+            </div>`;
+    } else {
+        actionBtn = `
+            <div style="text-align:center;font-size:11px;font-weight:700;color:#5a6e90;letter-spacing:.08em;margin-top:4px;">
+                PRONÓSTICO CERRADO
+            </div>
+            <div class="prediction-result">
+                <span class="prediction-score">${hasPred ? `${pred.predictedHomeScore} – ${pred.predictedAwayScore}` : '—'}</span>
+                ${hasPred ? `<span class="prediction-pts">${pred.pointsScored ?? 0} pts</span>` : ''}
             </div>`;
     }
 
     return `
         <div class="match-card" id="prono-card-${match.id}">
             <div class="match-card-header">
-                <span class="match-time">⏰ ${matchTime} hs</span>
-                <span class="match-status-badge">${getMatchStatusGP(match)}</span>
+                <span class="${leftLabel.css}">${leftLabel.text}</span>
+                <span class="match-status-badge">${getStageLabelGP(match)}</span>
             </div>
             <div class="match-teams">
                 <div class="team">
@@ -347,12 +362,12 @@ async function renderGroup(groupId, groupName) {
                     </div>`;
             }).join('')}
             <div class="group-action-btns">
-                <button class="btn-group-calc" onclick="calculateGroupStandings('${groupId}')">
-                    Calcular con pronósticos
-                </button>
                 ${groupLocked
                     ? `<div style="text-align:center;font-size:11px;font-weight:700;color:#5a6e90;letter-spacing:.08em;padding:10px 0;">PRONÓSTICO CERRADO</div>`
-                    : `<button class="${savedPredictions.length > 0 ? 'btn-group-save' : 'btn-group-predict'}"
+                    : `<button class="btn-group-calc" onclick="calculateGroupStandings('${groupId}')">
+                           Calcular con pronósticos
+                       </button>
+                       <button class="${savedPredictions.length > 0 ? 'btn-group-save' : 'btn-group-predict'}"
                                id="btn-group-save-${groupId}"
                                onclick="saveGroupPrediction('${groupId}')">
                            ${savedPredictions.length > 0 ? 'EDITAR PRONÓSTICO' : 'PRONOSTICAR'}

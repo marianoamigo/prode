@@ -264,12 +264,12 @@ function formatTime(dt) {
 
 function buildMatchCard(match, prediction, currentUser, canEdit) {
     const hasPred = !!prediction;
-    const matchTime = formatTime(match.dateTime);
+    const isLive = match.status === 'LIVE';
+    const leftLabel = getMatchLeftLabel(match);
 
-    // VS block: solo muestra el resultado real, nunca el pronóstico del usuario
     const hasRealScore = match.homeScore !== null && match.homeScore !== undefined;
     const vsInner = hasRealScore
-        ? `<span class="score-display">${match.homeScore}–${match.awayScore}</span>`
+        ? `<span class="score-display${isLive ? ' score-live' : ''}">${match.homeScore}–${match.awayScore}</span>`
         : `<span class="vs-text">VS</span>`;
 
     let actionSection = '';
@@ -322,8 +322,8 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
     return `
         <div class="match-card" id="card-${match.id}">
             <div class="match-card-header">
-                <span class="match-time">⏰ ${matchTime} hs</span>
-                <span class="match-status-badge">${getMatchStatus(match)}</span>
+                <span class="${leftLabel.css}">${leftLabel.text}</span>
+                <span class="match-status-badge">${getStageLabel(match)}</span>
             </div>
             <div class="match-teams">
                 <div class="team">
@@ -394,14 +394,20 @@ function getStageLabel(match) {
     return stages[match.stage] || match.stage;
 }
 
-function getMatchStatus(match) {
-    const now = new Date();
-    const kickoff = new Date(match.dateTime);
-    if (match.status === "SCHEDULED" && now >= kickoff) return "EN JUEGO";
-    if (match.status === "SCHEDULED") return getStageLabel(match);
-    if (match.status === "LIVE") return "EN JUEGO";
-    if (match.status === "FINISHED") return "FINALIZADO";
-    return match.status;
+function getTimeElapsedLabel(timeElapsed) {
+    if (!timeElapsed || timeElapsed.toLowerCase() === 'notstarted') return '';
+    if (timeElapsed.toLowerCase() === 'ht') return ' - ENTRETIEMPO';
+    return ` - ${timeElapsed}'`;
+}
+
+function getMatchLeftLabel(match) {
+    if (match.status === 'LIVE') {
+        return { text: `EN JUEGO${getTimeElapsedLabel(match.timeElapsed)}`, css: 'match-status-live' };
+    }
+    if (match.status === 'FINISHED') {
+        return { text: 'FINALIZADO', css: 'match-time' };
+    }
+    return { text: `⏰ ${formatTime(match.dateTime)} hs`, css: 'match-time' };
 }
 
 function formatMatchDate(dateTime) {

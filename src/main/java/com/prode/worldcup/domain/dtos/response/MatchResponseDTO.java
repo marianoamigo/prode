@@ -18,6 +18,7 @@ public record MatchResponseDTO(
         MatchStage stage,
         LocalDateTime dateTime,
         Integer matchDay,
-        String groupName
+        String groupName,
+        String timeElapsed
 ) {
 }

@@ -46,7 +46,8 @@ public class MatchService {
                         match.getMatchDay(),
                         match.getStage() == MatchStage.GROUP_STAGE
                                 ? match.getHomeTeam().getGroup().getName()
-                                : null
+                                : null,
+                        match.getTimeElapsed()
                 ))
                 .toList();
     }
@@ -137,7 +138,8 @@ public class MatchService {
                         match.getMatchDay(),
                         match.getStage() == MatchStage.GROUP_STAGE
                                 ? match.getHomeTeam().getGroup().getName()
-                                : null
+                                : null,
+                        match.getTimeElapsed()
                 ))
                 .toList();
     }

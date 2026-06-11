@@ -186,6 +186,12 @@ public class LiveScoreSyncService {
                     }
                 }
 
+                String newTimeElapsed = game.isLive() ? game.timeElapsed() : null;
+                if (!Objects.equals(match.getTimeElapsed(), newTimeElapsed)) {
+                    match.setTimeElapsed(newTimeElapsed);
+                    changed = true;
+                }
+
                 if (changed) {
                     matchRepository.save(match);
                     updated++;
