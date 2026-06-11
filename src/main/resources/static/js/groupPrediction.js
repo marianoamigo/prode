@@ -89,8 +89,9 @@ function formatDateLabelGP(dateStr) {
 
 function getMatchLeftLabelGP(match) {
     if (match.status === 'LIVE') {
-        const elapsed = match.timeElapsed && match.timeElapsed.toLowerCase() !== 'notstarted'
-            ? (match.timeElapsed.toLowerCase() === 'ht' ? ' - ENTRETIEMPO' : ` - ${match.timeElapsed}'`)
+        const te = match.timeElapsed;
+        const elapsed = te && te.toLowerCase() !== 'notstarted'
+            ? (te.toLowerCase() === 'ht' ? ' - ENTRETIEMPO' : (!isNaN(te) ? ` - ${te}'` : ''))
             : '';
         return { text: `EN JUEGO${elapsed}`, css: 'match-status-live' };
     }

@@ -397,6 +397,7 @@ function getStageLabel(match) {
 function getTimeElapsedLabel(timeElapsed) {
     if (!timeElapsed || timeElapsed.toLowerCase() === 'notstarted') return '';
     if (timeElapsed.toLowerCase() === 'ht') return ' - ENTRETIEMPO';
+    if (isNaN(timeElapsed)) return '';
     return ` - ${timeElapsed}'`;
 }
 
