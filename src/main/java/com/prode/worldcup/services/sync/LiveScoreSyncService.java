@@ -98,10 +98,12 @@ public class LiveScoreSyncService {
 
     private void buildTeamMap() {
         try {
-            List<ExternalTeam> teams = restClient.get()
+            Map<String, List<ExternalTeam>> response = restClient.get()
                     .uri("/get/teams")
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {});
+
+            List<ExternalTeam> teams = response != null ? response.get("teams") : null;
 
             if (teams == null || teams.isEmpty()) {
                 log.warn("LiveSync: no teams returned from external API");
