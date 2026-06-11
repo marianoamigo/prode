@@ -5,7 +5,10 @@ let currentGPModalMatchId = null;
 let activePartidoFilter = null;
 const groupTeamsMap = {};
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", () => {
+    init();
+    initModalSwipe('gpModal', closeGPModal);
+});
 
 async function init() {
     const currentUser = await loadCurrentUser();
@@ -321,8 +324,10 @@ async function renderGroup(groupId, groupName) {
                 <button class="btn-group-calc" onclick="calculateGroupStandings('${groupId}')">
                     Calcular con pronósticos
                 </button>
-                <button class="btn-group-save" onclick="saveGroupPrediction('${groupId}')">
-                    Guardar grupo
+                <button class="${savedPredictions.length > 0 ? 'btn-group-save' : 'btn-group-predict'}"
+                        id="btn-group-save-${groupId}"
+                        onclick="saveGroupPrediction('${groupId}')">
+                    ${savedPredictions.length > 0 ? 'EDITAR PRONÓSTICO' : 'PRONOSTICAR'}
                 </button>
             </div>
         </div>`;
@@ -368,13 +373,20 @@ async function saveGroupPrediction(groupId) {
         return;
     }
 
-    await fetch("/api/group-predictions/save", {
+    const res = await fetch("/api/group-predictions/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ groupId, predictions })
     });
 
-    alert("Pronósticos guardados");
+    if (res.ok) {
+        const btn = document.getElementById(`btn-group-save-${groupId}`);
+        if (btn) {
+            btn.textContent = 'EDITAR PRONÓSTICO';
+            btn.className = 'btn-group-save';
+        }
+        alert("Pronósticos guardados");
+    }
 }
 
 // ── CALCULAR POSICIONES CON PRONÓSTICOS DE PARTIDOS ──

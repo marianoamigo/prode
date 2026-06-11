@@ -5,7 +5,10 @@ let modalMatchId = null;
 let modalScores = [0, 0];
 let activeFixtureFilter = null;
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", () => {
+    init();
+    initModalSwipe('predModal', closeModal);
+});
 
 function toDateStr(d) {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;

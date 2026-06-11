@@ -24,4 +24,15 @@ public interface MatchRepository extends JpaRepository<MatchEntity, UUID> {
 
     List<MatchEntity>
     findByStageAndStatus(MatchStage stage,MatchStatus status);
+
+    List<MatchEntity>
+    findByDateTimeBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
+
+    @org.springframework.data.jpa.repository.Query(
+        "SELECT m FROM MatchEntity m WHERE m.homeTeam.code = :homeCode AND m.awayTeam.code = :awayCode"
+    )
+    java.util.Optional<MatchEntity> findByHomeTeamCodeAndAwayTeamCode(
+        @org.springframework.data.repository.query.Param("homeCode") String homeCode,
+        @org.springframework.data.repository.query.Param("awayCode") String awayCode
+    );
 }

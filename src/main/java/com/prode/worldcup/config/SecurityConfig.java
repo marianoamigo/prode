@@ -48,6 +48,9 @@ public class SecurityConfig {
                                 "/api/private/invite/**")
                         .permitAll()
 
+                        .requestMatchers("/api/push/vapid-public-key")
+                        .permitAll()
+
                         .requestMatchers("/api/admin/**")
                         .hasRole("ADMIN")
 

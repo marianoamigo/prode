@@ -2,8 +2,15 @@ server:
   servlet:
     session:
       timeout: 30d
+      cookie:
+        max-age: PT720H
 
 spring:
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    timeout: 30d
   application:
     name: worldcup
   profiles:
@@ -24,6 +31,17 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
+
+worldcup:
+  api:
+    base-url: "https://worldcup26.ir"
+    token: "${WORLDCUP_API_TOKEN:}"
+
+push:
+  vapid:
+    public-key: "${VAPID_PUBLIC_KEY:}"
+    private-key: "${VAPID_PRIVATE_KEY:}"
+    subject: "mailto:marianoamigo93@gmail.com"
 
 logging:
   level:

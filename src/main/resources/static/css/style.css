@@ -122,6 +122,19 @@ p, span, label, td, th {
   background: rgba(255,255,255,0.06);
 }
 
+#pushBellBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  transition: color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+#pushBellBtn:hover { color: var(--accent); background: rgba(255,255,255,0.06); }
+#pushBellBtn.push-active { color: var(--accent); }
+
 /* ---- BOTTOM NAV (menú app móvil) ---- */
 .bottom-nav {
   position: fixed;
@@ -1272,6 +1285,22 @@ hr {
 }
 
 .btn-group-calc:active { opacity: .8; }
+
+.btn-group-predict {
+  flex: 1;
+  padding: 9px 10px;
+  background: #1a2e55;
+  color: #b8c5e8;
+  border: none;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.btn-group-predict:active { opacity: .8; }
 
 .btn-group-save {
   flex: 1;
