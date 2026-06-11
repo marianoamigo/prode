@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -95,6 +96,16 @@ public class MatchService {
         matchRepository.save(match);
 
 
+    }
+
+    @Transactional
+    public void recalculateMatch(UUID matchId) {
+        MatchEntity match = matchRepository.findById(matchId).orElseThrow();
+        predictionService.recalculatePointsForMatch(match);
+        if (match.getStage() == MatchStage.GROUP_STAGE) {
+            groupStandingService.recalculateGroup(match.getHomeTeam().getGroup().getId());
+        }
+        log.info("[[ MATCH SERVICE ]] recalculateMatch: recalculated for matchId={}", matchId);
     }
 
     public List<MatchResponseDTO> getMatchesByDate(

@@ -1,12 +1,16 @@
 package com.prode.worldcup.controllers;
 
+import com.prode.worldcup.services.matches.MatchService;
 import com.prode.worldcup.services.sync.LiveScoreSyncService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,10 +19,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminController {
 
     private final LiveScoreSyncService syncService;
+    private final MatchService matchService;
 
     @PostMapping("/sync-scores")
     public ResponseEntity<String> syncScores() {
         syncService.syncScores();
         return ResponseEntity.ok("Sync ejecutado — revisá los logs");
+    }
+
+    @PostMapping("/recalculate/{matchId}")
+    public ResponseEntity<String> recalculate(@PathVariable UUID matchId) {
+        matchService.recalculateMatch(matchId);
+        return ResponseEntity.ok("Recálculo ejecutado");
     }
 }

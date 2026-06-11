@@ -231,6 +231,11 @@ function updateMatchCard(matchId) {
     if (card) card.outerHTML = newHtml;
 }
 
+async function recalculateMatch(matchId) {
+    await fetch(`/api/admin/recalculate/${matchId}`, { method: 'POST' });
+    window.location.reload();
+}
+
 async function updateMatchResult(matchId, finished) {
     const homeScore = document.getElementById(`admin-home-${matchId}`).value;
     const awayScore = document.getElementById(`admin-away-${matchId}`).value;
@@ -286,9 +291,15 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
 
     let adminSection = '';
     if (currentUser?.role === 'ADMIN') {
+        const isFinished = match.status === 'FINISHED';
         adminSection = `
             <div class="admin-section">
                 <div class="admin-label">ADMIN</div>
+                ${isFinished ? `
+                <div style="color:#5a6e90;font-size:12px;text-align:center;">Partido finalizado</div>
+                <div class="admin-btns">
+                    <button class="admin-btn update" onclick="recalculateMatch('${match.id}')">Re-calcular puntos</button>
+                </div>` : `
                 <div class="admin-inputs">
                     <input id="admin-home-${match.id}" type="number" min="0" class="admin-input" value="${match.homeScore ?? 0}">
                     <span style="color:#5a6e90;">–</span>
@@ -297,7 +308,7 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
                 <div class="admin-btns">
                     <button class="admin-btn update" onclick="updateMatchResult('${match.id}', false)">Actualizar</button>
                     <button class="admin-btn finish" onclick="updateMatchResult('${match.id}', true)">Finalizar</button>
-                </div>
+                </div>`}
             </div>`;
     }
 

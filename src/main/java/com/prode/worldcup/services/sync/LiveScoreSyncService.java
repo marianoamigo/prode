@@ -4,6 +4,9 @@ import com.prode.worldcup.domain.dtos.external.ExternalGame;
 import com.prode.worldcup.domain.dtos.external.ExternalTeam;
 import com.prode.worldcup.infrastructure.persistence.entity.MatchEntity;
 import com.prode.worldcup.infrastructure.persistence.repository.MatchRepository;
+import com.prode.worldcup.services.group.GroupStandingService;
+import com.prode.worldcup.services.matches.PredictionService;
+import com.prode.worldcup.shared.MatchStage;
 import com.prode.worldcup.shared.MatchStatus;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,8 @@ import java.util.*;
 public class LiveScoreSyncService {
 
     private final MatchRepository matchRepository;
+    private final PredictionService predictionService;
+    private final GroupStandingService groupStandingService;
 
     @Value("${worldcup.api.base-url:https://worldcup26.ir}")
     private String baseUrl;
@@ -160,6 +165,9 @@ public class LiveScoreSyncService {
                 boolean changed = false;
 
                 MatchStatus newStatus = resolveStatus(game);
+                boolean justFinished = match.getStatus() != MatchStatus.FINISHED
+                        && newStatus == MatchStatus.FINISHED;
+
                 if (match.getStatus() != newStatus) {
                     match.setStatus(newStatus);
                     changed = true;
@@ -184,6 +192,16 @@ public class LiveScoreSyncService {
                     log.info("LiveSync: updated {} vs {} → status={} score={}-{}",
                             homeCode, awayCode, newStatus,
                             match.getHomeScore(), match.getAwayScore());
+
+                    if (justFinished) {
+                        predictionService.recalculatePointsForMatch(match);
+                        if (match.getStage() == MatchStage.GROUP_STAGE) {
+                            groupStandingService.recalculateGroup(
+                                    match.getHomeTeam().getGroup().getId());
+                        }
+                        log.info("LiveSync: recalculated points and standings for {} vs {}",
+                                homeCode, awayCode);
+                    }
                 }
             }
 
