@@ -129,6 +129,7 @@ public class LiveScoreSyncService {
         }
     }
 
+    @org.springframework.transaction.annotation.Transactional
     public void syncScores() {
         if (externalIdToCode.isEmpty()) {
             log.warn("LiveSync: team map empty, attempting rebuild...");

@@ -142,13 +142,19 @@ public class PredictionService {
 
     public void recalculatePointsForMatch(MatchEntity match) {
 
-        List<PredictionEntity> predictions = predictionRepository.findByMatchId(match.getId() );
+        List<PredictionEntity> predictions = predictionRepository.findByMatchId(match.getId());
 
         for (PredictionEntity prediction : predictions) {
+            prediction.setPointsScored(calculatePoints(prediction, match));
+            predictionRepository.save(prediction);
 
-            prediction.setPointsScored( calculatePoints(prediction, match ));
-
-            predictionRepository.save( prediction );
+            // recalculate user total points from all their predictions
+            int total = predictionRepository.findByUserId(prediction.getUser().getId())
+                    .stream()
+                    .mapToInt(p -> p.getPointsScored() != null ? p.getPointsScored() : 0)
+                    .sum();
+            prediction.getUser().setTotalPoints(total);
+            userRepository.save(prediction.getUser());
         }
     }
 
