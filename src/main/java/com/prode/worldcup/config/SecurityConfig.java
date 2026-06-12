@@ -44,6 +44,8 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/api/auth/me",
                                 "/api/matches/**",
+                                "/api/ranking/**",
+                                "/api/profile/**",
                                 "/api/group-standings/**",
                                 "/api/private/invite/**")
                         .permitAll()

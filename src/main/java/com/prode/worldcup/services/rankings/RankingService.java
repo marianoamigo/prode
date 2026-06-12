@@ -25,6 +25,7 @@ public class RankingService {
 
                 .map(user ->
                         new GlobalRankingResponseDTO(
+                                user.getId().toString(),
                                 user.getName(),
                                 user.getTotalPoints(),
                                 user.getPictureUrl()

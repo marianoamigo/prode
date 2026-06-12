@@ -1,7 +1,7 @@
 package com.prode.worldcup.domain.dtos.response;
 
 public record GlobalRankingResponseDTO(
-        //Integer position,
+        String userId,
         String userName,
         Integer totalPoints,
         String pictureUrl

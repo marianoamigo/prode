@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Perfil — ORSAI</title>
+  <meta name="theme-color" content="#0d0f1a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/ORSAI.png">
+  <link rel="icon" href="/icons/ORSAI.png" type="image/png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <a class="brand-logo" href="/">ORSAI</a>
+    <div id="userSection"></div>
+  </nav>
+
+  <main class="page-container">
+
+    <div style="margin-bottom:16px;">
+      <a href="/pages/ranking" style="font-size:.8rem;color:var(--text-muted);text-decoration:none;">← Ranking global</a>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <img id="profilePic" src="" width="60" height="60"
+           style="border-radius:50%;border:2px solid var(--border);display:none;object-fit:cover;" alt="">
+      <div>
+        <h2 id="profileName" style="margin:0 0 2px;"></h2>
+        <div id="profilePoints" style="color:var(--accent);font-weight:600;font-size:.9rem;"></div>
+      </div>
+    </div>
+
+    <hr>
+
+    <p style="font-size:.8rem;color:var(--text-muted);margin:12px 0 16px;">Pronósticos en partidos terminados</p>
+
+    <div id="predictionsContainer">
+      <div style="text-align:center;padding:32px;color:var(--text-muted);">Cargando...</div>
+    </div>
+
+  </main>
+
+  <script src="/js/navbar.js"></script>
+  <script src="/js/profile.js"></script>
+  <script src="/js/bottomNav.js"></script>
+</body>
+</html>

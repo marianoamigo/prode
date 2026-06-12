@@ -21,10 +21,13 @@ function updateCalLabel() {
     const sel = toDateStr(selectedDate);
     const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
     const tomorrowStr = toDateStr(tomorrowDate);
+    const yesterdayDate = new Date(); yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterdayStr = toDateStr(yesterdayDate);
     const dias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
     const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
     if (sel === todayStr) label.textContent = 'Hoy';
     else if (sel === tomorrowStr) label.textContent = 'Mañana';
+    else if (sel === yesterdayStr) label.textContent = 'Ayer';
     else label.textContent = `${dias[selectedDate.getDay()]} ${selectedDate.getDate()} ${meses[selectedDate.getMonth()]}`;
 }
 
@@ -91,9 +94,12 @@ async function selectDate(dateStr) {
     const todayStr = toDateStr(new Date());
     const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
     const tomorrowStr = toDateStr(tomorrowDate);
+    const yesterdayDate = new Date(); yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterdayStr = toDateStr(yesterdayDate);
     document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
     if (dateStr === todayStr) document.querySelector('[data-tab="hoy"]')?.classList.add('active');
     else if (dateStr === tomorrowStr) document.querySelector('[data-tab="manana"]')?.classList.add('active');
+    else if (dateStr === yesterdayStr) document.querySelector('[data-tab="ayer"]')?.classList.add('active');
 
     updateCalLabel();
 
@@ -449,7 +455,12 @@ async function switchTab(btn, tab) {
     const currentUser = await loadCurrentUser();
     let matches;
 
-    if (tab === 'hoy') {
+    if (tab === 'ayer') {
+        selectedDate = new Date();
+        selectedDate.setDate(selectedDate.getDate() - 1);
+        matches = await loadMatchesByDate();
+        updateCalLabel();
+    } else if (tab === 'hoy') {
         selectedDate = new Date();
         matches = await loadMatchesByDate();
         updateCalLabel();

@@ -116,9 +116,8 @@ public class MatchService {
                 .findAll()
                 .stream()
                 .filter(match ->
-                        match.getDateTime()
-                                .toLocalDate()
-                                .equals(date)
+                        match.getDateTime().toLocalDate().equals(date)
+                        || match.getStatus() == MatchStatus.LIVE
                 )
                 .map(match -> new MatchResponseDTO(
                         match.getId(),

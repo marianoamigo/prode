@@ -166,6 +166,10 @@ public class LiveScoreSyncService {
                 boolean changed = false;
 
                 MatchStatus newStatus = resolveStatus(game);
+                // Never downgrade LIVE → SCHEDULED (external API lag or timing mismatch)
+                if (match.getStatus() == MatchStatus.LIVE && newStatus == MatchStatus.SCHEDULED) {
+                    newStatus = MatchStatus.LIVE;
+                }
                 boolean justFinished = match.getStatus() != MatchStatus.FINISHED
                         && newStatus == MatchStatus.FINISHED;
 
