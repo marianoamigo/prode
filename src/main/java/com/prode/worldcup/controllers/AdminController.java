@@ -32,4 +32,10 @@ public class AdminController {
         matchService.recalculateMatch(matchId);
         return ResponseEntity.ok("Recálculo ejecutado");
     }
+
+    @PostMapping("/reset/{matchId}")
+    public ResponseEntity<String> resetMatch(@PathVariable UUID matchId) {
+        matchService.resetMatch(matchId);
+        return ResponseEntity.ok("Partido reseteado a SCHEDULED, scores limpiados, puntos a cero");
+    }
 }

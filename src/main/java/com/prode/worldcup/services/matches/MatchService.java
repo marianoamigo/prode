@@ -109,6 +109,21 @@ public class MatchService {
         log.info("[[ MATCH SERVICE ]] recalculateMatch: recalculated for matchId={}", matchId);
     }
 
+    @Transactional
+    public void resetMatch(UUID matchId) {
+        MatchEntity match = matchRepository.findById(matchId).orElseThrow();
+        match.setStatus(MatchStatus.SCHEDULED);
+        match.setHomeScore(null);
+        match.setAwayScore(null);
+        match.setTimeElapsed(null);
+        matchRepository.save(match);
+        predictionService.recalculatePointsForMatch(match);
+        if (match.getStage() == MatchStage.GROUP_STAGE) {
+            groupStandingService.recalculateGroup(match.getHomeTeam().getGroup().getId());
+        }
+        log.info("[[ MATCH SERVICE ]] resetMatch: reset matchId={} back to SCHEDULED, scores cleared, points zeroed", matchId);
+    }
+
     public List<MatchResponseDTO> getMatchesByDate(
             LocalDate date
     ){

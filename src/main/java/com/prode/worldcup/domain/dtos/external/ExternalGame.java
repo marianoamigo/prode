@@ -19,7 +19,10 @@ public record ExternalGame(
     }
 
     public boolean isLive() {
-        return !isFinished() && !"notstarted".equalsIgnoreCase(timeElapsed);
+        return !isFinished()
+                && timeElapsed != null
+                && !timeElapsed.isBlank()
+                && !"notstarted".equalsIgnoreCase(timeElapsed);
     }
 
     public boolean isGroupStage() {

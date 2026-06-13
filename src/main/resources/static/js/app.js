@@ -242,6 +242,12 @@ async function recalculateMatch(matchId) {
     window.location.reload();
 }
 
+async function resetMatch(matchId) {
+    if (!confirm('¿Resetear partido a SCHEDULED? Limpia el score y pone puntos en 0.')) return;
+    await fetch(`/api/admin/reset/${matchId}`, { method: 'POST' });
+    window.location.reload();
+}
+
 async function updateMatchResult(matchId, finished) {
     const homeScore = document.getElementById(`admin-home-${matchId}`).value;
     const awayScore = document.getElementById(`admin-away-${matchId}`).value;
@@ -301,8 +307,8 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
                 </div>`;
         } else {
             actionSection = `
-                <div class="prediction-result">
-                    <span class="prediction-score">${hasPred ? `TU PRONÓSTICO: ${prediction.predictedHomeScore} – ${prediction.predictedAwayScore}` : '—'}</span>
+                <div style="text-align:center;font-size:11px;font-weight:700;color:#5a6e90;letter-spacing:.08em;margin-top:4px;">
+                    PARTIDO PROGRAMADO PARA LAS ${formatTime(match.dateTime)} hs
                 </div>`;
         }
     }
@@ -326,6 +332,7 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
                 <div class="admin-btns">
                     <button class="admin-btn update" onclick="updateMatchResult('${match.id}', false)">Actualizar</button>
                     <button class="admin-btn finish" onclick="updateMatchResult('${match.id}', true)">Finalizar</button>
+                    <button class="admin-btn reset" onclick="resetMatch('${match.id}')">Resetear</button>
                 </div>`}
             </div>`;
     }
@@ -385,10 +392,12 @@ function renderMatches(matches, predictions, currentUser) {
 
     Object.keys(byDate).sort().forEach(dateKey => {
         if (showDatePills) html += `<div class="date-pill">${formatDateLabel(dateKey)}</div>`;
-        byDate[dateKey].forEach(match => {
-            const prediction = predictions.find(p => String(p.matchId) === String(match.id));
-            html += buildMatchCard(match, prediction, currentUser, canEditPrediction(match));
-        });
+        byDate[dateKey]
+            .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
+            .forEach(match => {
+                const prediction = predictions.find(p => String(p.matchId) === String(match.id));
+                html += buildMatchCard(match, prediction, currentUser, canEditPrediction(match));
+            });
     });
 
     container.innerHTML = html;

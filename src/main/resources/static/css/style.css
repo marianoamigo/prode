@@ -975,7 +975,7 @@ hr {
 .prediction-pts {
   font-size: 12px;
   font-weight: 700;
-  color: #2ecc71;
+  color: #1a8c45;
 }
 
 .prediction-pts-live {
@@ -1065,6 +1065,7 @@ hr {
 
 .admin-btn.update { background: #d4a017; color: #0e1628; }
 .admin-btn.finish { background: #c0392b; color: #ffffff; }
+.admin-btn.reset  { background: #5a3e8a; color: #ffffff; }
 
 /* ---- MODAL PRONÓSTICO ---- */
 .modal-overlay {

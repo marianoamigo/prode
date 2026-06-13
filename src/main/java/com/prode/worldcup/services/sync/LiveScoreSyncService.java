@@ -165,13 +165,17 @@ public class LiveScoreSyncService {
                 MatchEntity match = matchOpt.get();
                 boolean changed = false;
 
+                // Never touch a match that is already FINISHED
+                if (match.getStatus() == MatchStatus.FINISHED) {
+                    continue;
+                }
+
                 MatchStatus newStatus = resolveStatus(game);
                 // Never downgrade LIVE → SCHEDULED (external API lag or timing mismatch)
                 if (match.getStatus() == MatchStatus.LIVE && newStatus == MatchStatus.SCHEDULED) {
                     newStatus = MatchStatus.LIVE;
                 }
-                boolean justFinished = match.getStatus() != MatchStatus.FINISHED
-                        && newStatus == MatchStatus.FINISHED;
+                boolean justFinished = newStatus == MatchStatus.FINISHED;
 
                 if (match.getStatus() != newStatus) {
                     match.setStatus(newStatus);

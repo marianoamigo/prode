@@ -131,10 +131,12 @@ function renderPartidos() {
     let html = '';
     Object.keys(byDate).sort().forEach(dateKey => {
         html += `<div class="date-pill">${formatDateLabelGP(dateKey)}</div>`;
-        byDate[dateKey].forEach(match => {
-            const pred = allPredictions.find(p => String(p.matchId) === String(match.id));
-            html += buildPartidoCard(match, pred);
-        });
+        byDate[dateKey]
+            .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime))
+            .forEach(match => {
+                const pred = allPredictions.find(p => String(p.matchId) === String(match.id));
+                html += buildPartidoCard(match, pred);
+            });
     });
 
     container.innerHTML = html;
@@ -194,11 +196,7 @@ function buildPartidoCard(match, pred) {
     } else {
         actionBtn = `
             <div style="text-align:center;font-size:11px;font-weight:700;color:#5a6e90;letter-spacing:.08em;margin-top:4px;">
-                PRONÓSTICO CERRADO
-            </div>
-            <div class="prediction-result">
-                <span class="prediction-score">${hasPred ? `TU PRONÓSTICO: ${pred.predictedHomeScore} – ${pred.predictedAwayScore}` : '—'}</span>
-                ${hasPred ? `<span class="prediction-pts">${pred.pointsScored ?? 0} pts</span>` : ''}
+                PARTIDO PROGRAMADO PARA LAS ${formatTimeGP(match.dateTime)} hs
             </div>`;
     }
 

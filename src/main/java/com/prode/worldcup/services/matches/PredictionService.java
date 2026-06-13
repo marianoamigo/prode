@@ -109,7 +109,13 @@ public class PredictionService {
                 )).toList();
     }
 
-    private int calculatePoints(PredictionEntity prediction,MatchEntity match) {
+    private int calculatePoints(PredictionEntity prediction, MatchEntity match) {
+
+        if (match.getStatus() != MatchStatus.FINISHED
+                || match.getHomeScore() == null
+                || match.getAwayScore() == null) {
+            return 0;
+        }
 
         if (
                 prediction.getPredictionHomeScore()
