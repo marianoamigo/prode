@@ -76,12 +76,11 @@ function renderMembers(members) {
             ? `${m.predictedHomeScore}-${m.predictedAwayScore}`
             : '—';
         const pts = m.livePoints != null ? m.livePoints : '—';
-        const ptsColor = m.livePoints === 3 ? '#2ecc71' : m.livePoints === 1 ? '#f39c12' : 'var(--text-secondary)';
         return `
             <tr>
                 <td>${m.userName}</td>
                 <td style="text-align:center;font-weight:600;">${pred}</td>
-                <td style="text-align:right;font-weight:700;color:${ptsColor};">${pts}</td>
+                <td style="text-align:right;font-weight:700;color:var(--text-secondary);">${pts}</td>
             </tr>
         `;
     }).join('');

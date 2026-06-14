@@ -87,8 +87,9 @@ function renderRanking(ranking, currentUser, globalRanking) {
     let pos = 1;
     ranking.forEach((user, index) => {
         if (index > 0 && user.totalPoints < ranking[index - 1].totalPoints) pos = index + 1;
-        const badgeClass = '';
+        const badgeClass = pos === 1 ? 'top-1' : pos === 2 ? 'top-2' : pos === 3 ? 'top-3' : '';
         const isMe = currentUser && user.userName === currentUser.name;
+        const isFirst = pos === 1;
         body.innerHTML += `
             <tr style="${isMe ? 'background:rgba(232,64,10,0.08);' : ''}cursor:pointer;"
                 onclick="window.location.href='/pages/profile?id=${user.userId}'">
@@ -96,7 +97,7 @@ function renderRanking(ranking, currentUser, globalRanking) {
                 <td>
                     <div style="display:flex;align-items:center;gap:8px;">
                         ${user.pictureUrl ? `<img src="${user.pictureUrl}" width="30" height="30" style="border-radius:50%;border:1px solid var(--border);" alt="">` : ''}
-                        <span ${isMe ? 'style="color:var(--accent);font-weight:600;"' : ''}>${user.userName}</span>
+                        <span ${(isMe || isFirst) ? 'style="color:var(--accent);font-weight:600;"' : ''}>${user.userName}</span>
                     </div>
                 </td>
                 <td style="text-align:right;font-weight:600;color:var(--accent);">
