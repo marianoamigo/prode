@@ -87,7 +87,7 @@ function renderRanking(ranking, currentUser, globalRanking) {
     let pos = 1;
     ranking.forEach((user, index) => {
         if (index > 0 && user.totalPoints < ranking[index - 1].totalPoints) pos = index + 1;
-        const badgeClass = pos === 1 ? 'top-1' : pos === 2 ? 'top-2' : pos === 3 ? 'top-3' : '';
+        const badgeClass = '';
         const isMe = currentUser && user.userName === currentUser.name;
         body.innerHTML += `
             <tr style="${isMe ? 'background:rgba(232,64,10,0.08);' : ''}cursor:pointer;"
