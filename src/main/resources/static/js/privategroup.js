@@ -108,12 +108,9 @@ function renderRanking(ranking, currentUser, globalRanking) {
 }
 
 async function loadLiveMatches() {
-    const today = new Date();
-    const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-    const res = await fetch(`/api/matches/date/${dateStr}`);
+    const res = await fetch('/api/matches/live');
     if (!res.ok) return [];
-    const matches = await res.json();
-    return matches.filter(m => m.status === 'LIVE');
+    return res.json();
 }
 
 function renderLiveMatches(liveMatches, groupId) {

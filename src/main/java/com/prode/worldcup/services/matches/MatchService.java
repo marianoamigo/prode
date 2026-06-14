@@ -124,6 +124,29 @@ public class MatchService {
         log.info("[[ MATCH SERVICE ]] resetMatch: reset matchId={} back to SCHEDULED, scores cleared, points zeroed", matchId);
     }
 
+    public List<MatchResponseDTO> getLiveMatches() {
+        return matchRepository.findAll().stream()
+                .filter(match -> match.getStatus() == MatchStatus.LIVE)
+                .map(match -> new MatchResponseDTO(
+                        match.getId(),
+                        match.getHomeTeam().getName(),
+                        "/images/flags/" + match.getHomeTeam().getCode() + ".svg",
+                        match.getAwayTeam().getName(),
+                        "/images/flags/" + match.getAwayTeam().getCode() + ".svg",
+                        match.getHomeScore(),
+                        match.getAwayScore(),
+                        match.getStatus(),
+                        match.getStage(),
+                        match.getDateTime(),
+                        match.getMatchDay(),
+                        match.getStage() == MatchStage.GROUP_STAGE
+                                ? match.getHomeTeam().getGroup().getName()
+                                : null,
+                        match.getTimeElapsed()
+                ))
+                .toList();
+    }
+
     public List<MatchResponseDTO> getMatchesByDate(
             LocalDate date
     ){
@@ -131,7 +154,7 @@ public class MatchService {
                 .findAll()
                 .stream()
                 .filter(match ->
-                        (match.getStatus() == MatchStatus.LIVE && date.equals(LocalDate.now()))
+                        (match.getStatus() == MatchStatus.LIVE && date.equals(LocalDate.now(java.time.ZoneId.of("America/Argentina/Buenos_Aires"))))
                         || (match.getStatus() != MatchStatus.LIVE && match.getDateTime().toLocalDate().equals(date))
                 )
                 .map(match -> new MatchResponseDTO(

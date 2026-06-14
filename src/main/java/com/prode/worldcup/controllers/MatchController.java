@@ -30,6 +30,11 @@ public class MatchController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/live")
+    public List<MatchResponseDTO> getLiveMatches() {
+        return matchService.getLiveMatches();
+    }
+
     @GetMapping("/date/{date}")
     public List<MatchResponseDTO> getMatchesByDate(
             @PathVariable LocalDate date
