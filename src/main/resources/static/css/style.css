@@ -397,7 +397,6 @@ p, span, label, td, th {
   font-weight: 400;
 }
 
-.table tbody tr:first-child td { color: var(--accent); font-weight: 600; }
 
 /* ---- BUTTONS ---- */
 .btn {
