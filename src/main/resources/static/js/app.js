@@ -428,7 +428,7 @@ function getMatchLeftLabel(match) {
     if (match.status === 'FINISHED') {
         return { text: 'FINALIZADO', css: 'match-time' };
     }
-    return { text: `⏰ ${formatTime(match.dateTime)} hs`, css: 'match-time' };
+    return { text: `${formatTime(match.dateTime)} hs`, css: 'match-time' };
 }
 
 function formatMatchDate(dateTime) {

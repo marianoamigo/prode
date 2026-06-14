@@ -63,6 +63,14 @@ public class PrivateGroupController {
         return ResponseEntity.ok(privateGroupService.getGroupRanking(groupId));
     }
 
+    @GetMapping("/{groupId}/live-match/{matchId}")
+    public ResponseEntity<?> liveMatchDetails(
+            @PathVariable UUID groupId,
+            @PathVariable UUID matchId
+    ) {
+        return ResponseEntity.ok(privateGroupService.getLiveMatchGroupDetails(groupId, matchId));
+    }
+
     @GetMapping("/{groupId}")
     public ResponseEntity<?> getGroup(
             @PathVariable UUID groupId,

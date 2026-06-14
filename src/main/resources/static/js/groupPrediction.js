@@ -98,7 +98,7 @@ function getMatchLeftLabelGP(match) {
     if (match.status === 'FINISHED') {
         return { text: 'FINALIZADO', css: 'match-time' };
     }
-    return { text: `⏰ ${formatTimeGP(match.dateTime)} hs`, css: 'match-time' };
+    return { text: `${formatTimeGP(match.dateTime)} hs`, css: 'match-time' };
 }
 
 function getStageLabelGP(match) {

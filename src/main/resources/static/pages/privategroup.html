@@ -23,8 +23,8 @@
     <!-- Encabezado del grupo -->
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
       <a href="/pages/privategroups"
-         style="text-decoration:none;font-size:1.6rem;line-height:1;display:flex;align-items:center;">
-        🔙
+         style="text-decoration:none;font-size:1.4rem;line-height:1;display:flex;align-items:center;color:var(--text-secondary);">
+        &#9668;
       </a>
       <h2 id="groupTitle" style="margin:0;">Grupo</h2>
     </div>
@@ -47,6 +47,14 @@
     </div>
 
     <hr>
+
+    <!-- Partidos en juego -->
+    <div id="liveMatchesSection" style="display:none; margin-bottom:16px;">
+      <p style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-secondary);margin-bottom:10px;">
+        PARTIDOS EN JUEGO
+      </p>
+      <div id="liveMatchesList"></div>
+    </div>
 
     <table class="table">
       <thead>

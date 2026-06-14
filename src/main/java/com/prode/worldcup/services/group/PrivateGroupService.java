@@ -2,9 +2,14 @@ package com.prode.worldcup.services.group;
 
 import com.prode.worldcup.domain.dtos.response.GroupRankingResponseDTO;
 import com.prode.worldcup.domain.dtos.request.PrivateGroupRequestDTO;
+import com.prode.worldcup.domain.dtos.response.LiveMatchGroupMemberDTO;
 import com.prode.worldcup.domain.dtos.response.PrivateGroupResponseDTO;
+import com.prode.worldcup.infrastructure.persistence.entity.MatchEntity;
+import com.prode.worldcup.infrastructure.persistence.entity.PredictionEntity;
 import com.prode.worldcup.infrastructure.persistence.entity.PrivateGroupEntity;
 import com.prode.worldcup.infrastructure.persistence.entity.UserEntity;
+import com.prode.worldcup.infrastructure.persistence.repository.MatchRepository;
+import com.prode.worldcup.infrastructure.persistence.repository.PredictionRepository;
 import com.prode.worldcup.infrastructure.persistence.repository.PrivateGroupRepository;
 import com.prode.worldcup.infrastructure.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +26,8 @@ public class PrivateGroupService {
 
     private final UserRepository userRepository;
     private final PrivateGroupRepository privateGroupRepository;
+    private final MatchRepository matchRepository;
+    private final PredictionRepository predictionRepository;
     private static final String JOIN_PATH = "/join/";
 
     public PrivateGroupResponseDTO createGroup(String googleId, PrivateGroupRequestDTO request) {
@@ -132,6 +139,40 @@ public class PrivateGroupService {
                         user.getPictureUrl()
                 ))
                 .toList();
+    }
+
+    public List<LiveMatchGroupMemberDTO> getLiveMatchGroupDetails(UUID groupId, UUID matchId) {
+        PrivateGroupEntity group = privateGroupRepository.findById(groupId).orElseThrow();
+        MatchEntity match = matchRepository.findById(matchId).orElseThrow();
+
+        return group.getUsers().stream()
+                .map(user -> {
+                    Optional<PredictionEntity> predOpt = predictionRepository.findByUserIdAndMatchId(user.getId(), matchId);
+                    Integer predHome = predOpt.map(PredictionEntity::getPredictionHomeScore).orElse(null);
+                    Integer predAway = predOpt.map(PredictionEntity::getPredictionAwayScore).orElse(null);
+                    Integer pts = null;
+                    if (predOpt.isPresent() && match.getHomeScore() != null && match.getAwayScore() != null) {
+                        pts = calcLivePoints(predOpt.get(), match);
+                    }
+                    return new LiveMatchGroupMemberDTO(user.getName(), predHome, predAway, pts);
+                })
+                .sorted((a, b) -> {
+                    int pa = a.livePoints() != null ? a.livePoints() : -1;
+                    int pb = b.livePoints() != null ? b.livePoints() : -1;
+                    return Integer.compare(pb, pa);
+                })
+                .toList();
+    }
+
+    private int calcLivePoints(PredictionEntity prediction, MatchEntity match) {
+        int predHome = prediction.getPredictionHomeScore();
+        int predAway = prediction.getPredictionAwayScore();
+        int actHome = match.getHomeScore();
+        int actAway = match.getAwayScore();
+        if (predHome == actHome && predAway == actAway) return 3;
+        int predResult = Integer.compare(predHome, predAway);
+        int actualResult = Integer.compare(actHome, actAway);
+        return predResult == actualResult ? 1 : 0;
     }
 
     public void deleteGroup(UUID groupId, String googleId) {

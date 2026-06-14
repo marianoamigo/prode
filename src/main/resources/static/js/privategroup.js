@@ -14,11 +14,13 @@ async function init() {
     document.getElementById("deleteGroupButton").addEventListener("click", deleteGroup);
     document.getElementById("leaveGroupButton").addEventListener("click", leaveGroup);
 
-    const [ranking, globalRanking] = await Promise.all([
+    const [ranking, globalRanking, liveMatches] = await Promise.all([
         loadRanking(groupId),
-        fetch('/api/ranking/global').then(r => r.ok ? r.json() : []).catch(() => [])
+        fetch('/api/ranking/global').then(r => r.ok ? r.json() : []).catch(() => []),
+        loadLiveMatches()
     ]);
     renderRanking(ranking, currentUser, globalRanking);
+    renderLiveMatches(liveMatches, groupId);
 }
 
 function getGroupId() {
@@ -88,7 +90,8 @@ function renderRanking(ranking, currentUser, globalRanking) {
         const badgeClass = pos === 1 ? 'top-1' : pos === 2 ? 'top-2' : pos === 3 ? 'top-3' : '';
         const isMe = currentUser && user.userName === currentUser.name;
         body.innerHTML += `
-            <tr ${isMe ? 'style="background:rgba(232,64,10,0.08);"' : ''}>
+            <tr style="${isMe ? 'background:rgba(232,64,10,0.08);' : ''}cursor:pointer;"
+                onclick="window.location.href='/pages/profile?id=${user.userId}'">
                 <td><span class="rank-badge ${badgeClass}">${pos}</span></td>
                 <td>
                     <div style="display:flex;align-items:center;gap:8px;">
@@ -102,6 +105,43 @@ function renderRanking(ranking, currentUser, globalRanking) {
             </tr>
         `;
     });
+}
+
+async function loadLiveMatches() {
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    const res = await fetch(`/api/matches/date/${dateStr}`);
+    if (!res.ok) return [];
+    const matches = await res.json();
+    return matches.filter(m => m.status === 'LIVE');
+}
+
+function renderLiveMatches(liveMatches, groupId) {
+    const section = document.getElementById('liveMatchesSection');
+    const list = document.getElementById('liveMatchesList');
+    if (!section || !list) return;
+    if (!liveMatches || liveMatches.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    section.style.display = 'block';
+    list.innerHTML = liveMatches.map(match => `
+        <div onclick="window.location.href='/pages/live-match?groupId=${groupId}&matchId=${match.id}'"
+             style="
+                display:flex;align-items:center;justify-content:center;gap:10px;
+                background:var(--bg-card);border:1px solid var(--border-accent);
+                border-radius:12px;padding:14px 16px;margin-bottom:8px;
+                cursor:pointer;transition:background 0.15s;
+             "
+             onmouseover="this.style.background='var(--bg-card-hover)'"
+             onmouseout="this.style.background='var(--bg-card)'">
+            <img src="${match.homeFlagUrl}" style="width:40px;height:28px;object-fit:cover;border-radius:3px;" alt="${match.homeTeam}">
+            <span style="font-size:20px;font-weight:900;color:var(--text-primary);font-family:Impact,monospace;letter-spacing:2px;">
+                ${match.homeScore} – ${match.awayScore}
+            </span>
+            <img src="${match.awayFlagUrl}" style="width:40px;height:28px;object-fit:cover;border-radius:3px;" alt="${match.awayTeam}">
+        </div>
+    `).join('');
 }
 
 async function copyInviteLink() {

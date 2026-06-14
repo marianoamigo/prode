@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Partido en Vivo — ORSAI</title>
+  <meta name="theme-color" content="#0d0f1a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/ORSAI.png">
+  <link rel="icon" href="/icons/ORSAI.png" type="image/png">
+  <link rel="stylesheet" href="/css/style.css?v=2">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <a class="brand-logo" href="/">ORSAI</a>
+    <div id="userSection"></div>
+  </nav>
+
+  <main class="page-container">
+
+    <!-- Botón volver -->
+    <div style="margin-bottom:16px;">
+      <a id="backBtn" href="/pages/privategroups"
+         style="text-decoration:none;color:var(--text-secondary);font-size:0.85rem;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;display:inline-flex;align-items:center;gap:6px;">
+        <b>&lt;</b> <span id="backLabel">VOLVER</span>
+      </a>
+    </div>
+
+    <!-- Cabecera del partido -->
+    <div id="matchHeader" style="
+        display:flex;align-items:center;justify-content:center;gap:16px;
+        background:var(--bg-card);border:1px solid var(--border);
+        border-radius:14px;padding:20px 16px;margin-bottom:20px;
+    ">
+      <img id="homeFlagImg" src="" style="width:52px;height:36px;object-fit:cover;border-radius:4px;" alt="">
+      <div id="liveScore" style="font-size:2rem;font-weight:900;color:var(--accent);font-family:Impact,monospace;letter-spacing:4px;">
+        — – —
+      </div>
+      <img id="awayFlagImg" src="" style="width:52px;height:36px;object-fit:cover;border-radius:4px;" alt="">
+    </div>
+
+    <!-- Estado en vivo -->
+    <div style="text-align:center;margin-bottom:20px;">
+      <span id="liveStatus" style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:2px;text-transform:uppercase;">
+        EN JUEGO
+      </span>
+    </div>
+
+    <!-- Tabla de participantes -->
+    <table class="table" id="membersTable">
+      <thead>
+        <tr>
+          <th>Participante</th>
+          <th style="text-align:center;">Predicción</th>
+          <th style="text-align:right;">Pts</th>
+        </tr>
+      </thead>
+      <tbody id="membersBody">
+        <tr><td colspan="3" class="text-muted" style="padding:24px;text-align:center;font-size:.85rem;">Cargando...</td></tr>
+      </tbody>
+    </table>
+
+  </main>
+
+  <script src="/js/navbar.js"></script>
+  <script src="/js/live-match.js"></script>
+  <script src="/js/bottomNav.js"></script>
+</body>
+</html>
