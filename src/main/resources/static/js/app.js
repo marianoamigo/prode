@@ -323,6 +323,7 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
                 <div style="color:#5a6e90;font-size:12px;text-align:center;">Partido finalizado</div>
                 <div class="admin-btns">
                     <button class="admin-btn update" onclick="recalculateMatch('${match.id}')">Re-calcular puntos</button>
+                    <button class="admin-btn reset" onclick="resetMatch('${match.id}')">Reiniciar partido</button>
                 </div>` : `
                 <div class="admin-inputs">
                     <input id="admin-home-${match.id}" type="number" min="0" class="admin-input" value="${match.homeScore ?? 0}">
