@@ -1405,9 +1405,10 @@ hr {
   font-size: 16px;
   font-weight: 900;
   color: #1a2540;
-  min-width: 22px;
+  width: 28px;
   text-align: right;
   font-family: Impact, monospace;
+  flex-shrink: 0;
 }
 
 /* ---- GROUP TABS SCROLL (posiciones) ---- */
@@ -1472,7 +1473,7 @@ hr {
   display: flex;
   align-items: center;
   padding: 5px 14px;
-  gap: 4px;
+  gap: 8px;
   border-bottom: 1px solid rgba(14,22,40,0.12);
 }
 
@@ -1495,7 +1496,7 @@ hr {
 }
 
 .tabla-col-stat {
-  width: 26px;
+  width: 22px;
   text-align: center;
   font-size: 10px;
   font-weight: 700;
@@ -1524,12 +1525,119 @@ hr {
 }
 
 .tabla-stat {
-  width: 26px;
+  width: 22px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;
   color: #5a6e90;
   flex-shrink: 0;
+}
+
+/* ---- TABLA TERCEROS — GROUP TAG ---- */
+.tabla-group-tag {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: .5px;
+  flex-shrink: 0;
+}
+
+/* ---- PARTIDOS DE GRUPO (bajo la tabla de posiciones) ---- */
+.group-matches-section {
+  margin-top: 14px;
+}
+
+.group-matches-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 6px 0 8px;
+}
+
+.gmatch-row {
+  background: var(--bg-card);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+}
+
+.gmatch-status-row {
+  margin-bottom: 6px;
+}
+
+.gmatch-status {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.gmatch-status.live  { color: var(--accent); }
+.gmatch-status.fin   { color: var(--text-muted); }
+.gmatch-status.sched { color: var(--blue-pearl); }
+
+.gmatch-teams {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gmatch-team {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.gmatch-team.right {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.gmatch-flag {
+  width: 22px;
+  height: 15px;
+  object-fit: cover;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.gmatch-name {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gmatch-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  flex-shrink: 0;
+}
+
+.gmatch-score {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--text-primary);
+  font-family: Impact, monospace;
+  letter-spacing: .04em;
+}
+
+.gmatch-score.live { color: var(--accent); }
+
+.gmatch-vs {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
 }
 
 /* ---- INLINE SCORE INPUTS (tab Partidos en Pronósticos) ---- */
@@ -1592,6 +1700,190 @@ hr {
   font-size: 18px;
   font-weight: 700;
   color: #5a6e90;
+}
+
+/* ---- CANDIDATOS PROMO BOX (index.html) ---- */
+.candidatos-promo {
+  display: block;
+  background: linear-gradient(135deg, #1a2540 0%, #0e1628 100%);
+  border: 1px solid var(--accent);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.candidatos-promo-title {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.candidatos-promo-sub {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+/* ---- CANDIDATOS PAGE HEADER ---- */
+.candidatos-page-header {
+  margin-bottom: 20px;
+}
+
+.candidatos-page-title {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.candidatos-page-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* ---- CANDIDATOS FORM ---- */
+.candidatos-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.candidatos-row {
+  margin-bottom: 14px;
+}
+
+.candidatos-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.candidatos-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.candidatos-flag {
+  width: 30px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.candidatos-select {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  min-width: 0;
+}
+
+.candidatos-select option {
+  background: #161929;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.candidatos-save-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: var(--font-body);
+  margin-top: 6px;
+  transition: background .15s;
+}
+
+.candidatos-save-btn:hover { background: var(--accent-dark); }
+.candidatos-save-btn:active { transform: scale(.97); }
+.candidatos-save-btn.saved {
+  background: rgba(90, 110, 144, 0.35);
+  color: rgba(180, 200, 230, 0.8);
+  cursor: default;
+  pointer-events: none;
+}
+.candidatos-save-btn.update { background: #e07b2a; }
+.candidatos-save-btn.update:hover { background: #c96a1e; }
+
+.candidatos-deadline {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+/* ---- CHAMPION BADGE (profile.html) ---- */
+.champion-badge {
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.champion-badge-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.champion-badge-team {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.champion-badge-flag {
+  width: 32px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.champion-badge-name {
+  font-size: 16px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  letter-spacing: .06em;
 }
 
 /* ---- GROUP POS SELECT (tab Grupos en Pronósticos) ---- */

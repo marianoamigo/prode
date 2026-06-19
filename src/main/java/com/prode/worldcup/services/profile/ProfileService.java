@@ -3,6 +3,7 @@ package com.prode.worldcup.services.profile;
 import com.prode.worldcup.domain.dtos.response.ProfilePredictionDTO;
 import com.prode.worldcup.domain.dtos.response.ProfileResponseDTO;
 import com.prode.worldcup.infrastructure.persistence.entity.MatchEntity;
+import com.prode.worldcup.infrastructure.persistence.repository.ChampionPredictionRepository;
 import com.prode.worldcup.infrastructure.persistence.repository.PredictionRepository;
 import com.prode.worldcup.infrastructure.persistence.repository.UserRepository;
 import com.prode.worldcup.shared.MatchStage;
@@ -19,6 +20,7 @@ public class ProfileService {
 
     private final UserRepository userRepository;
     private final PredictionRepository predictionRepository;
+    private final ChampionPredictionRepository championRepo;
 
     public ProfileResponseDTO getProfile(UUID userId) {
         var user = userRepository.findById(userId).orElseThrow();
@@ -49,11 +51,17 @@ public class ProfileService {
                 })
                 .toList();
 
+        var champion = championRepo.findByUserId(userId).orElse(null);
+        String championName = champion != null ? champion.getChampion() : null;
+        String championFlag = champion != null ? champion.getChampionFlag() : null;
+
         return new ProfileResponseDTO(
                 user.getName(),
                 user.getPictureUrl(),
                 user.getTotalPoints() != null ? user.getTotalPoints() : 0,
-                predictions
+                predictions,
+                championName,
+                championFlag
         );
     }
 }

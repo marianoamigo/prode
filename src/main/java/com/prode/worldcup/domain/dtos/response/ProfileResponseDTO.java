@@ -6,6 +6,8 @@ public record ProfileResponseDTO(
         String userName,
         String pictureUrl,
         int totalPoints,
-        List<ProfilePredictionDTO> predictions
+        List<ProfilePredictionDTO> predictions,
+        String championName,
+        String championFlagUrl
 ) {
 }

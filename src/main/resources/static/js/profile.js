@@ -40,6 +40,21 @@ function renderProfile(profile) {
         pic.style.display = 'block';
     }
 
+    if (profile.championName) {
+        const badge = document.getElementById('championBadge');
+        if (badge) {
+            badge.style.display = 'flex';
+            badge.innerHTML = `
+                <div class="champion-badge">
+                    <span class="champion-badge-label">CANDIDATO AL TÍTULO</span>
+                    <div class="champion-badge-team">
+                        ${profile.championFlagUrl ? `<img src="${profile.championFlagUrl}" class="champion-badge-flag" alt="">` : ''}
+                        <span class="champion-badge-name">${profile.championName}</span>
+                    </div>
+                </div>`;
+        }
+    }
+
     if (!profile.predictions || profile.predictions.length === 0) {
         container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);">Sin pronósticos en partidos terminados</div>';
         return;

@@ -31,6 +31,8 @@
       <button class="mdf-btn" onclick="setPartidoFilter('md1', this)">Fecha 1</button>
       <button class="mdf-btn" onclick="setPartidoFilter('md2', this)">Fecha 2</button>
       <button class="mdf-btn" onclick="setPartidoFilter('md3', this)">Fecha 3</button>
+      <button class="mdf-btn" onclick="setPartidoFilter('candidatos', this)">Candidatos</button>
+      <button class="mdf-btn" onclick="setPartidoFilter('16avos', this)">16AVOS</button>
       <button class="mdf-btn" onclick="setPartidoFilter('r16', this)">Octavos</button>
       <button class="mdf-btn" onclick="setPartidoFilter('qf', this)">Cuartos</button>
       <button class="mdf-btn" onclick="setPartidoFilter('sf', this)">Semis/Final</button>
@@ -44,6 +46,17 @@
       <div class="empty-state">
         <div style="font-size:32px;margin-bottom:10px;">⏳</div>
         <div>Cargando partidos...</div>
+      </div>
+    </div>
+
+    <!-- CANDIDATOS (dentro del tab Partidos) -->
+    <div id="candidatosContainer" style="display:none;"></div>
+
+    <!-- 16AVOS placeholder -->
+    <div id="avosContainer" style="display:none;">
+      <div class="empty-state" style="padding:40px 0;">
+        <div style="font-size:32px;margin-bottom:10px;">🔜</div>
+        <div style="color:var(--text-muted);font-size:.85rem;letter-spacing:.06em;font-weight:700;">PRÓXIMAMENTE</div>
       </div>
     </div>
 

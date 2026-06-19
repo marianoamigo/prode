@@ -137,6 +137,7 @@ async function init() {
         const matchesWithDate = await loadMatchesByDate();
         const predictions = await loadPredictions();
         renderMatches(matchesWithDate, predictions, currentUser);
+        updateCandidatosPromo();
     }
 }
 
@@ -235,6 +236,18 @@ function updateMatchCard(matchId) {
     const newHtml = buildMatchCard(match, prediction, window._currentUser, canEdit);
     const card = document.getElementById(`card-${matchId}`);
     if (card) card.outerHTML = newHtml;
+}
+
+async function updateCandidatosPromo() {
+    const box = document.getElementById('candidatosPromo');
+    if (!box) return;
+    try {
+        const res = await fetch('/api/champion-prediction/mine');
+        const data = res.ok ? await res.json() : null;
+        box.style.display = (!data || !data.champion) ? 'block' : 'none';
+    } catch {
+        box.style.display = 'none';
+    }
 }
 
 async function recalculateMatch(matchId) {

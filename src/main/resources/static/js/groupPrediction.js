@@ -4,6 +4,9 @@ let allPredictions = [];
 let currentGPModalMatchId = null;
 let activePartidoFilter = null;
 const groupTeamsMap = {};
+const CANDIDATOS_DEADLINE = new Date('2026-06-27T23:59:59-03:00');
+let gpAllTeams = [];
+let gpChampionPrediction = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     init();
@@ -19,8 +22,25 @@ async function init() {
         return;
     }
 
-    const predsRes = await fetch('/api/predictions/mine');
+    const [predsRes, standingsRes, champRes] = await Promise.all([
+        fetch('/api/predictions/mine'),
+        fetch('/api/group-standings/all'),
+        fetch('/api/champion-prediction/mine')
+    ]);
     allPredictions = predsRes.ok ? await predsRes.json() : [];
+
+    const standings = standingsRes.ok ? await standingsRes.json() : [];
+    const seen = new Set();
+    gpAllTeams = [];
+    standings.forEach(s => {
+        if (!seen.has(s.teamName)) {
+            seen.add(s.teamName);
+            gpAllTeams.push({ name: s.teamName, flagUrl: s.flagUrl });
+        }
+    });
+    gpAllTeams.sort((a, b) => a.name.localeCompare(b.name));
+
+    gpChampionPrediction = champRes.ok ? await champRes.json() : null;
 
     await loadAllMatchesForTab();
     await loadGroups();
@@ -59,6 +79,15 @@ function setPartidoFilter(key, btn) {
     activePartidoFilter = key;
     document.querySelectorAll('.mdf-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+
+    const isCandidatos = key === 'candidatos';
+    const is16Avos = key === '16avos';
+    document.getElementById('partidosContainer').style.display  = (!isCandidatos && !is16Avos) ? 'block' : 'none';
+    document.getElementById('candidatosContainer').style.display = isCandidatos ? 'block' : 'none';
+    document.getElementById('avosContainer').style.display       = is16Avos ? 'block' : 'none';
+
+    if (isCandidatos) { renderGPCandidatos(); return; }
+    if (is16Avos) return;
     renderPartidos();
 }
 
@@ -436,6 +465,178 @@ async function saveGroupPrediction(groupId) {
             btn.className = 'btn-group-save';
         }
         alert("Pronósticos guardados");
+    }
+}
+
+// ── CANDIDATOS (inline en Pronósticos) ──
+function renderGPCandidatos() {
+    const container = document.getElementById('candidatosContainer');
+    if (!container) return;
+
+    const past = new Date() > CANDIDATOS_DEADLINE;
+    const hasSaved = gpChampionPrediction && gpChampionPrediction.champion;
+
+    if (past && hasSaved) {
+        container.innerHTML = buildGPCandidatosReadOnly();
+        return;
+    }
+    if (past) {
+        container.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:.85rem;font-weight:700;letter-spacing:.06em;">PLAZO VENCIDO — SIN PRONÓSTICO</div>`;
+        return;
+    }
+
+    const roles = [
+        { key: 'champion',  label: '1° CAMPEÓN' },
+        { key: 'runnerUp',  label: '2° SUBCAMPEÓN' },
+        { key: 'third',     label: '3° TERCER PUESTO' },
+        { key: 'fourth',    label: '4° CUARTO PUESTO' },
+    ];
+
+    let html = `<div class="candidatos-form">`;
+    roles.forEach(r => {
+        const savedName = gpChampionPrediction?.[r.key] || '';
+        const savedFlag = gpChampionPrediction?.[r.key + 'Flag'] || '';
+        html += `
+            <div class="candidatos-row">
+                <div class="candidatos-label">${r.label}</div>
+                <div class="candidatos-select-wrap">
+                    <img id="gp-flag-${r.key}" src="${savedFlag || ''}"
+                         class="candidatos-flag" alt=""
+                         style="${savedFlag ? '' : 'display:none;'}"
+                         onerror="this.style.display='none'">
+                    <select id="gp-sel-${r.key}" class="candidatos-select"
+                            onchange="gpOnSelectChange('${r.key}')">
+                        <option value="">— Elegí un país —</option>
+                        ${gpAllTeams.map(t => `
+                            <option value="${t.name}" data-flag="${t.flagUrl}"
+                                    ${t.name === savedName ? 'selected' : ''}>${t.name}</option>
+                        `).join('')}
+                    </select>
+                </div>
+            </div>`;
+    });
+
+    const initialLabel = (gpChampionPrediction?.champion) ? 'PRONÓSTICO GUARDADO' : 'GUARDAR PRONÓSTICO';
+    const initialClass = (gpChampionPrediction?.champion) ? ' saved' : '';
+    html += `
+        <button class="candidatos-save-btn${initialClass}" onclick="gpSaveCandidatos()">${initialLabel}</button>
+        <div class="candidatos-deadline">
+            Podrás modificar tus candidatos hasta el 27/06 a las 23.59 en PRONÓSTICOS &gt; CANDIDATOS
+        </div>
+    </div>`;
+
+    container.innerHTML = html;
+    roles.forEach(r => gpUpdateFlagDisplay(r.key));
+}
+
+function buildGPCandidatosReadOnly() {
+    const p = gpChampionPrediction;
+    const picks = [
+        { label: '1° CAMPEÓN',       name: p.champion,  flag: p.championFlag },
+        { label: '2° SUBCAMPEÓN',    name: p.runnerUp,  flag: p.runnerUpFlag },
+        { label: '3° TERCER PUESTO', name: p.third,     flag: p.thirdFlag },
+        { label: '4° CUARTO PUESTO', name: p.fourth,    flag: p.fourthFlag },
+    ];
+    let html = `<div class="candidatos-form">`;
+    picks.forEach(pk => {
+        html += `
+            <div class="candidatos-row">
+                <div class="candidatos-label">${pk.label}</div>
+                <div class="candidatos-select-wrap">
+                    ${pk.flag ? `<img src="${pk.flag}" class="candidatos-flag" alt="">` : ''}
+                    <span style="font-size:14px;font-weight:700;text-transform:uppercase;color:var(--text-primary);">${pk.name || '—'}</span>
+                </div>
+            </div>`;
+    });
+    html += `<div class="candidatos-deadline" style="text-align:center;color:var(--text-muted);">PRONÓSTICO GUARDADO</div></div>`;
+    return html;
+}
+
+function gpOnSelectChange(key) {
+    gpUpdateFlagDisplay(key);
+    gpUpdateSaveButtonLabel();
+}
+
+function gpUpdateSaveButtonLabel() {
+    const btn = document.querySelector('#candidatosContainer .candidatos-save-btn');
+    if (!btn) return;
+    const hasSavedChampion = !!(gpChampionPrediction?.champion);
+    if (!hasSavedChampion) {
+        btn.textContent = 'GUARDAR PRONÓSTICO';
+        btn.classList.remove('saved', 'update');
+        return;
+    }
+    const keys = ['champion', 'runnerUp', 'third', 'fourth'];
+    const hasChanges = keys.some(k => {
+        const sel = document.getElementById(`gp-sel-${k}`);
+        const saved = gpChampionPrediction?.[k] || '';
+        return sel && sel.value !== saved;
+    });
+    if (hasChanges) {
+        btn.textContent = 'ACTUALIZAR PRONÓSTICO';
+        btn.classList.remove('saved');
+        btn.classList.add('update');
+    } else {
+        btn.textContent = 'PRONÓSTICO GUARDADO';
+        btn.classList.remove('update');
+        btn.classList.add('saved');
+    }
+}
+
+function gpUpdateFlagDisplay(key) {
+    const sel = document.getElementById(`gp-sel-${key}`);
+    const flagImg = document.getElementById(`gp-flag-${key}`);
+    if (!sel || !flagImg) return;
+    const opt = sel.options[sel.selectedIndex];
+    if (opt && opt.dataset.flag) {
+        flagImg.src = opt.dataset.flag;
+        flagImg.style.display = 'block';
+    } else {
+        flagImg.style.display = 'none';
+    }
+}
+
+async function gpSaveCandidatos() {
+    if (new Date() > CANDIDATOS_DEADLINE) {
+        alert('El plazo para modificar candidatos ya venció (27/06)');
+        return;
+    }
+    const champion = document.getElementById('gp-sel-champion')?.value || null;
+    const runnerUp = document.getElementById('gp-sel-runnerUp')?.value || null;
+    const third    = document.getElementById('gp-sel-third')?.value    || null;
+    const fourth   = document.getElementById('gp-sel-fourth')?.value   || null;
+
+    if (!champion) { alert('Tenés que elegir al menos el Campeón'); return; }
+    const names = [champion, runnerUp, third, fourth].filter(Boolean);
+    if (new Set(names).size !== names.length) {
+        alert('No podés elegir el mismo país en más de una posición');
+        return;
+    }
+
+    const getFlag = key => {
+        const sel = document.getElementById(`gp-sel-${key}`);
+        return sel?.options[sel.selectedIndex]?.dataset.flag || null;
+    };
+
+    const body = {
+        champion, championFlag: getFlag('champion'),
+        runnerUp, runnerUpFlag: getFlag('runnerUp'),
+        third, thirdFlag: getFlag('third'),
+        fourth, fourthFlag: getFlag('fourth')
+    };
+
+    const res = await fetch('/api/champion-prediction/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+
+    if (res.ok) {
+        gpChampionPrediction = body;
+        gpUpdateSaveButtonLabel();
+        alert('¡Candidatos guardados!');
+    } else {
+        alert('Error al guardar. Intentá de nuevo.');
     }
 }
 
