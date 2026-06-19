@@ -1359,10 +1359,10 @@ hr {
 .tabla-row {
   display: flex;
   align-items: center;
-  padding: 10px 14px;
+  padding: 10px 14px 10px 8px;
   border-bottom: 1px solid rgba(14,22,40,0.12);
   color: #1a2540;
-  gap: 8px;
+  gap: 4px;
 }
 
 .tabla-row:last-child { border-bottom: none; }
@@ -1373,7 +1373,7 @@ hr {
   width: 22px;
   color: #5a6e90;
   font-family: Impact, monospace;
-  text-align: center;
+  text-align: right;
 }
 
 .tabla-pos.top { color: var(--accent); }
@@ -1472,14 +1472,14 @@ hr {
 .tabla-cols {
   display: flex;
   align-items: center;
-  padding: 5px 14px;
-  gap: 8px;
+  padding: 5px 14px 5px 8px;
+  gap: 4px;
   border-bottom: 1px solid rgba(14,22,40,0.12);
 }
 
 .tabla-col-pos {
   width: 22px;
-  text-align: center;
+  text-align: right;
   font-size: 10px;
   font-weight: 700;
   color: #5a6e90;
@@ -1504,6 +1504,10 @@ hr {
   text-transform: uppercase;
   flex-shrink: 0;
 }
+.tabla-col-pos + .tabla-col-team { margin-left: 6px; }
+.tabla-pos + .tabla-team { margin-left: 6px; }
+.tabla-col-team + .tabla-col-stat { margin-left: 14px; }
+.tabla-team + .tabla-stat { margin-left: 14px; }
 
 .tabla-col-pts {
   width: 28px;
