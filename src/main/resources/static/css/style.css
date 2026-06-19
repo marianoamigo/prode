@@ -71,15 +71,15 @@ p, span, label, td, th {
 
 /* ---- BRAND LOGO ---- */
 .brand-logo {
-  font-family: var(--font-brand);
-  font-style: italic;
-  font-weight: 900;
-  font-size: 1.8rem;
-  color: var(--accent);
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
+  display: flex;
+  align-items: center;
   text-decoration: none;
   line-height: 1;
+}
+.brand-logo img {
+  height: 32px;
+  width: auto;
+  display: block;
 }
 
 /* ---- TOP NAV (solo logo + acción derecha) ---- */
@@ -1496,7 +1496,7 @@ hr {
 }
 
 .tabla-col-stat {
-  width: 22px;
+  width: 26px;
   text-align: center;
   font-size: 10px;
   font-weight: 700;
@@ -1525,7 +1525,7 @@ hr {
 }
 
 .tabla-stat {
-  width: 22px;
+  width: 26px;
   text-align: center;
   font-size: 12px;
   font-weight: 600;

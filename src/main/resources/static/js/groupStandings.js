@@ -81,8 +81,6 @@ function buildStandingsTable(teams) {
                 <span class="tabla-col-stat">G</span>
                 <span class="tabla-col-stat">E</span>
                 <span class="tabla-col-stat">P</span>
-                <span class="tabla-col-stat">GF</span>
-                <span class="tabla-col-stat">GC</span>
                 <span class="tabla-col-stat">DG</span>
                 <span class="tabla-col-pts">PTS</span>
             </div>
@@ -97,8 +95,6 @@ function buildStandingsTable(teams) {
                     <span class="tabla-stat">${t.wins}</span>
                     <span class="tabla-stat">${t.draws}</span>
                     <span class="tabla-stat">${t.losses}</span>
-                    <span class="tabla-stat">${t.goalsFor}</span>
-                    <span class="tabla-stat">${t.goalsAgainst}</span>
                     <span class="tabla-stat">${t.goalDifference >= 0 ? '+' : ''}${t.goalDifference}</span>
                     <span class="tabla-pts">${t.points}</span>
                 </div>
@@ -192,8 +188,6 @@ function renderThirdPlaceTable(container) {
                 <span class="tabla-col-stat">G</span>
                 <span class="tabla-col-stat">E</span>
                 <span class="tabla-col-stat">P</span>
-                <span class="tabla-col-stat">GF</span>
-                <span class="tabla-col-stat">GC</span>
                 <span class="tabla-col-stat">DG</span>
                 <span class="tabla-col-pts">PTS</span>
             </div>
@@ -209,8 +203,6 @@ function renderThirdPlaceTable(container) {
                     <span class="tabla-stat">${t.wins}</span>
                     <span class="tabla-stat">${t.draws}</span>
                     <span class="tabla-stat">${t.losses}</span>
-                    <span class="tabla-stat">${t.goalsFor}</span>
-                    <span class="tabla-stat">${t.goalsAgainst}</span>
                     <span class="tabla-stat">${t.goalDifference >= 0 ? '+' : ''}${t.goalDifference}</span>
                     <span class="tabla-pts">${t.points}</span>
                 </div>
