@@ -2,6 +2,8 @@ package com.prode.worldcup.infrastructure.persistence.repository;
 
 import com.prode.worldcup.infrastructure.persistence.entity.GroupPredictionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -24,4 +26,9 @@ public interface GroupPredictionRepository extends JpaRepository<GroupPrediction
     findByGroupId(
             UUID groupId
     );
+
+    boolean existsByUserIdAndGroupId(UUID userId, UUID groupId);
+
+    @Query("SELECT DISTINCT gp.group.id FROM GroupPredictionEntity gp WHERE gp.user.id = :userId")
+    List<UUID> findGroupIdsByUserId(@Param("userId") UUID userId);
 }

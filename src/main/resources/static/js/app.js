@@ -138,6 +138,7 @@ async function init() {
         const predictions = await loadPredictions();
         renderMatches(matchesWithDate, predictions, currentUser);
         updateCandidatosPromo();
+        updateLateGroupPromo();
     }
 }
 
@@ -236,6 +237,20 @@ function updateMatchCard(matchId) {
     const newHtml = buildMatchCard(match, prediction, window._currentUser, canEdit);
     const card = document.getElementById(`card-${matchId}`);
     if (card) card.outerHTML = newHtml;
+}
+
+async function updateLateGroupPromo() {
+    const box = document.getElementById('lateGroupPromo');
+    if (!box) return;
+    try {
+        const res = await fetch('/api/group-predictions/has-missing');
+        if (res.ok) {
+            const hasMissing = await res.json();
+            box.style.display = hasMissing ? 'block' : 'none';
+        }
+    } catch {
+        box.style.display = 'none';
+    }
 }
 
 async function updateCandidatosPromo() {

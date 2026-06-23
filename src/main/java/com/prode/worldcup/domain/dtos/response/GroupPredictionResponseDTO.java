@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public record GroupPredictionResponseDTO (
         UUID teamId,
-        Integer position
+        Integer position,
+        Boolean isLate
 ) {
 }

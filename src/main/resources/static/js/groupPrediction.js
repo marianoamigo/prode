@@ -5,6 +5,18 @@ let currentGPModalMatchId = null;
 let activePartidoFilter = null;
 const groupTeamsMap = {};
 const CANDIDATOS_DEADLINE = new Date('2026-06-27T23:59:59-03:00');
+const LATE_PREDICTION_DEADLINE = new Date('2026-06-24T19:00:00Z');
+// Keyed by team code (stable across envs, defined in SQL migration)
+const FIXED_TEAMS = {
+    'mx': 1, // México (A) — 1ro
+    'ht': 4, // Haití (C) — 4to
+    'us': 1, // Estados Unidos (D) — 1ro
+    'tr': 4, // Turquía (D) — 4to
+    'de': 1, // Alemania (E) — 1ro
+    'tn': 4, // Túnez (F) — 4to
+    'ar': 1, // Argentina (J) — 1ro
+    'jo': 4, // Jordania (J) — 4to
+};
 let gpAllTeams = [];
 let gpChampionPrediction = null;
 
@@ -359,54 +371,109 @@ async function renderGroup(groupId, groupName) {
     const groupLocked = groupMatches.length > 0 &&
         Date.now() >= Math.min(...groupMatches.map(m => new Date(m.dateTime).getTime()));
 
+    const hasLateExisting = savedPredictions.length > 0 && savedPredictions.some(p => p.isLate);
+    const isLateMode = (savedPredictions.length === 0 || hasLateExisting)
+        && groupLocked
+        && new Date() < LATE_PREDICTION_DEADLINE;
+
+    // Fixed positions for this group (keyed by team code)
+    const fixedPositions = new Set(
+        group.teams.filter(t => FIXED_TEAMS[t.code] !== undefined).map(t => FIXED_TEAMS[t.code])
+    );
+    const availablePositions = [1, 2, 3, 4].filter(p => !fixedPositions.has(p));
+
+    // Default positions for late mode (use saved if exists, else assign in order)
+    const lateDefaultPos = {};
+    if (isLateMode) {
+        let avIdx = 0;
+        for (const team of group.teams) {
+            if (FIXED_TEAMS[team.code] !== undefined) {
+                lateDefaultPos[team.id] = FIXED_TEAMS[team.code];
+            } else {
+                const savedPos = savedPredictions.find(p => p.teamId === team.id)?.position;
+                lateDefaultPos[team.id] = savedPos ?? (availablePositions[avIdx++] ?? 1);
+            }
+        }
+    }
+
     const orderedTeams = [...group.teams].sort((a, b) => {
         const posA = savedPredictions.find(p => p.teamId === a.id)?.position ?? 999;
         const posB = savedPredictions.find(p => p.teamId === b.id)?.position ?? 999;
         return posA - posB;
     });
 
-    const teamsToRender = savedPredictions.length > 0 ? orderedTeams : group.teams;
+    // In late mode always show all 4 teams (fixed ones have no savedPrediction row)
+    const teamsToRender = (savedPredictions.length > 0 && !isLateMode) ? orderedTeams : group.teams;
 
     const container = document.getElementById("groupPredictionContainer");
 
     container.innerHTML += `
         <div class="tabla-card" id="group-card-${groupId}" style="margin-bottom:14px;">
             <div class="tabla-header">GRUPO ${groupName}</div>
+            ${isLateMode ? `<div style="text-align:center;font-size:10px;font-weight:800;color:#f0a500;letter-spacing:.1em;padding:6px 0 2px;">PRONÓSTICO TARDÍO — 1 PUNTO POR ACIERTO</div>` : ''}
             ${teamsToRender.map((team, index) => {
-                const saved = savedPredictions.find(p => p.teamId === team.id);
-                const selectedPos = saved ? saved.position : index + 1;
+                let selectedPos, isFixed, rowStyle, rightCell;
+                if (isLateMode) {
+                    isFixed = FIXED_TEAMS[team.code] !== undefined;
+                    selectedPos = lateDefaultPos[team.id];
+                    rowStyle = isFixed ? 'opacity:0.45;pointer-events:none;' : '';
+                    if (isFixed) {
+                        rightCell = `<span style="font-size:15px;font-weight:900;color:#f0a500;padding:0 10px;letter-spacing:.02em;">${selectedPos}°</span>`;
+                    } else {
+                        rightCell = `<select class="group-pos-select prediction-position"
+                                data-group-id="${groupId}"
+                                data-team-id="${team.id}"
+                                data-fixed="false"
+                                onchange="updatePosDisplay(this, '${team.id}')">
+                            ${availablePositions.map(p => `<option value="${p}" ${selectedPos === p ? 'selected' : ''}>${p}°</option>`).join('')}
+                        </select>`;
+                    }
+                } else {
+                    isFixed = false;
+                    const saved = savedPredictions.find(p => p.teamId === team.id);
+                    selectedPos = saved ? saved.position : index + 1;
+                    rowStyle = '';
+                    rightCell = `<select class="group-pos-select prediction-position"
+                            data-group-id="${groupId}"
+                            data-team-id="${team.id}"
+                            data-fixed="false"
+                            onchange="updatePosDisplay(this, '${team.id}')"
+                            ${groupLocked ? 'disabled' : ''}>
+                        <option value="1" ${selectedPos === 1 ? 'selected' : ''}>1°</option>
+                        <option value="2" ${selectedPos === 2 ? 'selected' : ''}>2°</option>
+                        <option value="3" ${selectedPos === 3 ? 'selected' : ''}>3°</option>
+                        <option value="4" ${selectedPos === 4 ? 'selected' : ''}>4°</option>
+                    </select>`;
+                }
                 const flagUrl = team.code ? `/images/flags/${team.code}.svg` : null;
                 const isTop = selectedPos <= 2;
                 return `
-                    <div class="tabla-row" id="group-row-${team.id}">
+                    <div class="tabla-row" id="group-row-${team.id}" style="${rowStyle}">
                         <span class="tabla-pos group-pos-display ${isTop ? 'top' : ''}" id="pos-display-${team.id}">${selectedPos}</span>
                         <div class="tabla-team">
                             ${flagUrl ? `<img src="${flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${team.name || ''}">` : ''}
                             <span class="tabla-name">${team.name}</span>
                         </div>
-                        <select class="group-pos-select prediction-position"
-                                data-group-id="${groupId}"
-                                data-team-id="${team.id}"
-                                onchange="updatePosDisplay(this, '${team.id}')"
-                                ${groupLocked ? 'disabled' : ''}>
-                            <option value="1" ${selectedPos === 1 ? 'selected' : ''}>1°</option>
-                            <option value="2" ${selectedPos === 2 ? 'selected' : ''}>2°</option>
-                            <option value="3" ${selectedPos === 3 ? 'selected' : ''}>3°</option>
-                            <option value="4" ${selectedPos === 4 ? 'selected' : ''}>4°</option>
-                        </select>
+                        ${rightCell}
                     </div>`;
             }).join('')}
             <div class="group-action-btns">
-                ${groupLocked
+                ${groupLocked && !isLateMode
                     ? `<div style="text-align:center;font-size:11px;font-weight:700;color:#5a6e90;letter-spacing:.08em;padding:10px 0;">PRONÓSTICO CERRADO</div>`
-                    : `<button class="btn-group-calc" onclick="calculateGroupStandings('${groupId}')">
-                           Calcular con pronósticos
-                       </button>
-                       <button class="${savedPredictions.length > 0 ? 'btn-group-save' : 'btn-group-predict'}"
-                               id="btn-group-save-${groupId}"
-                               onclick="saveGroupPrediction('${groupId}')">
-                           ${savedPredictions.length > 0 ? 'EDITAR PRONÓSTICO' : 'PRONOSTICAR'}
-                       </button>`
+                    : isLateMode
+                        ? `<button class="${hasLateExisting ? 'btn-group-save' : 'btn-group-predict'}"
+                                   id="btn-group-save-${groupId}"
+                                   onclick="saveGroupPrediction('${groupId}', true)">
+                               ${hasLateExisting ? 'EDITAR PRONÓSTICO' : 'PRONOSTICAR GRUPO'}
+                           </button>`
+                        : `<button class="btn-group-calc" onclick="calculateGroupStandings('${groupId}')">
+                               Calcular con pronósticos
+                           </button>
+                           <button class="${savedPredictions.length > 0 ? 'btn-group-save' : 'btn-group-predict'}"
+                                   id="btn-group-save-${groupId}"
+                                   onclick="saveGroupPrediction('${groupId}')">
+                               ${savedPredictions.length > 0 ? 'EDITAR PRONÓSTICO' : 'PRONOSTICAR'}
+                           </button>`
                 }
             </div>
         </div>`;
@@ -421,19 +488,25 @@ function updatePosDisplay(select, teamId) {
 }
 
 // ── GUARDAR PRONÓSTICO POR GRUPO ──
-async function saveGroupPrediction(groupId) {
-    // Validate deadline: cannot save after first match of this group starts
-    const teams = groupTeamsMap[groupId];
-    if (teams) {
-        const teamNames = new Set(teams.map(t => t.name));
-        const groupMatches = allMatches.filter(m =>
-            m.stage === 'GROUP_STAGE' && teamNames.has(m.homeTeam) && teamNames.has(m.awayTeam)
-        );
-        if (groupMatches.length > 0) {
-            const firstMatchTime = Math.min(...groupMatches.map(m => new Date(m.dateTime).getTime()));
-            if (Date.now() >= firstMatchTime) {
-                alert("No se puede pronosticar este grupo: el primer partido ya comenzó");
-                return;
+async function saveGroupPrediction(groupId, isLateMode = false) {
+    if (isLateMode) {
+        if (new Date() >= LATE_PREDICTION_DEADLINE) {
+            alert("El plazo para pronósticos tardíos ya venció (24/06 a las 16 hs)");
+            return;
+        }
+    } else {
+        const teams = groupTeamsMap[groupId];
+        if (teams) {
+            const teamNames = new Set(teams.map(t => t.name));
+            const groupMatches = allMatches.filter(m =>
+                m.stage === 'GROUP_STAGE' && teamNames.has(m.homeTeam) && teamNames.has(m.awayTeam)
+            );
+            if (groupMatches.length > 0) {
+                const firstMatchTime = Math.min(...groupMatches.map(m => new Date(m.dateTime).getTime()));
+                if (Date.now() >= firstMatchTime) {
+                    alert("No se puede pronosticar este grupo: el primer partido ya comenzó");
+                    return;
+                }
             }
         }
     }
@@ -443,6 +516,7 @@ async function saveGroupPrediction(groupId) {
     const positions = [];
 
     selects.forEach(select => {
+        if (isLateMode && select.dataset.fixed === 'true') return; // fixed teams: no enviar
         positions.push(Number(select.value));
         predictions.push({ teamId: select.dataset.teamId, position: Number(select.value) });
     });
@@ -461,10 +535,12 @@ async function saveGroupPrediction(groupId) {
     if (res.ok) {
         const btn = document.getElementById(`btn-group-save-${groupId}`);
         if (btn) {
-            btn.textContent = 'EDITAR PRONÓSTICO';
+            btn.textContent = isLateMode ? 'EDITAR PRONÓSTICO' : 'EDITAR PRONÓSTICO';
             btn.className = 'btn-group-save';
         }
-        alert("Pronósticos guardados");
+        alert(isLateMode ? "Pronóstico tardío guardado — vale 1 punto por acierto" : "Pronósticos guardados");
+    } else {
+        alert("No se pudo guardar el pronóstico. El plazo puede haber vencido.");
     }
 }
 

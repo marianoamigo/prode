@@ -41,7 +41,12 @@ public class GroupPredictionEntity {
     TeamEntity team;
 
     Integer position;
+
     @Builder.Default
     Integer pointsScored = 0;
+
+    @Column(name = "is_late")
+    @Builder.Default
+    Boolean isLate = false;
 
 }

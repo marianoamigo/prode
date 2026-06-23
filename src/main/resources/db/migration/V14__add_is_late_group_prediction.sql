@@ -1,0 +1,1 @@
+ALTER TABLE group_predictions ADD COLUMN is_late BOOLEAN NOT NULL DEFAULT FALSE;
