@@ -5,7 +5,7 @@ let currentGPModalMatchId = null;
 let activePartidoFilter = null;
 const groupTeamsMap = {};
 const CANDIDATOS_DEADLINE = new Date('2026-06-27T23:59:59-03:00');
-const LATE_PREDICTION_DEADLINE = new Date('2026-06-24T19:00:00Z');
+const LATE_PREDICTION_DEADLINE = new Date('2026-06-26T03:00:00Z');
 // Keyed by team code (stable across envs, defined in SQL migration)
 const FIXED_TEAMS = {
     'mx': 1, // México (A) — 1ro

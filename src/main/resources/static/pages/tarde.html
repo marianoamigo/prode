@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pronósticos — ORSAI</title>
+  <meta name="theme-color" content="#0d0f1a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="icon" href="/icons/ORSAI.png" type="image/png">
+  <link rel="stylesheet" href="../css/style.css?v=2">
+</head>
+<body>
+
+  <nav class="top-nav">
+    <a class="brand-logo" href="/"><img src="/logo/logo.png" alt="ORSAI FC"></a>
+    <div id="userSection"></div>
+  </nav>
+
+  <main class="page-container" id="mainContent" style="padding-top:16px;">
+    <div class="empty-state">
+      <div style="font-size:32px;margin-bottom:10px;">⏳</div>
+      <div>Cargando...</div>
+    </div>
+  </main>
+
+  <script src="/js/navbar.js"></script>
+  <script>
+    const LATE_DEADLINE = new Date('2026-06-26T03:00:00Z');
+
+    const FIXED_TEAMS = {
+      'mx': 1,
+      'us': 1,
+      'tr': 4,
+      'de': 1,
+      'tn': 4,
+      'ar': 1,
+      'jo': 4,
+    };
+
+    const groupTeamsMap = {};
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const currentUser = await loadCurrentUser();
+      renderNavbar(currentUser);
+
+      if (!currentUser) {
+        showLoginRequired();
+        return;
+      }
+
+      if (new Date() >= LATE_DEADLINE) {
+        showMessage('El plazo para pronósticos tardíos ya venció.');
+        return;
+      }
+
+      const res = await fetch('/api/late-groups/available');
+      if (!res.ok) {
+        showMessage('Error al cargar grupos. Intentá de nuevo.');
+        return;
+      }
+
+      const groups = await res.json();
+
+      if (!groups || groups.length === 0) {
+        showMessage('¡Ya tenés todos los pronósticos de grupos cargados!');
+        return;
+      }
+
+      renderGroups(groups);
+    });
+
+    function showLoginRequired() {
+      document.getElementById('mainContent').innerHTML = `
+        <div style="text-align:center;padding:60px 20px;">
+          <p style="font-size:1.05rem;font-weight:700;letter-spacing:.05em;margin-bottom:28px;color:var(--text-primary);line-height:1.5;">
+            NECESITAS ESTAR LOGUEADO PARA PRONOSTICAR
+          </p>
+          <a href="/oauth2/authorization/google"
+             style="display:inline-block;padding:14px 32px;background:var(--accent);color:#fff;
+                    border-radius:50px;font-weight:700;font-size:.85rem;letter-spacing:.08em;
+                    text-transform:uppercase;text-decoration:none;font-family:var(--font-body);">
+            Loguearse
+          </a>
+        </div>`;
+    }
+
+    function showMessage(msg) {
+      document.getElementById('mainContent').innerHTML = `
+        <div style="text-align:center;padding:60px 20px;color:var(--text-muted);
+                    font-size:.9rem;font-weight:700;letter-spacing:.05em;">
+          ${msg}
+        </div>`;
+    }
+
+    function renderGroups(groups) {
+      const container = document.getElementById('mainContent');
+      container.innerHTML = `
+        <div style="text-align:center;font-size:10px;font-weight:800;color:#f0a500;
+                    letter-spacing:.1em;padding:4px 0 16px;">
+          PRONÓSTICO TARDÍO — 1 PUNTO POR ACIERTO
+        </div>
+        <div id="groupPredictionContainer"></div>`;
+
+      for (const group of groups) {
+        renderGroup(group);
+      }
+    }
+
+    function renderGroup(group) {
+      groupTeamsMap[group.id] = group.teams;
+
+      const fixedPositions = new Set(
+        group.teams.filter(t => FIXED_TEAMS[t.code] !== undefined).map(t => FIXED_TEAMS[t.code])
+      );
+      const availablePositions = [1, 2, 3, 4].filter(p => !fixedPositions.has(p));
+
+      let avIdx = 0;
+      const defaultPos = {};
+      for (const team of group.teams) {
+        if (FIXED_TEAMS[team.code] !== undefined) {
+          defaultPos[team.id] = FIXED_TEAMS[team.code];
+        } else {
+          defaultPos[team.id] = availablePositions[avIdx++] ?? 1;
+        }
+      }
+
+      const rows = group.teams.map(team => {
+        const isFixed = FIXED_TEAMS[team.code] !== undefined;
+        const pos = defaultPos[team.id];
+        const flagUrl = team.code ? `/images/flags/${team.code}.svg` : null;
+        const isTop = pos <= 2;
+        const rowStyle = isFixed ? 'opacity:0.45;pointer-events:none;' : '';
+
+        const rightCell = isFixed
+          ? `<span style="font-size:15px;font-weight:900;color:#f0a500;padding:0 10px;letter-spacing:.02em;">${pos}°</span>`
+          : `<select class="group-pos-select prediction-position"
+                data-group-id="${group.id}"
+                data-team-id="${team.id}"
+                data-fixed="false"
+                onchange="updatePosDisplay(this, '${team.id}')">
+              ${availablePositions.map(p => `<option value="${p}" ${pos === p ? 'selected' : ''}>${p}°</option>`).join('')}
+            </select>`;
+
+        return `
+          <div class="tabla-row" id="group-row-${team.id}" style="${rowStyle}">
+            <span class="tabla-pos group-pos-display ${isTop ? 'top' : ''}" id="pos-display-${team.id}">${pos}</span>
+            <div class="tabla-team">
+              ${flagUrl ? `<img src="${flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${team.name}">` : ''}
+              <span class="tabla-name">${team.name}</span>
+            </div>
+            ${rightCell}
+          </div>`;
+      }).join('');
+
+      const container = document.getElementById('groupPredictionContainer');
+      container.innerHTML += `
+        <div class="tabla-card" id="group-card-${group.id}" style="margin-bottom:14px;">
+          <div class="tabla-header">GRUPO ${group.name}</div>
+          ${rows}
+          <div class="group-action-btns">
+            <button class="btn-group-predict" id="btn-group-save-${group.id}"
+                    onclick="saveGroupPrediction('${group.id}')">
+              PRONOSTICAR GRUPO
+            </button>
+          </div>
+        </div>`;
+    }
+
+    function updatePosDisplay(select, teamId) {
+      const display = document.getElementById(`pos-display-${teamId}`);
+      if (display) {
+        display.textContent = select.value;
+        display.classList.toggle('top', parseInt(select.value) <= 2);
+      }
+    }
+
+    async function saveGroupPrediction(groupId) {
+      if (new Date() >= LATE_DEADLINE) {
+        alert('El plazo para pronósticos tardíos ya venció.');
+        return;
+      }
+
+      const selects = document.querySelectorAll(`.prediction-position[data-group-id="${groupId}"]`);
+      const predictions = [];
+      const positions = [];
+
+      selects.forEach(select => {
+        positions.push(Number(select.value));
+        predictions.push({ teamId: select.dataset.teamId, position: Number(select.value) });
+      });
+
+      if (new Set(positions).size !== positions.length) {
+        alert('Hay posiciones repetidas en el grupo.');
+        return;
+      }
+
+      const res = await fetch('/api/group-predictions/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ groupId, predictions })
+      });
+
+      if (res.ok) {
+        const btn = document.getElementById(`btn-group-save-${groupId}`);
+        if (btn) {
+          btn.textContent = 'GUARDADO ✓';
+          btn.className = 'btn-group-save';
+          btn.disabled = true;
+        }
+        alert('Pronóstico tardío guardado — vale 1 punto por acierto');
+      } else {
+        const text = await res.text().catch(() => '');
+        alert('No se pudo guardar. ' + (text || 'Intentá de nuevo.'));
+      }
+    }
+  </script>
+</body>
+</html>

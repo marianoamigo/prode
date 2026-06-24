@@ -28,7 +28,7 @@ public class GroupPredictionService {
     private final GroupRepository groupRepository;
     private final TeamRepository teamRepository;
 
-    private static final LocalDateTime LATE_DEADLINE = LocalDateTime.of(2026, 6, 24, 19, 0);
+    private static final LocalDateTime LATE_DEADLINE = LocalDateTime.of(2026, 6, 26, 3, 0);
 
     @Transactional
     public void savePrediction(String googleId, GroupPredictionSaveRequestDTO request) {

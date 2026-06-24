@@ -226,6 +226,7 @@ async function savePrediction(matchId) {
         else window._predictions.push(saved);
 
         updateMatchCard(matchId);
+        alert('Pronóstico guardado');
     }
 }
 
