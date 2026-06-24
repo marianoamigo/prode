@@ -19,6 +19,7 @@ const FIXED_TEAMS = {
 };
 let gpAllTeams = [];
 let gpChampionPrediction = null;
+let gpStandingsByGroup = {};
 
 document.addEventListener("DOMContentLoaded", () => {
     init();
@@ -42,9 +43,12 @@ async function init() {
     allPredictions = predsRes.ok ? await predsRes.json() : [];
 
     const standings = standingsRes.ok ? await standingsRes.json() : [];
+    gpStandingsByGroup = {};
     const seen = new Set();
     gpAllTeams = [];
     standings.forEach(s => {
+        if (!gpStandingsByGroup[s.groupName]) gpStandingsByGroup[s.groupName] = [];
+        gpStandingsByGroup[s.groupName].push(s);
         if (!seen.has(s.teamName)) {
             seen.add(s.teamName);
             gpAllTeams.push({ name: s.teamName, flagUrl: s.flagUrl });
@@ -407,6 +411,11 @@ async function renderGroup(groupId, groupName) {
 
     const container = document.getElementById("groupPredictionContainer");
 
+    if (groupLocked && !isLateMode) {
+        container.innerHTML += buildComparisonGroupCard(groupId, groupName, group.teams, savedPredictions, gpStandingsByGroup[groupName] || []);
+        return;
+    }
+
     container.innerHTML += `
         <div class="tabla-card" id="group-card-${groupId}" style="margin-bottom:14px;">
             <div class="tabla-header">GRUPO ${groupName}</div>
@@ -714,6 +723,77 @@ async function gpSaveCandidatos() {
     } else {
         alert('Error al guardar. Intentá de nuevo.');
     }
+}
+
+// ── GRUPO CERRADO: VISTA COMPARACIÓN PRONO / REAL / PTS ──
+function buildComparisonGroupCard(groupId, groupName, teams, predictions, standings) {
+    const groupFinished = standings.length === 4 && standings.every(s => s.played === 3);
+    const isLateGroup = predictions.some(p => p.isLate);
+
+    const predictedIds = new Set(predictions.map(p => p.teamId));
+    const orderedTeams = [
+        ...teams
+            .filter(t => predictedIds.has(t.id))
+            .sort((a, b) => {
+                const pa = predictions.find(p => p.teamId === a.id)?.position ?? 999;
+                const pb = predictions.find(p => p.teamId === b.id)?.position ?? 999;
+                return pa - pb;
+            }),
+        ...teams.filter(t => !predictedIds.has(t.id))
+    ];
+
+    const rows = orderedTeams.map(team => {
+        const pred = predictions.find(p => p.teamId === team.id);
+        const standing = standings.find(s => s.teamName === team.name);
+        const predictedPos = pred ? pred.position : null;
+        const realPos = standing ? standing.position : null;
+        const isLate = pred ? pred.isLate : false;
+
+        const predDisplay = predictedPos !== null ? predictedPos : '—';
+        const predTop = predictedPos !== null && predictedPos <= 2;
+        const realDisplay = realPos !== null ? realPos : '—';
+        const realTop = realPos !== null && realPos <= 2;
+
+        let ptsDisplay, ptsColor;
+        if (!groupFinished) {
+            ptsDisplay = '—';
+            ptsColor = '#5a6e90';
+        } else if (predictedPos === null) {
+            ptsDisplay = '+0';
+            ptsColor = '#5a6e90';
+        } else if (predictedPos === realPos) {
+            ptsDisplay = isLate ? '+1' : '+2';
+            ptsColor = '#4caf50';
+        } else {
+            ptsDisplay = '+0';
+            ptsColor = '#5a6e90';
+        }
+
+        const flagUrl = team.code ? `/images/flags/${team.code}.svg` : '';
+        return `
+            <div class="tabla-row">
+                <span class="tabla-pos ${predTop ? 'top' : ''}">${predDisplay}</span>
+                <div class="tabla-team">
+                    ${flagUrl ? `<img src="${flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${team.name}">` : ''}
+                    <span class="tabla-name">${team.name}</span>
+                </div>
+                <span class="tabla-stat" style="color:${realTop ? 'var(--accent)' : '#5a6e90'};font-weight:900;font-size:14px;">${realDisplay}</span>
+                <span class="tabla-pts" style="color:${ptsColor};">${ptsDisplay}</span>
+            </div>`;
+    }).join('');
+
+    return `
+        <div class="tabla-card" id="group-card-${groupId}" style="margin-bottom:14px;">
+            <div class="tabla-header">GRUPO ${groupName}</div>
+            ${isLateGroup ? `<div style="text-align:center;font-size:10px;font-weight:800;color:#f0a500;letter-spacing:.1em;padding:6px 0 2px;">PRONÓSTICO TARDÍO</div>` : ''}
+            <div class="tabla-cols">
+                <span class="tabla-col-pos" style="font-size:8px;">PRED</span>
+                <span class="tabla-col-team"></span>
+                <span class="tabla-col-stat">REAL</span>
+                <span class="tabla-col-pts">PTS</span>
+            </div>
+            ${rows}
+        </div>`;
 }
 
 // ── CALCULAR POSICIONES CON PRONÓSTICOS DE PARTIDOS ──

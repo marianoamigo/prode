@@ -9,11 +9,126 @@ async function init() {
     if (!userId) {
         document.getElementById('predictionsContainer').innerHTML =
             '<div style="text-align:center;padding:32px;color:var(--text-muted);">Perfil no encontrado</div>';
+        document.getElementById('gruposPredContainer').innerHTML = '';
         return;
     }
 
     const profile = await loadProfile(userId);
     renderProfile(profile);
+    loadProfileGroupPredictions(userId);
+}
+
+function switchProfileTab(btn, tab) {
+    document.querySelectorAll('.tabs .tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('partidosContainer').style.display = tab === 'partidos' ? 'block' : 'none';
+    document.getElementById('gruposContainer').style.display = tab === 'grupos' ? 'block' : 'none';
+}
+
+async function loadProfileGroupPredictions(userId) {
+    const [groupsRes, standingsRes] = await Promise.all([
+        fetch('/api/group/all'),
+        fetch('/api/group-standings/all')
+    ]);
+    const groups = groupsRes.ok ? await groupsRes.json() : [];
+    const allStandings = standingsRes.ok ? await standingsRes.json() : [];
+
+    const predsByGroup = await Promise.all(
+        groups.map(g =>
+            fetch(`/api/profile/${userId}/group-predictions/${g.id}`)
+                .then(r => r.ok ? r.json() : [])
+        )
+    );
+
+    const container = document.getElementById('gruposPredContainer');
+    let html = '';
+
+    groups.forEach((group, i) => {
+        const predictions = predsByGroup[i];
+        if (!predictions || predictions.length === 0) return;
+
+        const groupStandings = allStandings.filter(s => s.groupName === group.name);
+        const groupFinished = groupStandings.length === 4 && groupStandings.every(s => s.played === 3);
+        if (!groupFinished) return;
+
+        const isLateGroup = predictions.some(p => p.isLate);
+
+        html += buildProfileGroupCard(group, predictions, groupStandings, isLateGroup, groupFinished);
+    });
+
+    if (!html) {
+        html = '<div style="text-align:center;padding:32px;color:var(--text-muted);">Sin pronósticos de grupos</div>';
+    }
+    container.innerHTML = html;
+}
+
+function buildProfileGroupCard(group, predictions, groupStandings, isLateGroup, groupFinished) {
+    const predictedIds = new Set(predictions.map(p => p.teamId));
+
+    const orderedTeams = [
+        ...group.teams
+            .filter(t => predictedIds.has(t.id))
+            .sort((a, b) => {
+                const pa = predictions.find(p => p.teamId === a.id)?.position ?? 999;
+                const pb = predictions.find(p => p.teamId === b.id)?.position ?? 999;
+                return pa - pb;
+            }),
+        ...group.teams.filter(t => !predictedIds.has(t.id))
+    ];
+
+    const rows = orderedTeams.map(team => {
+        const pred = predictions.find(p => p.teamId === team.id);
+        const standing = groupStandings.find(s => s.teamName === team.name);
+        const predictedPos = pred ? pred.position : null;
+        const realPos = standing ? standing.position : null;
+        const isLate = pred ? pred.isLate : false;
+
+        const predDisplay = predictedPos !== null ? predictedPos : '—';
+        const predTop = predictedPos !== null && predictedPos <= 2;
+        const realDisplay = realPos !== null ? realPos : '—';
+        const realTop = realPos !== null && realPos <= 2;
+
+        let ptsDisplay, ptsColor;
+        if (!groupFinished) {
+            ptsDisplay = '—';
+            ptsColor = '#5a6e90';
+        } else if (predictedPos === null) {
+            ptsDisplay = '+0';
+            ptsColor = '#5a6e90';
+        } else if (predictedPos === realPos) {
+            ptsDisplay = isLate ? '+1' : '+2';
+            ptsColor = '#4caf50';
+        } else {
+            ptsDisplay = '+0';
+            ptsColor = '#5a6e90';
+        }
+
+        const flagUrl = team.code ? `/images/flags/${team.code}.svg` : '';
+
+        return `
+            <div class="tabla-row">
+                <span class="tabla-pos ${predTop ? 'top' : ''}">${predDisplay}</span>
+                <div class="tabla-team">
+                    ${flagUrl ? `<img src="${flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${team.name}">` : ''}
+                    <span class="tabla-name">${team.name}</span>
+                </div>
+                <span class="tabla-stat" style="color:${realTop ? 'var(--accent)' : '#5a6e90'};font-weight:900;font-size:14px;">${realDisplay}</span>
+                <span class="tabla-pts" style="color:${ptsColor};">${ptsDisplay}</span>
+            </div>`;
+    }).join('');
+
+    return `
+        <div class="tabla-card" style="margin-bottom:14px;">
+            <div class="tabla-header">GRUPO ${group.name}</div>
+            ${isLateGroup ? `<div style="text-align:center;font-size:10px;font-weight:800;color:#f0a500;letter-spacing:.1em;padding:6px 0 2px;">PRONÓSTICO TARDÍO</div>` : ''}
+            <div class="tabla-cols">
+                <span class="tabla-col-pos" style="font-size:8px;">PRED</span>
+                <span class="tabla-col-team"></span>
+                <span class="tabla-col-stat">REAL</span>
+                <span class="tabla-col-pts">PTS</span>
+            </div>
+            ${rows}
+        </div>`;
 }
 
 async function loadProfile(userId) {

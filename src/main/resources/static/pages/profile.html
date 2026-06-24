@@ -38,10 +38,22 @@
 
     <hr>
 
-    <p style="font-size:.8rem;color:var(--text-muted);margin:12px 0 16px;">Pronósticos en partidos terminados</p>
+    <div class="tabs" style="margin-bottom:16px;">
+      <button class="tab active" onclick="switchProfileTab(this, 'partidos')">PARTIDOS</button>
+      <button class="tab" onclick="switchProfileTab(this, 'grupos')">GRUPOS</button>
+    </div>
 
-    <div id="predictionsContainer">
-      <div style="text-align:center;padding:32px;color:var(--text-muted);">Cargando...</div>
+    <div id="partidosContainer">
+      <p style="font-size:.8rem;color:var(--text-muted);margin:0 0 16px;">Pronósticos en partidos terminados</p>
+      <div id="predictionsContainer">
+        <div style="text-align:center;padding:32px;color:var(--text-muted);">Cargando...</div>
+      </div>
+    </div>
+
+    <div id="gruposContainer" style="display:none;">
+      <div id="gruposPredContainer">
+        <div style="text-align:center;padding:32px;color:var(--text-muted);">Cargando...</div>
+      </div>
     </div>
 
   </main>

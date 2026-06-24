@@ -91,6 +91,20 @@ public class GroupPredictionService {
                 .toList();
     }
 
+    public List<GroupPredictionResponseDTO> findByUserIdAndGroupId(UUID userId, UUID groupId) {
+        return groupPredictionRepository
+                .findByUserIdAndGroupId(userId, groupId)
+                .stream()
+                .map(prediction ->
+                        new GroupPredictionResponseDTO(
+                                prediction.getTeam().getId(),
+                                prediction.getPosition(),
+                                prediction.getIsLate()
+                        )
+                )
+                .toList();
+    }
+
     public boolean hasMissingGroupPredictions(String googleId) {
         LocalDateTime nowUtc = LocalDateTime.now(ZoneOffset.UTC);
         if (nowUtc.isAfter(LATE_DEADLINE)) return false;
