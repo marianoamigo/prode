@@ -139,6 +139,10 @@ async function init() {
         renderMatches(matchesWithDate, predictions, currentUser);
         updateCandidatosPromo();
         updateLateGroupPromo();
+        if (currentUser.role === 'ADMIN') {
+            const panel = document.getElementById('adminGlobalPanel');
+            if (panel) panel.style.display = 'block';
+        }
     }
 }
 
@@ -268,6 +272,20 @@ async function updateCandidatosPromo() {
 
 async function recalculateMatch(matchId) {
     await fetch(`/api/admin/recalculate/${matchId}`, { method: 'POST' });
+    window.location.reload();
+}
+
+async function recalculateAllGroups() {
+    if (!confirm('¿Recalcular pronósticos de posiciones de TODOS los grupos?')) return;
+    const res = await fetch('/api/admin/recalculate-all-groups', { method: 'POST' });
+    alert(await res.text());
+    window.location.reload();
+}
+
+async function recalculateEverything() {
+    if (!confirm('¿Recalcular TODO? (todos los partidos finalizados + todos los grupos)')) return;
+    const res = await fetch('/api/admin/recalculate-everything', { method: 'POST' });
+    alert(await res.text());
     window.location.reload();
 }
 

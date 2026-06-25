@@ -109,6 +109,13 @@ public class MatchService {
         log.info("[[ MATCH SERVICE ]] recalculateMatch: recalculated for matchId={}", matchId);
     }
 
+    public void recalculateAllFinishedMatches() {
+        matchRepository.findAll().stream()
+                .filter(m -> m.getStatus() == MatchStatus.FINISHED)
+                .forEach(predictionService::recalculatePointsForMatch);
+        log.info("[[ MATCH SERVICE ]] recalculateAllFinishedMatches: done");
+    }
+
     @Transactional
     public void resetMatch(UUID matchId) {
         MatchEntity match = matchRepository.findById(matchId).orElseThrow();

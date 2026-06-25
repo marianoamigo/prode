@@ -200,7 +200,7 @@ public class GroupStandingService {
             );
         }
         groupPredictionService
-                .recalculatePoints(
+                .forceRecalculatePoints(
                         groupId
                 );
     }

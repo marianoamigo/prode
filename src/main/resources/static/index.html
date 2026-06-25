@@ -65,10 +65,17 @@
 
     <h2 id="matchesDateTitle" style="display:none;"></h2>
 
-    <div
-            id="matchesContainer">
-
+    <div id="adminGlobalPanel" style="display:none;margin-bottom:12px;">
+        <div class="admin-section" style="border-radius:10px;">
+            <div class="admin-label">ADMIN GLOBAL</div>
+            <div class="admin-btns">
+                <button class="admin-btn update" onclick="recalculateEverything()">Recalcular TODO</button>
+                <button class="admin-btn update" onclick="recalculateAllGroups()">Solo grupos</button>
+            </div>
+        </div>
     </div>
+
+    <div id="matchesContainer"></div>
 
     <div style="display:none;">
         <button id="saveAllButton">Guardar Pronósticos</button>

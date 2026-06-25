@@ -28,7 +28,7 @@ public class GroupPredictionService {
     private final GroupRepository groupRepository;
     private final TeamRepository teamRepository;
 
-    private static final LocalDateTime LATE_DEADLINE = LocalDateTime.of(2026, 6, 26, 3, 0);
+    private static final LocalDateTime LATE_DEADLINE = LocalDateTime.of(2026, 6, 24, 19, 0);
 
     @Transactional
     public void savePrediction(String googleId, GroupPredictionSaveRequestDTO request) {
@@ -117,12 +117,22 @@ public class GroupPredictionService {
 
     @Transactional
     public void recalculatePoints(UUID groupId) {
+        recalculatePointsInternal(groupId, false);
+    }
+
+    @Transactional
+    public void forceRecalculatePoints(UUID groupId) {
+        recalculatePointsInternal(groupId, true);
+    }
+
+    private void recalculatePointsInternal(UUID groupId, boolean force) {
         List<GroupStandingEntity> standings = groupStandingRepository.findByGroupIdOrderByPosition(groupId);
         int totalPlayed = standings.stream()
                 .mapToInt(GroupStandingEntity::getPlayed)
                 .sum();
 
         if (totalPlayed < 12) {
+            log.info("[{}] ---> GRUPO {} INCOMPLETO (totalPlayed={}), SALTANDO", GroupPredictionService.class.getSimpleName(), groupId, totalPlayed);
             return;
         }
 
@@ -136,7 +146,7 @@ public class GroupPredictionService {
             UserEntity user = userPredictions.get(0).getUser();
 
             boolean isLate = userPredictions.stream().anyMatch(p -> Boolean.TRUE.equals(p.getIsLate()));
-            int pointsPerHit = isLate ? 1 : 3;
+            int pointsPerHit = isLate ? 1 : 2;
 
             int points = 0;
             for (GroupPredictionEntity prediction : userPredictions) {
@@ -150,28 +160,44 @@ public class GroupPredictionService {
                 }
             }
 
-            int alreadyAwarded = userPredictions.get(0).getPointsScored();
+            int alreadyAwarded = userPredictions.stream()
+                    .mapToInt(GroupPredictionEntity::getPointsScored)
+                    .max()
+                    .orElse(0);
 
-            if (alreadyAwarded > 0) {
+            if (!force && alreadyAwarded > 0) {
                 log.info(
-                        "[{}] ---> GRUPO {} YA PROCESADO PARA {}",
+                        "[{}] ---> GRUPO {} YA PROCESADO PARA {} ({}pts), SALTANDO",
                         GroupPredictionService.class.getSimpleName(),
                         groupId,
-                        user.getName()
+                        user.getName(),
+                        alreadyAwarded
                 );
                 continue;
             }
 
-            log.info(
-                    "[{}] ---> GROUP {} USER {} SUMA {} PUNTOS (isLate={})",
-                    GroupPredictionService.class.getSimpleName(),
-                    groupId,
-                    user.getName(),
-                    points,
-                    isLate
-            );
+            if (force && alreadyAwarded > 0) {
+                log.info(
+                        "[{}] ---> GRUPO {} FORCE-RECALC PARA {}: revirtiendo {}pts, aplicando {}pts",
+                        GroupPredictionService.class.getSimpleName(),
+                        groupId,
+                        user.getName(),
+                        alreadyAwarded,
+                        points
+                );
+                user.setTotalPoints(user.getTotalPoints() - alreadyAwarded + points);
+            } else {
+                log.info(
+                        "[{}] ---> GROUP {} USER {} SUMA {} PUNTOS (isLate={})",
+                        GroupPredictionService.class.getSimpleName(),
+                        groupId,
+                        user.getName(),
+                        points,
+                        isLate
+                );
+                user.setTotalPoints(user.getTotalPoints() + points);
+            }
 
-            user.setTotalPoints(user.getTotalPoints() + points);
             userRepository.save(user);
 
             for (GroupPredictionEntity prediction : userPredictions) {

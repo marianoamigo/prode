@@ -151,16 +151,14 @@ public class PredictionService {
         List<PredictionEntity> predictions = predictionRepository.findByMatchId(match.getId());
 
         for (PredictionEntity prediction : predictions) {
-            prediction.setPointsScored(calculatePoints(prediction, match));
+            int oldPoints = prediction.getPointsScored() != null ? prediction.getPointsScored() : 0;
+            int newPoints = calculatePoints(prediction, match);
+            prediction.setPointsScored(newPoints);
             predictionRepository.save(prediction);
 
-            // recalculate user total points from all their predictions
-            int total = predictionRepository.findByUserId(prediction.getUser().getId())
-                    .stream()
-                    .mapToInt(p -> p.getPointsScored() != null ? p.getPointsScored() : 0)
-                    .sum();
-            prediction.getUser().setTotalPoints(total);
-            userRepository.save(prediction.getUser());
+            UserEntity user = prediction.getUser();
+            user.setTotalPoints(user.getTotalPoints() - oldPoints + newPoints);
+            userRepository.save(user);
         }
     }
 
