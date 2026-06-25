@@ -292,13 +292,30 @@ async function updateMatchResult(matchId, finished) {
     const homeScore = document.getElementById(`admin-home-${matchId}`).value;
     const awayScore = document.getElementById(`admin-away-${matchId}`).value;
 
+    const body = { matchId, homeScore: Number(homeScore), awayScore: Number(awayScore), finished };
+
+    const penSection = document.getElementById(`penalty-section-${matchId}`);
+    if (penSection && penSection.style.display !== 'none') {
+        const penHome = document.getElementById(`admin-pen-home-${matchId}`);
+        const penAway = document.getElementById(`admin-pen-away-${matchId}`);
+        if (penHome && penAway) {
+            body.homePenaltyScore = Number(penHome.value);
+            body.awayPenaltyScore = Number(penAway.value);
+        }
+    }
+
     await fetch("/api/matches/result", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ matchId, homeScore: Number(homeScore), awayScore: Number(awayScore), finished })
+        body: JSON.stringify(body)
     });
 
     window.location.reload();
+}
+
+function togglePenaltyInputs(matchId) {
+    const section = document.getElementById(`penalty-section-${matchId}`);
+    if (section) section.style.display = 'block';
 }
 
 function formatDateLabel(dateStr) {
@@ -320,8 +337,12 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
     const leftLabel = getMatchLeftLabel(match);
 
     const hasRealScore = match.homeScore !== null && match.homeScore !== undefined;
+    const hasPenScore = match.homePenaltyScore !== null && match.homePenaltyScore !== undefined;
+    const penaltyLine = hasPenScore
+        ? `<div style="font-size:11px;color:#e74c3c;font-weight:700;text-align:center;margin-top:3px;">${match.homePenaltyScore}–${match.awayPenaltyScore} pen</div>`
+        : '';
     const vsInner = hasRealScore
-        ? `<span class="score-display${isLive ? ' score-live' : ''}">${match.homeScore}–${match.awayScore}</span>`
+        ? `<div><span class="score-display${isLive ? ' score-live' : ''}">${match.homeScore}–${match.awayScore}</span>${penaltyLine}</div>`
         : `<span class="vs-text">VS</span>`;
 
     let actionSection = '';
@@ -356,6 +377,12 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
     let adminSection = '';
     if (currentUser?.role === 'ADMIN') {
         const isFinished = match.status === 'FINISHED';
+        const isFinalStage = match.stage !== 'GROUP_STAGE';
+        const isDraw = match.homeScore !== null && match.homeScore !== undefined && match.homeScore === match.awayScore;
+        const hasPenalties = match.homePenaltyScore !== null && match.homePenaltyScore !== undefined;
+        const showPenaltyBtn = isFinalStage && isDraw && !hasPenalties;
+        const showPenaltyInputs = isFinalStage && hasPenalties;
+
         adminSection = `
             <div class="admin-section">
                 <div class="admin-label">ADMIN</div>
@@ -369,6 +396,15 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
                     <input id="admin-home-${match.id}" type="number" min="0" class="admin-input" value="${match.homeScore ?? 0}">
                     <span style="color:#5a6e90;">–</span>
                     <input id="admin-away-${match.id}" type="number" min="0" class="admin-input" value="${match.awayScore ?? 0}">
+                </div>
+                ${showPenaltyBtn ? `<div class="admin-btns"><button class="admin-btn update" onclick="togglePenaltyInputs('${match.id}')">PASAR A PENALES</button></div>` : ''}
+                <div id="penalty-section-${match.id}" style="${showPenaltyInputs ? '' : 'display:none;'}">
+                    <div style="color:#5a6e90;font-size:11px;font-weight:700;letter-spacing:.08em;text-align:center;margin-top:8px;">PENALES</div>
+                    <div class="admin-inputs">
+                        <input id="admin-pen-home-${match.id}" type="number" min="0" class="admin-input" value="${match.homePenaltyScore ?? 0}">
+                        <span style="color:#5a6e90;">–</span>
+                        <input id="admin-pen-away-${match.id}" type="number" min="0" class="admin-input" value="${match.awayPenaltyScore ?? 0}">
+                    </div>
                 </div>
                 <div class="admin-btns">
                     <button class="admin-btn update" onclick="updateMatchResult('${match.id}', false)">Actualizar</button>
@@ -449,7 +485,7 @@ function getStageLabel(match) {
         return match.groupName ? `FASE DE GRUPOS - GRUPO ${match.groupName}` : "FASE DE GRUPOS";
     }
     const stages = {
-        ROUND_OF_16: "OCTAVOS", QUARTER_FINAL: "CUARTOS",
+        ROUND_OF_32: "16AVOS", ROUND_OF_16: "OCTAVOS", QUARTER_FINAL: "CUARTOS",
         SEMI_FINAL: "SEMIFINAL", THIRD_PLACE: "TERCER PUESTO", FINAL: "FINAL"
     };
     return stages[match.stage] || match.stage;
@@ -628,8 +664,17 @@ function canEditPrediction(match) {
 
 function calculateLivePoints(prediction, match) {
     if (!prediction || match.homeScore === null || match.homeScore === undefined) return null;
-    if (prediction.predictedHomeScore === match.homeScore && prediction.predictedAwayScore === match.awayScore) return 3;
+    const isFinalStage = match.stage !== 'GROUP_STAGE';
+    if (prediction.predictedHomeScore === match.homeScore && prediction.predictedAwayScore === match.awayScore) {
+        return isFinalStage ? 6 : 3;
+    }
     const predResult = Math.sign(prediction.predictedHomeScore - prediction.predictedAwayScore);
     const actualResult = Math.sign(match.homeScore - match.awayScore);
-    return predResult === actualResult ? 1 : 0;
+    if (predResult === actualResult) return isFinalStage ? 3 : 1;
+    if (isFinalStage) {
+        const homeMatch = prediction.predictedHomeScore === match.homeScore;
+        const awayMatch = prediction.predictedAwayScore === match.awayScore;
+        if (homeMatch || awayMatch) return 1;
+    }
+    return 0;
 }

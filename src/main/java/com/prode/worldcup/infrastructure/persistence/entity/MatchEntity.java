@@ -31,6 +31,8 @@ public class MatchEntity {
     private MatchStatus status; //SCHEDULED, LIVE, FINISHED
     private Integer homeScore;
     private Integer awayScore;
+    private Integer homePenaltyScore;
+    private Integer awayPenaltyScore;
     private LocalDateTime dateTime;
     private Integer matchDay;
     private String timeElapsed;

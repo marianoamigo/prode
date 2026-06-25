@@ -14,6 +14,8 @@ public record MatchResponseDTO(
         String awayFlagUrl,
         Integer homeScore,
         Integer awayScore,
+        Integer homePenaltyScore,
+        Integer awayPenaltyScore,
         MatchStatus status,
         MatchStage stage,
         LocalDateTime dateTime,

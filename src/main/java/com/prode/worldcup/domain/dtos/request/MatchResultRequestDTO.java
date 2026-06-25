@@ -6,5 +6,7 @@ public record MatchResultRequestDTO (
         UUID matchId,
         Integer homeScore,
         Integer awayScore,
-        Boolean finished
+        Boolean finished,
+        Integer homePenaltyScore,
+        Integer awayPenaltyScore
 ){}

@@ -32,4 +32,6 @@ public class ChampionPredictionEntity {
     private String fourth;
     private String fourthFlag;
     private LocalDateTime updatedAt;
+    @Builder.Default
+    private Integer pointsScored = 0;
 }

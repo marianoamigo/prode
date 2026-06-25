@@ -8,6 +8,7 @@ import com.prode.worldcup.infrastructure.persistence.entity.UserEntity;
 import com.prode.worldcup.infrastructure.persistence.repository.MatchRepository;
 import com.prode.worldcup.infrastructure.persistence.repository.PredictionRepository;
 import com.prode.worldcup.infrastructure.persistence.repository.UserRepository;
+import com.prode.worldcup.shared.MatchStage;
 import com.prode.worldcup.shared.MatchStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -117,30 +118,35 @@ public class PredictionService {
             return 0;
         }
 
-        if (
-                prediction.getPredictionHomeScore()
-                        .equals(match.getHomeScore())
-                        &&
-                        prediction.getPredictionAwayScore()
-                                .equals(match.getAwayScore())
-        ) {
-            return 3;
+        boolean isFinalStage = match.getStage() != MatchStage.GROUP_STAGE;
+
+        boolean exactScore = prediction.getPredictionHomeScore().equals(match.getHomeScore())
+                && prediction.getPredictionAwayScore().equals(match.getAwayScore());
+
+        if (exactScore) {
+            return isFinalStage ? 6 : 3;
         }
 
-        int predictedResult =
-                Integer.compare(
-                        prediction.getPredictionHomeScore(),
-                        prediction.getPredictionAwayScore()
-                );
+        int predictedResult = Integer.compare(
+                prediction.getPredictionHomeScore(),
+                prediction.getPredictionAwayScore()
+        );
 
-        int actualResult =
-                Integer.compare(
-                        match.getHomeScore(),
-                        match.getAwayScore()
-                );
+        int actualResult = Integer.compare(
+                match.getHomeScore(),
+                match.getAwayScore()
+        );
 
         if (predictedResult == actualResult) {
-            return 1;
+            return isFinalStage ? 3 : 1;
+        }
+
+        if (isFinalStage) {
+            boolean homeMatch = prediction.getPredictionHomeScore().equals(match.getHomeScore());
+            boolean awayMatch = prediction.getPredictionAwayScore().equals(match.getAwayScore());
+            if (homeMatch || awayMatch) {
+                return 1;
+            }
         }
 
         return 0;

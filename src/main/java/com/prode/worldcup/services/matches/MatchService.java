@@ -4,6 +4,7 @@ import com.prode.worldcup.domain.dtos.request.MatchResultRequestDTO;
 import com.prode.worldcup.domain.dtos.response.MatchResponseDTO;
 import com.prode.worldcup.infrastructure.persistence.entity.MatchEntity;
 import com.prode.worldcup.infrastructure.persistence.repository.MatchRepository;
+import com.prode.worldcup.services.champion.ChampionPredictionService;
 import com.prode.worldcup.services.group.GroupStandingService;
 import com.prode.worldcup.shared.MatchStage;
 import com.prode.worldcup.shared.MatchStatus;
@@ -24,6 +25,7 @@ public class MatchService {
     private final MatchRepository matchRepository;
     private final PredictionService predictionService;
     private final GroupStandingService groupStandingService;
+    private final ChampionPredictionService championPredictionService;
 
     public List<MatchResponseDTO> findAll() {
         return matchRepository.findAll()
@@ -40,6 +42,8 @@ public class MatchService {
                                 + ".svg",
                         match.getHomeScore(),
                         match.getAwayScore(),
+                        match.getHomePenaltyScore(),
+                        match.getAwayPenaltyScore(),
                         match.getStatus(),
                         match.getStage(),
                         match.getDateTime(),
@@ -66,29 +70,29 @@ public class MatchService {
 
         if(match.getStatus() == MatchStatus.FINISHED) return;
 
-        match.setHomeScore(
-                request.homeScore()
-        );
+        match.setHomeScore(request.homeScore());
+        match.setAwayScore(request.awayScore());
 
-        match.setAwayScore(
-                request.awayScore()
-        );
+        if (request.homePenaltyScore() != null && request.awayPenaltyScore() != null) {
+            match.setHomePenaltyScore(request.homePenaltyScore());
+            match.setAwayPenaltyScore(request.awayPenaltyScore());
+        }
 
         log.info(" [[ MATCH SERVICE ]] FINISHED REQUEST : {}",request.finished());
 
         if(Boolean.TRUE.equals(request.finished())){
             match.setStatus(MatchStatus.FINISHED);
-            predictionService
-                    .recalculatePointsForMatch(
-                            match
-                    );
+            matchRepository.save(match);
+            predictionService.recalculatePointsForMatch(match);
 
             if (match.getStage() == MatchStage.GROUP_STAGE) {
-                groupStandingService
-                        .recalculateGroup(match
-                                .getHomeTeam()
-                                .getGroup()
-                                .getId());
+                groupStandingService.recalculateGroup(
+                        match.getHomeTeam().getGroup().getId());
+            }
+
+            if (match.getStage() == MatchStage.FINAL
+                    || match.getStage() == MatchStage.THIRD_PLACE) {
+                championPredictionService.recalculateAllChampionPoints();
             }
         } else match.setStatus(MatchStatus.LIVE);
 
@@ -106,6 +110,9 @@ public class MatchService {
         if (match.getStage() == MatchStage.GROUP_STAGE) {
             groupStandingService.recalculateGroup(match.getHomeTeam().getGroup().getId());
         }
+        if (match.getStage() == MatchStage.FINAL || match.getStage() == MatchStage.THIRD_PLACE) {
+            championPredictionService.recalculateAllChampionPoints();
+        }
         log.info("[[ MATCH SERVICE ]] recalculateMatch: recalculated for matchId={}", matchId);
     }
 
@@ -122,6 +129,8 @@ public class MatchService {
         match.setStatus(MatchStatus.SCHEDULED);
         match.setHomeScore(null);
         match.setAwayScore(null);
+        match.setHomePenaltyScore(null);
+        match.setAwayPenaltyScore(null);
         match.setTimeElapsed(null);
         matchRepository.save(match);
         predictionService.recalculatePointsForMatch(match);
@@ -142,6 +151,8 @@ public class MatchService {
                         "/images/flags/" + match.getAwayTeam().getCode() + ".svg",
                         match.getHomeScore(),
                         match.getAwayScore(),
+                        match.getHomePenaltyScore(),
+                        match.getAwayPenaltyScore(),
                         match.getStatus(),
                         match.getStage(),
                         match.getDateTime(),
@@ -176,6 +187,8 @@ public class MatchService {
                                 + ".svg",
                         match.getHomeScore(),
                         match.getAwayScore(),
+                        match.getHomePenaltyScore(),
+                        match.getAwayPenaltyScore(),
                         match.getStatus(),
                         match.getStage(),
                         match.getDateTime(),
