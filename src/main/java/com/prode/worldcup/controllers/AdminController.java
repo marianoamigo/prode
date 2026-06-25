@@ -1,6 +1,7 @@
 package com.prode.worldcup.controllers;
 
 import com.prode.worldcup.infrastructure.persistence.repository.GroupRepository;
+import com.prode.worldcup.services.admin.AdminRecalculationService;
 import com.prode.worldcup.services.group.GroupPredictionService;
 import com.prode.worldcup.services.matches.MatchService;
 import com.prode.worldcup.services.sync.LiveScoreSyncService;
@@ -24,6 +25,7 @@ public class AdminController {
     private final MatchService matchService;
     private final GroupPredictionService groupPredictionService;
     private final GroupRepository groupRepository;
+    private final AdminRecalculationService adminRecalculationService;
 
     @PostMapping("/sync-scores")
     public ResponseEntity<String> syncScores() {
@@ -34,7 +36,7 @@ public class AdminController {
     @PostMapping("/recalculate/{matchId}")
     public ResponseEntity<String> recalculate(@PathVariable UUID matchId) {
         matchService.recalculateMatch(matchId);
-        return ResponseEntity.ok("Recálculo ejecutado");
+        return ResponseEntity.ok("Recálculo del partido ejecutado");
     }
 
     @PostMapping("/reset/{matchId}")
@@ -43,30 +45,9 @@ public class AdminController {
         return ResponseEntity.ok("Partido reseteado a SCHEDULED, scores limpiados, puntos a cero");
     }
 
-    @PostMapping("/recalculate-group/{groupName}")
-    public ResponseEntity<String> forceRecalculateGroup(@PathVariable String groupName) {
-        return groupRepository.findByName(groupName.toUpperCase())
-                .map(group -> {
-                    groupPredictionService.forceRecalculatePoints(group.getId());
-                    return ResponseEntity.ok("Recálculo forzado del grupo " + groupName.toUpperCase() + " ejecutado");
-                })
-                .orElse(ResponseEntity.badRequest().body("Grupo no encontrado: " + groupName));
-    }
-
-    @PostMapping("/recalculate-all-groups")
-    public ResponseEntity<String> forceRecalculateAllGroups() {
-        groupRepository.findAll().forEach(group ->
-                groupPredictionService.forceRecalculatePoints(group.getId())
-        );
-        return ResponseEntity.ok("Recálculo forzado de todos los grupos ejecutado");
-    }
-
     @PostMapping("/recalculate-everything")
     public ResponseEntity<String> recalculateEverything() {
-        matchService.recalculateAllFinishedMatches();
-        groupRepository.findAll().forEach(group ->
-                groupPredictionService.forceRecalculatePoints(group.getId())
-        );
+        adminRecalculationService.recalculateEverything();
         return ResponseEntity.ok("Recálculo completo ejecutado: partidos + grupos");
     }
 }

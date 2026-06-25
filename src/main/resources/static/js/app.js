@@ -275,15 +275,8 @@ async function recalculateMatch(matchId) {
     window.location.reload();
 }
 
-async function recalculateAllGroups() {
-    if (!confirm('¿Recalcular pronósticos de posiciones de TODOS los grupos?')) return;
-    const res = await fetch('/api/admin/recalculate-all-groups', { method: 'POST' });
-    alert(await res.text());
-    window.location.reload();
-}
-
 async function recalculateEverything() {
-    if (!confirm('¿Recalcular TODO? (todos los partidos finalizados + todos los grupos)')) return;
+    if (!confirm('¿Recalcular TODO? Resetea todos los puntos y recalcula desde cero: todos los partidos finalizados + todos los grupos.')) return;
     const res = await fetch('/api/admin/recalculate-everything', { method: 'POST' });
     alert(await res.text());
     window.location.reload();
