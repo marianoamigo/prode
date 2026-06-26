@@ -27,15 +27,14 @@
     </div>
     <!-- Filtro de fecha: solo visible en tab Partidos -->
     <div class="matchday-filter" id="matchdayFilterBar">
-      <button class="mdf-btn active" onclick="setPartidoFilter(null, this)">Todo</button>
-      <button class="mdf-btn" onclick="setPartidoFilter('md1', this)">Fecha 1</button>
-      <button class="mdf-btn" onclick="setPartidoFilter('md2', this)">Fecha 2</button>
-      <button class="mdf-btn" onclick="setPartidoFilter('md3', this)">Fecha 3</button>
-      <button class="mdf-btn" onclick="setPartidoFilter('candidatos', this)">Candidatos</button>
-      <button class="mdf-btn" onclick="setPartidoFilter('16avos', this)">16AVOS</button>
-      <button class="mdf-btn" onclick="setPartidoFilter('r16', this)">Octavos</button>
-      <button class="mdf-btn" onclick="setPartidoFilter('qf', this)">Cuartos</button>
-      <button class="mdf-btn" onclick="setPartidoFilter('sf', this)">Semis/Final</button>
+      <button class="mdf-btn" id="filter-md1" onclick="setPartidoFilter('md1', this)">Fecha 1</button>
+      <button class="mdf-btn" id="filter-md2" onclick="setPartidoFilter('md2', this)">Fecha 2</button>
+      <button class="mdf-btn" id="filter-md3" onclick="setPartidoFilter('md3', this)">Fecha 3</button>
+      <button class="mdf-btn" id="filter-candidatos" onclick="setPartidoFilter('candidatos', this)">Candidatos</button>
+      <button class="mdf-btn" id="filter-16avos" onclick="setPartidoFilter('16avos', this)">16AVOS</button>
+      <button class="mdf-btn" id="filter-r16" onclick="setPartidoFilter('r16', this)">Octavos</button>
+      <button class="mdf-btn" id="filter-qf" onclick="setPartidoFilter('qf', this)">Cuartos</button>
+      <button class="mdf-btn" id="filter-sf" onclick="setPartidoFilter('sf', this)">Semis/Final</button>
     </div>
   </div>
 
@@ -51,14 +50,6 @@
 
     <!-- CANDIDATOS (dentro del tab Partidos) -->
     <div id="candidatosContainer" style="display:none;"></div>
-
-    <!-- 16AVOS placeholder -->
-    <div id="avosContainer" style="display:none;">
-      <div class="empty-state" style="padding:40px 0;">
-        <div style="font-size:32px;margin-bottom:10px;">🔜</div>
-        <div style="color:var(--text-muted);font-size:.85rem;letter-spacing:.06em;font-weight:700;">PRÓXIMAMENTE</div>
-      </div>
-    </div>
 
     <!-- TAB GRUPOS -->
     <div id="gruposContainer" style="display:none;">

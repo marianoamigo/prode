@@ -42,9 +42,9 @@
       <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
                   border:1px solid rgba(184,197,232,0.1);">
         <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.6;">
-          Podés pronosticar <strong>resultados de partidos</strong> y
-          <strong>posiciones de los grupos</strong> en la sección
-          <span style="color:var(--accent);font-weight:700;">Pronósticos</span>.
+          Podés pronosticar <strong>resultados de partidos</strong>,
+          <strong>posiciones de los grupos</strong> y <strong>candidatos</strong> en la sección
+          <a href="/pages/group-prediction" style="color:var(--accent);font-weight:700;text-decoration:none;">Pronósticos</a>.
         </p>
       </div>
 
@@ -63,6 +63,14 @@
         </p>
       </div>
 
+      <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
+                  border:1px solid rgba(184,197,232,0.1);">
+        <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.6;">
+          Los candidatos podrán elegirse hasta el final de la fase de grupos:
+          <strong>27/06 a las 23:59</strong>.
+        </p>
+      </div>
+
     </div>
 
     <h3 style="font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;
@@ -76,7 +84,7 @@
       <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
                   border:1px solid rgba(184,197,232,0.1);">
         <p style="margin:0 0 8px;font-size:.8rem;font-weight:700;letter-spacing:.06em;
-                  text-transform:uppercase;color:var(--accent);">Partidos</p>
+                  text-transform:uppercase;color:var(--accent);">Partidos de Fase de Grupos</p>
         <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.7;">
           🥇 <strong>3 puntos</strong> por resultado exacto<br>
           🎯 <strong>1 punto</strong> por acertar el ganador o el empate
@@ -86,17 +94,34 @@
       <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
                   border:1px solid rgba(184,197,232,0.1);">
         <p style="margin:0 0 8px;font-size:.8rem;font-weight:700;letter-spacing:.06em;
-                  text-transform:uppercase;color:var(--accent);">Grupos</p>
+                  text-transform:uppercase;color:var(--accent);">Partidos de Fase Final</p>
         <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.7;">
-          🏆 <strong>2 puntos</strong> por cada posición acertada de un país al finalizar el grupo
+          🥇 <strong>6 puntos</strong> por resultado exacto<br>
+          🎯 <strong>3 puntos</strong> por acertar el ganador o el empate<br>
+          ⚽ <strong>1 punto</strong> en caso de no acertar resultado pero sí los goles de uno de los equipos
         </p>
       </div>
 
       <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
                   border:1px solid rgba(184,197,232,0.1);">
-        <p style="margin:0;font-size:.85rem;color:var(--text-secondary);line-height:1.6;
-                  font-style:italic;">
-          🔜 Próximamente se podrá pronosticar la fase final y los finalistas.
+        <p style="margin:0 0 8px;font-size:.8rem;font-weight:700;letter-spacing:.06em;
+                  text-transform:uppercase;color:var(--accent);">Grupos</p>
+        <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.7;">
+          🏆 <strong>2 puntos</strong> por cada posición acertada de un país al finalizar el grupo<br>
+          📝 <strong>1 punto</strong> por cada posición acertada en pronóstico tardío
+        </p>
+      </div>
+
+      <div style="background:rgba(30,48,80,0.7);border-radius:14px;padding:16px 18px;
+                  border:1px solid rgba(184,197,232,0.1);">
+        <p style="margin:0 0 8px;font-size:.8rem;font-weight:700;letter-spacing:.06em;
+                  text-transform:uppercase;color:var(--accent);">Candidatos</p>
+        <p style="margin:0;font-size:.9rem;color:var(--text-primary);line-height:1.7;">
+          🥇 <strong>10 puntos</strong> por puesto exacto del candidato (1° al 4° valen lo mismo)<br>
+          🥈 <strong>6 puntos</strong> por acertar si llegó a la final o al tercer puesto pero no el resultado<br>
+          <span style="font-size:.82rem;color:var(--text-secondary);">(pronosticar 1° y sale 2°, o pronosticar 3° y sale 4°, o viceversa)</span><br>
+          🎯 <strong>3 puntos</strong> por acertar que llegó a semifinal pero no el último partido<br>
+          <span style="font-size:.82rem;color:var(--text-secondary);">(pronosticar 1°/2° y que salga 3°/4°, o viceversa)</span>
         </p>
       </div>
 
@@ -104,7 +129,7 @@
 
     <div style="text-align:center;padding-bottom:16px;">
       <button class="btn-confirmar" style="max-width:260px;"
-              onclick="window.location.href='/'">
+              onclick="localStorage.setItem('seVieneFaseFinalAck','1');window.location.href='/pages/group-prediction'">
         ¡A pronosticar!
       </button>
     </div>

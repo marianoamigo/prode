@@ -35,10 +35,29 @@
         <div class="candidatos-promo-sub">Si no pronosticaste las posiciones de algún grupo, podés hacerlo hasta el 24/06 a las 16 hs desde la sección PRONÓSTICOS &gt; GRUPOS</div>
     </a>
 
-    <a href="/pages/candidatos" id="candidatosPromo" class="candidatos-promo" style="display:none;">
-        <div class="candidatos-promo-title">¿YA ELEGISTE A TUS CANDIDATOS?</div>
-        <div class="candidatos-promo-sub">Tenés tiempo hasta el 27/06!</div>
-    </a>
+    <div id="candidatosPromo" class="candidatos-promo" style="display:none;position:relative;">
+        <a href="/pages/candidatos" style="display:block;text-decoration:none;color:inherit;">
+            <div class="candidatos-promo-title">ÚLTIMOS DÍAS PARA ELEGIR O CAMBIAR TUS CANDIDATOS</div>
+            <div class="candidatos-promo-sub">Tenés tiempo hasta el sábado 27/06 inclusive</div>
+        </a>
+        <button onclick="ackUltimosDias()" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
+    </div>
+
+    <div id="faseFinalBanner" class="candidatos-promo" style="display:none;position:relative;">
+        <a href="/pages/rules" style="display:block;text-decoration:none;color:inherit;">
+            <div class="candidatos-promo-title">SE VIENE LA FASE FINAL 🔥</div>
+            <div class="candidatos-promo-sub">ACTUALIZACIÓN DE PUNTAJES PARA PRONÓSTICOS Y CANDIDATOS</div>
+        </a>
+        <button onclick="ackFaseFinal()" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
+    </div>
+
+    <div id="domingo16avosBanner" class="candidatos-promo" style="display:none;position:relative;">
+        <a href="/pages/group-prediction?filter=16avos" style="display:block;text-decoration:none;color:inherit;">
+            <div class="candidatos-promo-title">EL DOMINGO A LAS 16 HS ARRANCAN LOS 16AVOS</div>
+            <div class="candidatos-promo-sub">¡Ya podés pronosticar los partidos confirmados de 16avos de final!</div>
+        </a>
+        <button onclick="ack16Avos()" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
+    </div>
 
     <div class="tabs mb-3">
         <button class="tab" data-tab="ayer" onclick="switchTab(this, 'ayer')">Ayer</button>

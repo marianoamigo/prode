@@ -139,6 +139,8 @@ async function init() {
         renderMatches(matchesWithDate, predictions, currentUser);
         updateCandidatosPromo();
         updateLateGroupPromo();
+        updateFaseFinalBanner();
+        update16AvosBanner();
         if (currentUser.role === 'ADMIN') {
             const panel = document.getElementById('adminGlobalPanel');
             if (panel) panel.style.display = 'block';
@@ -258,16 +260,48 @@ async function updateLateGroupPromo() {
     }
 }
 
-async function updateCandidatosPromo() {
+function updateCandidatosPromo() {
     const box = document.getElementById('candidatosPromo');
     if (!box) return;
-    try {
-        const res = await fetch('/api/champion-prediction/mine');
-        const data = res.ok ? await res.json() : null;
-        box.style.display = (!data || !data.champion) ? 'block' : 'none';
-    } catch {
-        box.style.display = 'none';
-    }
+    if (localStorage.getItem('ultimosDiasAck')) { box.style.display = 'none'; return; }
+    const argNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    const y = argNow.getUTCFullYear(), m = argNow.getUTCMonth(), d = argNow.getUTCDate();
+    const inWindow = y === 2026 && m === 5 && d >= 26 && d <= 27;
+    box.style.display = inWindow ? 'block' : 'none';
+}
+
+function ackUltimosDias() {
+    localStorage.setItem('ultimosDiasAck', '1');
+    const box = document.getElementById('candidatosPromo');
+    if (box) box.style.display = 'none';
+}
+
+function updateFaseFinalBanner() {
+    const box = document.getElementById('faseFinalBanner');
+    if (!box) return;
+    box.style.display = localStorage.getItem('seVieneFaseFinalAck') ? 'none' : 'block';
+}
+
+function ackFaseFinal() {
+    localStorage.setItem('seVieneFaseFinalAck', '1');
+    const box = document.getElementById('faseFinalBanner');
+    if (box) box.style.display = 'none';
+}
+
+function update16AvosBanner() {
+    const box = document.getElementById('domingo16avosBanner');
+    if (!box) return;
+    if (localStorage.getItem('domingo16avosAck')) { box.style.display = 'none'; return; }
+    const argNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    const y = argNow.getUTCFullYear(), m = argNow.getUTCMonth(), d = argNow.getUTCDate();
+    const notExpired = !(y > 2026 || m > 5 || (y === 2026 && m === 5 && d > 28));
+    box.style.display = notExpired ? 'block' : 'none';
+}
+
+function ack16Avos() {
+    localStorage.setItem('domingo16avosAck', '1');
+    const box = document.getElementById('domingo16avosBanner');
+    if (box) box.style.display = 'none';
 }
 
 async function recalculateMatch(matchId) {
@@ -485,7 +519,7 @@ function getStageLabel(match) {
         return match.groupName ? `FASE DE GRUPOS - GRUPO ${match.groupName}` : "FASE DE GRUPOS";
     }
     const stages = {
-        ROUND_OF_32: "16AVOS", ROUND_OF_16: "OCTAVOS", QUARTER_FINAL: "CUARTOS",
+        ROUND_OF_32: "16AVOS DE FINAL", ROUND_OF_16: "OCTAVOS", QUARTER_FINAL: "CUARTOS",
         SEMI_FINAL: "SEMIFINAL", THIRD_PLACE: "TERCER PUESTO", FINAL: "FINAL"
     };
     return stages[match.stage] || match.stage;

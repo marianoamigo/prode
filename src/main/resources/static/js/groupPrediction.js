@@ -97,13 +97,10 @@ function setPartidoFilter(key, btn) {
     btn.classList.add('active');
 
     const isCandidatos = key === 'candidatos';
-    const is16Avos = key === '16avos';
-    document.getElementById('partidosContainer').style.display  = (!isCandidatos && !is16Avos) ? 'block' : 'none';
+    document.getElementById('partidosContainer').style.display   = !isCandidatos ? 'block' : 'none';
     document.getElementById('candidatosContainer').style.display = isCandidatos ? 'block' : 'none';
-    document.getElementById('avosContainer').style.display       = is16Avos ? 'block' : 'none';
 
     if (isCandidatos) { renderGPCandidatos(); return; }
-    if (is16Avos) return;
     renderPartidos();
 }
 
@@ -112,17 +109,32 @@ function applyPartidoFilter(matches) {
     if (activePartidoFilter === 'md1') return matches.filter(m => m.matchDay === 1);
     if (activePartidoFilter === 'md2') return matches.filter(m => m.matchDay === 2);
     if (activePartidoFilter === 'md3') return matches.filter(m => m.matchDay === 3);
+    if (activePartidoFilter === '16avos') return matches.filter(m => m.stage === 'ROUND_OF_32');
     if (activePartidoFilter === 'r16') return matches.filter(m => m.stage === 'ROUND_OF_16');
     if (activePartidoFilter === 'qf')  return matches.filter(m => m.stage === 'QUARTER_FINAL');
     if (activePartidoFilter === 'sf')  return matches.filter(m => ['SEMI_FINAL','THIRD_PLACE','FINAL'].includes(m.stage));
     return matches;
 }
 
+function getDefaultFilter() {
+    const argNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    const y = argNow.getUTCFullYear(), m = argNow.getUTCMonth(), d = argNow.getUTCDate();
+    if (y === 2026 && m === 5 && d >= 28) return '16avos';
+    return 'md3';
+}
+
 // ── TAB PARTIDOS ──
 async function loadAllMatchesForTab() {
     const response = await fetch('/api/matches/all');
     allMatches = await response.json();
-    renderPartidos();
+    const urlFilter = new URLSearchParams(window.location.search).get('filter');
+    const filter = urlFilter || getDefaultFilter();
+    const btn = document.getElementById(`filter-${filter}`);
+    if (btn) {
+        setPartidoFilter(filter, btn);
+    } else {
+        renderPartidos();
+    }
 }
 
 function formatDateLabelGP(dateStr) {
@@ -151,6 +163,7 @@ function getStageLabelGP(match) {
         return match.groupName ? `FASE DE GRUPOS - GRUPO ${match.groupName}` : "FASE DE GRUPOS";
     }
     const stages = {
+        ROUND_OF_32: "16AVOS DE FINAL",
         ROUND_OF_16: "OCTAVOS", QUARTER_FINAL: "CUARTOS",
         SEMI_FINAL: "SEMIFINAL", THIRD_PLACE: "TERCER PUESTO", FINAL: "FINAL"
     };
@@ -195,10 +208,15 @@ function formatTimeGP(dt) {
 
 function calculateLivePoints(prediction, match) {
     if (!prediction || match.homeScore === null || match.homeScore === undefined) return null;
-    if (prediction.predictedHomeScore === match.homeScore && prediction.predictedAwayScore === match.awayScore) return 3;
+    const isFinalStage = match.stage !== 'GROUP_STAGE';
+    if (prediction.predictedHomeScore === match.homeScore && prediction.predictedAwayScore === match.awayScore) {
+        return isFinalStage ? 6 : 3;
+    }
     const predResult = Math.sign(prediction.predictedHomeScore - prediction.predictedAwayScore);
     const actualResult = Math.sign(match.homeScore - match.awayScore);
-    return predResult === actualResult ? 1 : 0;
+    if (predResult === actualResult) return isFinalStage ? 3 : 1;
+    if (isFinalStage && (prediction.predictedHomeScore === match.homeScore || prediction.predictedAwayScore === match.awayScore)) return 1;
+    return 0;
 }
 
 function buildPartidoCard(match, pred) {

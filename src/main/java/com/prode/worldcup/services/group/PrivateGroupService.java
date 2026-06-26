@@ -5,6 +5,7 @@ import com.prode.worldcup.domain.dtos.request.PrivateGroupRequestDTO;
 import com.prode.worldcup.domain.dtos.response.LiveMatchGroupMemberDTO;
 import com.prode.worldcup.domain.dtos.response.PrivateGroupResponseDTO;
 import com.prode.worldcup.infrastructure.persistence.entity.MatchEntity;
+import com.prode.worldcup.shared.MatchStage;
 import com.prode.worldcup.infrastructure.persistence.entity.PredictionEntity;
 import com.prode.worldcup.infrastructure.persistence.entity.PrivateGroupEntity;
 import com.prode.worldcup.infrastructure.persistence.entity.UserEntity;
@@ -169,10 +170,13 @@ public class PrivateGroupService {
         int predAway = prediction.getPredictionAwayScore();
         int actHome = match.getHomeScore();
         int actAway = match.getAwayScore();
-        if (predHome == actHome && predAway == actAway) return 3;
+        boolean isFinalStage = match.getStage() != MatchStage.GROUP_STAGE;
+        if (predHome == actHome && predAway == actAway) return isFinalStage ? 6 : 3;
         int predResult = Integer.compare(predHome, predAway);
         int actualResult = Integer.compare(actHome, actAway);
-        return predResult == actualResult ? 1 : 0;
+        if (predResult == actualResult) return isFinalStage ? 3 : 1;
+        if (isFinalStage && (predHome == actHome || predAway == actAway)) return 1;
+        return 0;
     }
 
     public void deleteGroup(UUID groupId, String googleId) {
