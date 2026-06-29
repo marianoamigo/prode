@@ -142,7 +142,7 @@ function buildStandingsTable(teams) {
                 <div class="tabla-row">
                     <span class="tabla-pos ${i < 2 ? 'top' : ''}">${i + 1}</span>
                     <div class="tabla-team">
-                        ${t.flagUrl ? `<img src="${t.flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${t.teamName || ''}">` : ''}
+                        ${t.flagUrl ? `<a href="/pages/team-results.html?team=${encodeURIComponent(t.teamName)}" style="line-height:0;"><img src="${t.flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${t.teamName || ''}"></a>` : ''}
                         <span class="tabla-name">${t.teamName}</span>
                     </div>
                     <span class="tabla-stat">${t.played}</span>
@@ -198,12 +198,12 @@ function buildGroupMatchRow(m) {
             <div class="gmatch-status-row">${statusLabel}</div>
             <div class="gmatch-teams">
                 <div class="gmatch-team">
-                    ${m.homeFlagUrl ? `<img src="${m.homeFlagUrl}" class="gmatch-flag" alt="">` : ''}
+                    ${m.homeFlagUrl && m.homeTeam ? `<a href="/pages/team-results.html?team=${encodeURIComponent(m.homeTeam)}" style="line-height:0;"><img src="${m.homeFlagUrl}" class="gmatch-flag" alt=""></a>` : (m.homeFlagUrl ? `<img src="${m.homeFlagUrl}" class="gmatch-flag" alt="">` : '')}
                     <span class="gmatch-name">${homeName}</span>
                 </div>
                 <div class="gmatch-center">${scoreBlock}</div>
                 <div class="gmatch-team right">
-                    ${m.awayFlagUrl ? `<img src="${m.awayFlagUrl}" class="gmatch-flag" alt="">` : ''}
+                    ${m.awayFlagUrl && m.awayTeam ? `<a href="/pages/team-results.html?team=${encodeURIComponent(m.awayTeam)}" style="line-height:0;"><img src="${m.awayFlagUrl}" class="gmatch-flag" alt=""></a>` : (m.awayFlagUrl ? `<img src="${m.awayFlagUrl}" class="gmatch-flag" alt="">` : '')}
                     <span class="gmatch-name">${awayName}</span>
                 </div>
             </div>
@@ -252,7 +252,7 @@ function renderThirdPlaceTable(container) {
                 <div class="tabla-row">
                     <span class="tabla-pos ${i < 8 ? 'top' : ''}">${i + 1}</span>
                     <div class="tabla-team">
-                        ${t.flagUrl ? `<img src="${t.flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${t.teamName || ''}">` : ''}
+                        ${t.flagUrl ? `<a href="/pages/team-results.html?team=${encodeURIComponent(t.teamName)}" style="line-height:0;"><img src="${t.flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${t.teamName || ''}"></a>` : ''}
                         <span class="tabla-name">${t.teamName}</span>
                         <span class="tabla-group-tag">${t.groupName}</span>
                     </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Posiciones — ORSAI</title>
+  <title>Resultados — ORSAI</title>
   <meta name="theme-color" content="#0d0f1a">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,18 +21,23 @@
 
   <main class="page-container">
 
-    <div id="bracketSection"></div>
-
-    <div class="group-tabs-scroll" id="standingGroupTabs"></div>
-
-    <div id="groupsContainer">
-      <p class="text-muted" style="font-size:.85rem;text-align:center;padding:24px 0;">Cargando posiciones...</p>
+    <div style="margin-bottom:16px;">
+      <a onclick="history.back()" style="font-size:.8rem;color:var(--text-muted);text-decoration:none;cursor:pointer;">&#9668; VOLVER</a>
     </div>
+
+    <div id="teamHeader" style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+      <img id="teamFlag" src="" style="display:none;width:56px;height:38px;border-radius:4px;object-fit:cover;" alt="">
+      <h2 id="teamName" style="margin:0;letter-spacing:.06em;font-size:1.3rem;"></h2>
+    </div>
+
+    <div id="matchesContainer">
+      <div style="text-align:center;padding:32px;color:var(--text-muted);">Cargando...</div>
+    </div>
+
   </main>
 
   <script src="/js/navbar.js"></script>
-  <script src="/js/bracket.js?v=4"></script>
-  <script src="/js/groupStandings.js?v=3"></script>
+  <script src="/js/team-results.js"></script>
   <script src="/js/bottomNav.js"></script>
 </body>
 </html>

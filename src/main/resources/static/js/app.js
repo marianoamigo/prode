@@ -142,6 +142,7 @@ async function init() {
         updateFaseFinalBanner();
         update16AvosBanner();
         updateBracketBanner();
+        updateBanderasBanner();
         if (currentUser.role === 'ADMIN') {
             const panel = document.getElementById('adminGlobalPanel');
             if (panel) panel.style.display = 'block';
@@ -321,6 +322,18 @@ function ackBracketBanner() {
     if (box) box.style.display = 'none';
 }
 
+function updateBanderasBanner() {
+    const box = document.getElementById('banderasBanner');
+    if (!box) return;
+    box.style.display = localStorage.getItem('banderasBannerAck') ? 'none' : 'block';
+}
+
+function ackBanderasBanner() {
+    localStorage.setItem('banderasBannerAck', '1');
+    const box = document.getElementById('banderasBanner');
+    if (box) box.style.display = 'none';
+}
+
 async function recalculateMatch(matchId) {
     await fetch(`/api/admin/recalculate/${matchId}`, { method: 'POST' });
     window.location.reload();
@@ -478,14 +491,14 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
             </div>
             <div class="match-teams">
                 <div class="team">
-                    ${match.homeFlagUrl ? `<img src="${match.homeFlagUrl}" class="team-flag-img" alt="${match.homeTeam || ''}">` : ''}
+                    ${match.homeFlagUrl && match.homeTeam ? `<a href="/pages/team-results.html?team=${encodeURIComponent(match.homeTeam)}" style="line-height:0;"><img src="${match.homeFlagUrl}" class="team-flag-img" alt="${match.homeTeam}"></a>` : (match.homeFlagUrl ? `<img src="${match.homeFlagUrl}" class="team-flag-img" alt="">` : '')}
                     <div class="team-name">${match.homeTeam || ''}</div>
                 </div>
                 <div class="vs-block">
                     ${vsInner}
                 </div>
                 <div class="team">
-                    ${match.awayFlagUrl ? `<img src="${match.awayFlagUrl}" class="team-flag-img" alt="${match.awayTeam || ''}">` : ''}
+                    ${match.awayFlagUrl && match.awayTeam ? `<a href="/pages/team-results.html?team=${encodeURIComponent(match.awayTeam)}" style="line-height:0;"><img src="${match.awayFlagUrl}" class="team-flag-img" alt="${match.awayTeam}"></a>` : (match.awayFlagUrl ? `<img src="${match.awayFlagUrl}" class="team-flag-img" alt="">` : '')}
                     <div class="team-name">${match.awayTeam || ''}</div>
                 </div>
             </div>

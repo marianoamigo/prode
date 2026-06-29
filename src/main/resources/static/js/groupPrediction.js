@@ -274,12 +274,12 @@ function buildPartidoCard(match, pred) {
             </div>
             <div class="match-teams">
                 <div class="team">
-                    ${match.homeFlagUrl ? `<img src="${match.homeFlagUrl}" class="team-flag-img" alt="${match.homeTeam || ''}">` : ''}
+                    ${match.homeFlagUrl && match.homeTeam ? `<a href="/pages/team-results.html?team=${encodeURIComponent(match.homeTeam)}" style="line-height:0;"><img src="${match.homeFlagUrl}" class="team-flag-img" alt="${match.homeTeam}"></a>` : (match.homeFlagUrl ? `<img src="${match.homeFlagUrl}" class="team-flag-img" alt="">` : '')}
                     <div class="team-name">${match.homeTeam || ''}</div>
                 </div>
                 ${vsBlock}
                 <div class="team">
-                    ${match.awayFlagUrl ? `<img src="${match.awayFlagUrl}" class="team-flag-img" alt="${match.awayTeam || ''}">` : ''}
+                    ${match.awayFlagUrl && match.awayTeam ? `<a href="/pages/team-results.html?team=${encodeURIComponent(match.awayTeam)}" style="line-height:0;"><img src="${match.awayFlagUrl}" class="team-flag-img" alt="${match.awayTeam}"></a>` : (match.awayFlagUrl ? `<img src="${match.awayFlagUrl}" class="team-flag-img" alt="">` : '')}
                     <div class="team-name">${match.awayTeam || ''}</div>
                 </div>
             </div>
@@ -481,7 +481,7 @@ async function renderGroup(groupId, groupName) {
                     <div class="tabla-row" id="group-row-${team.id}" style="${rowStyle}">
                         <span class="tabla-pos group-pos-display ${isTop ? 'top' : ''}" id="pos-display-${team.id}">${selectedPos}</span>
                         <div class="tabla-team">
-                            ${flagUrl ? `<img src="${flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${team.name || ''}">` : ''}
+                            ${flagUrl ? `<a href="/pages/team-results.html?team=${encodeURIComponent(team.name)}" style="line-height:0;"><img src="${flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${team.name || ''}"></a>` : ''}
                             <span class="tabla-name">${team.name}</span>
                         </div>
                         ${rightCell}
@@ -795,7 +795,7 @@ function buildComparisonGroupCard(groupId, groupName, teams, predictions, standi
             <div class="tabla-row">
                 <span class="tabla-pos ${predTop ? 'top' : ''}">${predDisplay}</span>
                 <div class="tabla-team">
-                    ${flagUrl ? `<img src="${flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${team.name}">` : ''}
+                    ${flagUrl ? `<a href="/pages/team-results.html?team=${encodeURIComponent(team.name)}" style="line-height:0;"><img src="${flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${team.name}"></a>` : ''}
                     <span class="tabla-name">${team.name}</span>
                 </div>
                 <span class="tabla-stat" style="color:${realTop ? 'var(--accent)' : '#5a6e90'};font-weight:900;font-size:14px;">${realDisplay}</span>

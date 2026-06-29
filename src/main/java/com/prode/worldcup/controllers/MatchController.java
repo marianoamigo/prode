@@ -35,6 +35,11 @@ public class MatchController {
         return matchService.getLiveMatches();
     }
 
+    @GetMapping("/team/{teamName}")
+    public List<MatchResponseDTO> getMatchesByTeam(@PathVariable String teamName) {
+        return matchService.getMatchesByTeam(teamName);
+    }
+
     @GetMapping("/date/{date}")
     public List<MatchResponseDTO> getMatchesByDate(
             @PathVariable LocalDate date

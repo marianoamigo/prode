@@ -112,6 +112,19 @@ public class MatchService {
         log.info("[[ MATCH SERVICE ]] resetMatch: reset matchId={}", matchId);
     }
 
+    public List<MatchResponseDTO> getMatchesByTeam(String teamName) {
+        return matchRepository.findAll().stream()
+                .filter(m -> (m.getHomeTeam() != null && m.getHomeTeam().getName().equalsIgnoreCase(teamName))
+                          || (m.getAwayTeam() != null && m.getAwayTeam().getName().equalsIgnoreCase(teamName)))
+                .sorted((a, b) -> {
+                    if (a.getDateTime() == null) return 1;
+                    if (b.getDateTime() == null) return -1;
+                    return a.getDateTime().compareTo(b.getDateTime());
+                })
+                .map(this::mapToDTO)
+                .toList();
+    }
+
     public List<MatchResponseDTO> getLiveMatches() {
         return matchRepository.findAll().stream()
                 .filter(match -> match.getStatus() == MatchStatus.LIVE)

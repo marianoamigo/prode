@@ -174,7 +174,7 @@ function buildBcTeamRow(teamName, flagUrl, srcNum, score, penScore, isWinner, is
         let displayName = teamName.toUpperCase();
         if (displayName === 'BOSNIA HERZEGOVINA') displayName = 'BOSNIA';
         const flag = flagUrl ? `<img src="${flagUrl}" class="bc-flag" alt="">` : '';
-        return `<div class="bc-team${isWinner ? ' bc-winner' : ''}">${flag}<span class="bc-name">${displayName}</span></div>${scoreEl}`;
+        return `<a href="/pages/team-results.html?team=${encodeURIComponent(teamName)}" class="bc-team${isWinner ? ' bc-winner' : ''}" style="text-decoration:none;color:inherit;">${flag}<span class="bc-name">${displayName}</span></a>${scoreEl}`;
     }
     return `<div class="bc-team"><span class="bc-tbd">${srcPrefix}.${srcNum || '?'}</span></div>${scoreEl}`;
 }
