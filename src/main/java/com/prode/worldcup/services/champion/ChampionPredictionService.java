@@ -12,10 +12,13 @@ import com.prode.worldcup.shared.MatchStage;
 import com.prode.worldcup.shared.MatchStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Slf4j
@@ -40,8 +43,14 @@ public class ChampionPredictionService {
                 .orElse(null);
     }
 
+    private static final LocalDateTime DEADLINE =
+            LocalDateTime.of(2026, 6, 27, 23, 59, 59);
+
     @Transactional
     public void save(String googleId, ChampionPredictionRequestDTO req) {
+        if (LocalDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires")).isAfter(DEADLINE)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El plazo para modificar candidatos ya venció");
+        }
         var user = userRepository.findByGoogleId(googleId).orElseThrow();
         var entity = championRepo.findByUserId(user.getId())
                 .orElseGet(() -> ChampionPredictionEntity.builder().user(user).build());

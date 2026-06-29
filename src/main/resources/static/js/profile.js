@@ -178,7 +178,7 @@ function renderProfile(profile) {
     let html = '';
     profile.predictions.forEach(p => {
         const pts = p.pointsScored;
-        const ptsColor = pts === 3 ? '#4caf50' : pts === 1 ? 'var(--accent)' : 'var(--text-muted)';
+        const ptsColor = pts === 6 ? '#388e3c' : pts === 3 ? '#4caf50' : pts === 1 ? 'var(--accent)' : 'var(--text-muted)';
         const stageName = getStageName(p.stage, p.groupName);
 
         html += `
