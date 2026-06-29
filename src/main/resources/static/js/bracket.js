@@ -79,6 +79,8 @@ function buildFinalColumn(fin, trd) {
 
     let content = '';
     if (finMatch) {
+        const finLabelTop = finTop - 20;
+        content += `<div style="position:absolute;top:${finLabelTop}px;left:0;right:0;font-size:9px;font-weight:700;letter-spacing:.08em;color:#FFD700;text-align:center;line-height:16px;">FINAL</div>`;
         content += `<div style="position:absolute;top:${finTop}px;left:0;right:0;height:${BC_CARD_H}px;">${buildBracketCard(finMatch)}</div>`;
     }
     if (trdMatch) {
@@ -123,15 +125,26 @@ function buildBracketCard(match) {
         (match.awayScore === match.homeScore && hasPen && match.awayPenaltyScore > match.homePenaltyScore)
     );
 
+    const isFinished = match.status === 'FINISHED';
+    const srcPrefix  = match.stage === 'THIRD_PLACE' ? 'P' : 'G';
+
     const homeRow = buildBcTeamRow(match.homeTeam, match.homeFlagUrl, homeSrc,
-        hasScore ? match.homeScore : null, hasPen ? match.homePenaltyScore : null, isWinHome, isLive);
+        hasScore ? match.homeScore : null, hasPen ? match.homePenaltyScore : null, isWinHome, isLive, srcPrefix);
     const awayRow = buildBcTeamRow(match.awayTeam, match.awayFlagUrl, awaySrc,
-        hasScore ? match.awayScore : null, hasPen ? match.awayPenaltyScore : null, isWinAway, isLive);
+        hasScore ? match.awayScore : null, hasPen ? match.awayPenaltyScore : null, isWinAway, isLive, srcPrefix);
 
     const cls      = 'bc-card' + (isLive ? ' bc-live' : '');
     const numBadge = n ? `<span class="bc-num">${n}</span>` : '';
-    const dateStr  = formatBracketDate(match.dateTime);
-    const dateRow  = dateStr ? `<div class="bc-date-row">${dateStr}</div>` : '';
+
+    let dateRow;
+    if (isLive) {
+        dateRow = `<div class="bc-date-row" style="color:var(--accent);font-weight:700;">EN JUEGO</div>`;
+    } else if (isFinished) {
+        dateRow = `<div class="bc-date-row">FINALIZADO</div>`;
+    } else {
+        const dateStr = formatBracketDate(match.dateTime);
+        dateRow = dateStr ? `<div class="bc-date-row">${dateStr}</div>` : '';
+    }
 
     return `<div class="${cls}">${dateRow}${numBadge}<div class="bc-row">${homeRow}</div><div class="bc-divider"></div><div class="bc-row">${awayRow}</div></div>`;
 }
@@ -146,7 +159,7 @@ function formatBracketDate(dt) {
     return `${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]} ${h}:${min}`;
 }
 
-function buildBcTeamRow(teamName, flagUrl, srcNum, score, penScore, isWinner, isLive) {
+function buildBcTeamRow(teamName, flagUrl, srcNum, score, penScore, isWinner, isLive, srcPrefix = 'G') {
     let scoreText = '';
     if (score !== null && score !== undefined) {
         scoreText = penScore !== null && penScore !== undefined
@@ -158,10 +171,12 @@ function buildBcTeamRow(teamName, flagUrl, srcNum, score, penScore, isWinner, is
         : '';
 
     if (teamName) {
+        let displayName = teamName.toUpperCase();
+        if (displayName === 'BOSNIA HERZEGOVINA') displayName = 'BOSNIA';
         const flag = flagUrl ? `<img src="${flagUrl}" class="bc-flag" alt="">` : '';
-        return `<div class="bc-team${isWinner ? ' bc-winner' : ''}">${flag}<span class="bc-name">${teamName}</span></div>${scoreEl}`;
+        return `<div class="bc-team${isWinner ? ' bc-winner' : ''}">${flag}<span class="bc-name">${displayName}</span></div>${scoreEl}`;
     }
-    return `<div class="bc-team"><span class="bc-tbd">G.${srcNum || '?'}</span></div>${scoreEl}`;
+    return `<div class="bc-team"><span class="bc-tbd">${srcPrefix}.${srcNum || '?'}</span></div>${scoreEl}`;
 }
 
 function getBracketSources(n) {
