@@ -81,8 +81,8 @@ public class PredictionService {
         return new PredictionResponseDTO(
                 prediction.getId(),
                 prediction.getMatch().getId(),
-                prediction.getMatch().getHomeTeam().getName(),
-                prediction.getMatch().getAwayTeam().getName(),
+                teamName(prediction.getMatch().getHomeTeam()),
+                teamName(prediction.getMatch().getAwayTeam()),
                 prediction.getPredictionHomeScore(),
                 prediction.getPredictionAwayScore(),
                 prediction.getPointsScored()
@@ -102,12 +102,16 @@ public class PredictionService {
                 .map(prediction -> new PredictionResponseDTO(
                         prediction.getId(),
                         prediction.getMatch().getId(),
-                        prediction.getMatch().getHomeTeam().getName(),
-                        prediction.getMatch().getAwayTeam().getName(),
+                        teamName(prediction.getMatch().getHomeTeam()),
+                        teamName(prediction.getMatch().getAwayTeam()),
                         prediction.getPredictionHomeScore(),
                         prediction.getPredictionAwayScore(),
                         prediction.getPointsScored()
                 )).toList();
+    }
+
+    private String teamName(com.prode.worldcup.infrastructure.persistence.entity.TeamEntity team) {
+        return team != null ? team.getName() : null;
     }
 
     private int calculatePoints(PredictionEntity prediction, MatchEntity match) {

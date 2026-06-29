@@ -110,9 +110,9 @@ function applyPartidoFilter(matches) {
     if (activePartidoFilter === 'md2') return matches.filter(m => m.matchDay === 2);
     if (activePartidoFilter === 'md3') return matches.filter(m => m.matchDay === 3);
     if (activePartidoFilter === '16avos') return matches.filter(m => m.stage === 'ROUND_OF_32');
-    if (activePartidoFilter === 'r16') return matches.filter(m => m.stage === 'ROUND_OF_16');
-    if (activePartidoFilter === 'qf')  return matches.filter(m => m.stage === 'QUARTER_FINAL');
-    if (activePartidoFilter === 'sf')  return matches.filter(m => ['SEMI_FINAL','THIRD_PLACE','FINAL'].includes(m.stage));
+    if (activePartidoFilter === 'r16') return matches.filter(m => m.stage === 'ROUND_OF_16' && m.homeTeam && m.awayTeam);
+    if (activePartidoFilter === 'qf')  return matches.filter(m => m.stage === 'QUARTER_FINAL' && m.homeTeam && m.awayTeam);
+    if (activePartidoFilter === 'sf')  return matches.filter(m => ['SEMI_FINAL','THIRD_PLACE','FINAL'].includes(m.stage) && m.homeTeam && m.awayTeam);
     return matches;
 }
 
@@ -175,7 +175,10 @@ function renderPartidos() {
     const filtered = applyPartidoFilter(allMatches);
 
     if (!filtered.length) {
-        container.innerHTML = '<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">📅</div><div>No hay partidos en esta fase</div></div>';
+        const msg = ['r16', 'qf', 'sf'].includes(activePartidoFilter)
+            ? 'Partidos a definir'
+            : 'No hay partidos en esta fase';
+        container.innerHTML = `<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">⏳</div><div>${msg}</div></div>`;
         return;
     }
 

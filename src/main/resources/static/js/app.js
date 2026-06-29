@@ -141,6 +141,7 @@ async function init() {
         updateLateGroupPromo();
         updateFaseFinalBanner();
         update16AvosBanner();
+        updateBracketBanner();
         if (currentUser.role === 'ADMIN') {
             const panel = document.getElementById('adminGlobalPanel');
             if (panel) panel.style.display = 'block';
@@ -294,13 +295,29 @@ function update16AvosBanner() {
     if (localStorage.getItem('domingo16avosAck')) { box.style.display = 'none'; return; }
     const argNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
     const y = argNow.getUTCFullYear(), m = argNow.getUTCMonth(), d = argNow.getUTCDate();
-    const notExpired = !(y > 2026 || m > 5 || (y === 2026 && m === 5 && d > 28));
+    const notExpired = y === 2026 && (m === 5 || (m === 6 && d <= 3));
     box.style.display = notExpired ? 'block' : 'none';
 }
 
 function ack16Avos() {
     localStorage.setItem('domingo16avosAck', '1');
     const box = document.getElementById('domingo16avosBanner');
+    if (box) box.style.display = 'none';
+}
+
+function updateBracketBanner() {
+    const box = document.getElementById('bracketBanner');
+    if (!box) return;
+    if (localStorage.getItem('bracketBannerAck')) { box.style.display = 'none'; return; }
+    const argNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    const y = argNow.getUTCFullYear(), m = argNow.getUTCMonth(), d = argNow.getUTCDate();
+    const notExpired = y === 2026 && (m === 5 || (m === 6 && d <= 3));
+    box.style.display = notExpired ? 'block' : 'none';
+}
+
+function ackBracketBanner() {
+    localStorage.setItem('bracketBannerAck', '1');
+    const box = document.getElementById('bracketBanner');
     if (box) box.style.display = 'none';
 }
 
@@ -313,6 +330,11 @@ async function recalculateEverything() {
     if (!confirm('¿Recalcular TODO? Resetea todos los puntos y recalcula desde cero: todos los partidos finalizados + todos los grupos.')) return;
     const res = await fetch('/api/admin/recalculate-everything', { method: 'POST' });
     alert(await res.text());
+    window.location.reload();
+}
+
+async function recalculateBracket() {
+    await fetch('/api/admin/recalculate-bracket', { method: 'POST' });
     window.location.reload();
 }
 
@@ -569,8 +591,8 @@ async function switchTab(btn, tab) {
     btn.classList.add('active');
     activeTab = tab;
 
-    const filterBar = document.getElementById('fixtureFilterBar');
-    if (filterBar) filterBar.style.display = tab === 'fixture' ? 'flex' : 'none';
+    const bracketSection = document.getElementById('bracketSection');
+    if (bracketSection) bracketSection.style.display = tab === 'fixture' ? 'block' : 'none';
 
     const currentUser = await loadCurrentUser();
     let matches;
@@ -590,10 +612,12 @@ async function switchTab(btn, tab) {
         matches = await loadMatchesByDate();
         updateCalLabel();
     } else {
-        activeFixtureFilter = null;
-        document.querySelectorAll('#fixtureFilterBar .mdf-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+        // Fixture tab: bracket only
         matches = await loadMatches();
         window._fixtureAllMatches = matches;
+        renderBracketSection(matches);
+        document.getElementById('matchesContainer').innerHTML = '';
+        return;
     }
 
     const predictions = await loadPredictions();
@@ -630,14 +654,13 @@ function setFixtureFilter(key, btn) {
 }
 
 function applyFixtureFilter(matches) {
-    if (!activeFixtureFilter) return matches;
-    if (activeFixtureFilter === 'md1') return matches.filter(m => m.matchDay === 1);
-    if (activeFixtureFilter === 'md2') return matches.filter(m => m.matchDay === 2);
-    if (activeFixtureFilter === 'md3') return matches.filter(m => m.matchDay === 3);
-    if (activeFixtureFilter === 'r16') return matches.filter(m => m.stage === 'ROUND_OF_16');
-    if (activeFixtureFilter === 'qf')  return matches.filter(m => m.stage === 'QUARTER_FINAL');
-    if (activeFixtureFilter === 'sf')  return matches.filter(m => ['SEMI_FINAL','THIRD_PLACE','FINAL'].includes(m.stage));
-    return matches;
+    // In fixture tab, matchesContainer shows only GROUP_STAGE
+    const gs = matches.filter(m => m.stage === 'GROUP_STAGE');
+    if (!activeFixtureFilter) return gs;
+    if (activeFixtureFilter === 'md1') return gs.filter(m => m.matchDay === 1);
+    if (activeFixtureFilter === 'md2') return gs.filter(m => m.matchDay === 2);
+    if (activeFixtureFilter === 'md3') return gs.filter(m => m.matchDay === 3);
+    return gs;
 }
 
 // ── MODAL ──
@@ -712,3 +735,8 @@ function calculateLivePoints(prediction, match) {
     }
     return 0;
 }
+
+// ═══════════════════════════════════════════════════════════
+//  BRACKET FASE FINAL
+// ═══════════════════════════════════════════════════════════
+

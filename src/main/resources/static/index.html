@@ -53,10 +53,18 @@
 
     <div id="domingo16avosBanner" class="candidatos-promo" style="display:none;position:relative;">
         <a href="/pages/group-prediction?filter=16avos" style="display:block;text-decoration:none;color:inherit;">
-            <div class="candidatos-promo-title">EL DOMINGO A LAS 16 HS ARRANCAN LOS 16AVOS</div>
-            <div class="candidatos-promo-sub">¡Ya podés pronosticar los partidos confirmados de 16avos de final!</div>
+            <div class="candidatos-promo-title">YA ARRANCÓ LA FASE FINAL 🔥</div>
+            <div class="candidatos-promo-sub">¡Ya podés pronosticar todos los partidos de 16avos de final!</div>
         </a>
         <button onclick="ack16Avos()" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
+    </div>
+
+    <div id="bracketBanner" class="candidatos-promo" style="display:none;position:relative;">
+        <a href="/pages/group-standings" style="display:block;text-decoration:none;color:inherit;">
+            <div class="candidatos-promo-title">CUADRO DE LA FASE FINAL</div>
+            <div class="candidatos-promo-sub">Ya podés ver el cuadro completo de la fase final</div>
+        </a>
+        <button onclick="ackBracketBanner()" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
     </div>
 
     <div class="tabs mb-3">
@@ -71,17 +79,6 @@
     </button>
     <div class="date-strip" id="dateStrip"></div>
 
-    <!-- Filtro de Fixture (visible solo en tab Fixture) -->
-    <div class="matchday-filter" id="fixtureFilterBar" style="display:none;">
-      <button class="mdf-btn active" onclick="setFixtureFilter(null, this)">Todo</button>
-      <button class="mdf-btn" onclick="setFixtureFilter('md1', this)">Fecha 1</button>
-      <button class="mdf-btn" onclick="setFixtureFilter('md2', this)">Fecha 2</button>
-      <button class="mdf-btn" onclick="setFixtureFilter('md3', this)">Fecha 3</button>
-      <button class="mdf-btn" onclick="setFixtureFilter('r16', this)">Octavos</button>
-      <button class="mdf-btn" onclick="setFixtureFilter('qf', this)">Cuartos</button>
-      <button class="mdf-btn" onclick="setFixtureFilter('sf', this)">Semis/Final</button>
-    </div>
-
     <h2 id="matchesDateTitle" style="display:none;"></h2>
 
     <div id="adminGlobalPanel" style="display:none;margin-bottom:12px;">
@@ -89,9 +86,13 @@
             <div class="admin-label">ADMIN GLOBAL</div>
             <div class="admin-btns">
                 <button class="admin-btn update" onclick="recalculateEverything()">Recalcular TODO (partidos + grupos)</button>
+                <button class="admin-btn update" onclick="recalculateBracket()">Recalcular Bracket</button>
             </div>
         </div>
     </div>
+
+    <!-- BRACKET (fase final, visible solo en tab Fixture) -->
+    <div id="bracketSection" style="display:none;"></div>
 
     <div id="matchesContainer"></div>
 
@@ -140,6 +141,7 @@
 
 <script src="./js/navbar.js"></script>
 <script src="./js/bottomNav.js"></script>
+<script src="./js/bracket.js"></script>
 <script src="./js/app.js?v=2"></script>
 
 </body>

@@ -28,6 +28,8 @@ public interface MatchRepository extends JpaRepository<MatchEntity, UUID> {
     List<MatchEntity>
     findByDateTimeBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
 
+    Optional<MatchEntity> findByMatchNumber(Integer matchNumber);
+
     @org.springframework.data.jpa.repository.Query(
         "SELECT m FROM MatchEntity m WHERE m.homeTeam.code = :homeCode AND m.awayTeam.code = :awayCode"
     )

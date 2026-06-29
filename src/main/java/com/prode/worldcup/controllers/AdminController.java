@@ -50,4 +50,10 @@ public class AdminController {
         adminRecalculationService.recalculateEverything();
         return ResponseEntity.ok("Recálculo completo ejecutado: partidos + grupos");
     }
+
+    @PostMapping("/recalculate-bracket")
+    public ResponseEntity<String> recalculateBracket() {
+        matchService.recalculateBracket();
+        return ResponseEntity.ok("Bracket recalculado");
+    }
 }

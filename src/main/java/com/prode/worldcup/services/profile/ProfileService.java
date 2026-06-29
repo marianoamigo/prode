@@ -31,14 +31,14 @@ public class ProfileService {
                 .sorted((a, b) -> b.getMatch().getDateTime().compareTo(a.getMatch().getDateTime()))
                 .map(p -> {
                     MatchEntity m = p.getMatch();
-                    String groupName = m.getStage() == MatchStage.GROUP_STAGE
+                    String groupName = m.getStage() == MatchStage.GROUP_STAGE && m.getHomeTeam() != null
                             ? m.getHomeTeam().getGroup().getName()
                             : null;
                     return new ProfilePredictionDTO(
-                            m.getHomeTeam().getName(),
-                            "/images/flags/" + m.getHomeTeam().getCode() + ".svg",
-                            m.getAwayTeam().getName(),
-                            "/images/flags/" + m.getAwayTeam().getCode() + ".svg",
+                            m.getHomeTeam() != null ? m.getHomeTeam().getName() : null,
+                            m.getHomeTeam() != null ? "/images/flags/" + m.getHomeTeam().getCode() + ".svg" : null,
+                            m.getAwayTeam() != null ? m.getAwayTeam().getName() : null,
+                            m.getAwayTeam() != null ? "/images/flags/" + m.getAwayTeam().getCode() + ".svg" : null,
                             m.getHomeScore(),
                             m.getAwayScore(),
                             p.getPredictionHomeScore(),

@@ -21,6 +21,7 @@ public record MatchResponseDTO(
         LocalDateTime dateTime,
         Integer matchDay,
         String groupName,
-        String timeElapsed
+        String timeElapsed,
+        Integer matchNumber
 ) {
 }

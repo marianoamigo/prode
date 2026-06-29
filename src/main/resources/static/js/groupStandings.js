@@ -2,6 +2,14 @@ let standingsData = {};
 let allMatches = [];
 let activeStandingsGroup = null;
 
+const KNOCKOUT_TABS = [
+    { key: 'r32', label: '16AVOS',  stages: ['ROUND_OF_32'] },
+    { key: 'r16', label: 'OCTAVOS', stages: ['ROUND_OF_16'] },
+    { key: 'qf',  label: 'CUARTOS', stages: ['QUARTER_FINAL'] },
+    { key: 'sf',  label: 'SEMIS',   stages: ['SEMI_FINAL'] },
+    { key: 'fin', label: 'FINAL',   stages: ['FINAL', 'THIRD_PLACE'] },
+];
+
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
@@ -30,8 +38,9 @@ async function loadStandings() {
     });
 
     const groups = Object.keys(standingsData).sort();
-    activeStandingsGroup = groups[0] || null;
+    activeStandingsGroup = 'r32';
 
+    renderBracketSection(allMatches);
     renderGroupTabs(groups);
     renderActiveGroup();
 }
@@ -39,11 +48,17 @@ async function loadStandings() {
 function renderGroupTabs(groups) {
     const container = document.getElementById('standingGroupTabs');
     if (!container) return;
-    const tabs = [...groups, '3ROS'];
-    container.innerHTML = tabs.map(g => `
-        <button class="group-tab ${g === activeStandingsGroup ? 'active' : ''}"
-                onclick="selectStandingsGroup('${g}', this)">${g}</button>
-    `).join('');
+
+    let html = '';
+    KNOCKOUT_TABS.forEach(kt => {
+        html += `<button class="group-tab ${activeStandingsGroup === kt.key ? 'active' : ''}"
+                         onclick="selectStandingsGroup('${kt.key}', this)">${kt.label}</button>`;
+    });
+    [...groups, '3ROS'].forEach(g => {
+        html += `<button class="group-tab ${g === activeStandingsGroup ? 'active' : ''}"
+                         onclick="selectStandingsGroup('${g}', this)">${g}</button>`;
+    });
+    container.innerHTML = html;
 }
 
 function selectStandingsGroup(g, btn) {
@@ -57,6 +72,12 @@ function renderActiveGroup() {
     const container = document.getElementById("groupsContainer");
     if (!activeStandingsGroup) { container.innerHTML = ''; return; }
 
+    const kt = KNOCKOUT_TABS.find(t => t.key === activeStandingsGroup);
+    if (kt) {
+        renderStageMatches(kt, container);
+        return;
+    }
+
     if (activeStandingsGroup === '3ROS') {
         renderThirdPlaceTable(container);
         return;
@@ -68,6 +89,39 @@ function renderActiveGroup() {
         .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
 
     container.innerHTML = buildStandingsTable(teams) + buildGroupMatchesSections(groupMatches);
+}
+
+function renderStageMatches(kt, container) {
+    const stageMatches = allMatches
+        .filter(m => kt.stages.includes(m.stage))
+        .sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
+
+    const definedMatches = stageMatches.filter(m => m.homeTeam && m.awayTeam);
+    const toShow = kt.key === 'r32' ? stageMatches : definedMatches;
+
+    if (toShow.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div style="font-size:40px;margin-bottom:12px;">⏳</div><div>Partidos a definir</div></div>`;
+        return;
+    }
+
+    const dias  = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+    const meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+
+    const byDate = {};
+    toShow.forEach(m => {
+        const dk = m.dateTime ? m.dateTime.split('T')[0] : 'unknown';
+        if (!byDate[dk]) byDate[dk] = [];
+        byDate[dk].push(m);
+    });
+
+    let html = '<div class="group-matches-section">';
+    Object.keys(byDate).sort().forEach(dk => {
+        const d = new Date(dk + 'T12:00:00');
+        html += `<div class="group-matches-label">${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}</div>`;
+        byDate[dk].forEach(m => { html += buildGroupMatchRow(m); });
+    });
+    html += '</div>';
+    container.innerHTML = html;
 }
 
 function buildStandingsTable(teams) {
@@ -123,12 +177,12 @@ function buildGroupMatchesSections(matches) {
 }
 
 function buildGroupMatchRow(m) {
-    const isLive = m.status === 'LIVE';
+    const isLive     = m.status === 'LIVE';
     const isFinished = m.status === 'FINISHED';
-    const hasScore = m.homeScore !== null && m.homeScore !== undefined;
+    const hasScore   = m.homeScore !== null && m.homeScore !== undefined;
 
     let statusLabel;
-    if (isLive) statusLabel = `<span class="gmatch-status live">EN JUEGO</span>`;
+    if (isLive)     statusLabel = `<span class="gmatch-status live">EN JUEGO</span>`;
     else if (isFinished) statusLabel = `<span class="gmatch-status fin">FINALIZADO</span>`;
     else statusLabel = `<span class="gmatch-status sched">${formatGMatchTime(m.dateTime)} hs</span>`;
 
@@ -136,18 +190,21 @@ function buildGroupMatchRow(m) {
         ? `<span class="gmatch-score${isLive ? ' live' : ''}">${m.homeScore} – ${m.awayScore}</span>`
         : `<span class="gmatch-vs">VS</span>`;
 
+    const homeName = m.homeTeam || '?';
+    const awayName = m.awayTeam || '?';
+
     return `
         <div class="gmatch-row">
             <div class="gmatch-status-row">${statusLabel}</div>
             <div class="gmatch-teams">
                 <div class="gmatch-team">
                     ${m.homeFlagUrl ? `<img src="${m.homeFlagUrl}" class="gmatch-flag" alt="">` : ''}
-                    <span class="gmatch-name">${m.homeTeam}</span>
+                    <span class="gmatch-name">${homeName}</span>
                 </div>
                 <div class="gmatch-center">${scoreBlock}</div>
                 <div class="gmatch-team right">
                     ${m.awayFlagUrl ? `<img src="${m.awayFlagUrl}" class="gmatch-flag" alt="">` : ''}
-                    <span class="gmatch-name">${m.awayTeam}</span>
+                    <span class="gmatch-name">${awayName}</span>
                 </div>
             </div>
         </div>

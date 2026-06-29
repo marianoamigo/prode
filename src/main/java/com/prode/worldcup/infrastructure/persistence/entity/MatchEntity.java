@@ -36,6 +36,8 @@ public class MatchEntity {
     private LocalDateTime dateTime;
     private Integer matchDay;
     private String timeElapsed;
+    @Column(name = "match_number")
+    private Integer matchNumber;
 
     //antes del partido: status=SCHEDULED, home/away Score=null, durante partido: status=LIVE, post=FINISHED
 }
