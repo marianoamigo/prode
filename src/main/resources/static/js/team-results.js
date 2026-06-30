@@ -59,7 +59,7 @@ function buildTeamMatchCard(match) {
     const hasPen     = match.homePenaltyScore !== null && match.homePenaltyScore !== undefined;
 
     const penaltyLine = hasPen
-        ? `<div style="font-size:11px;color:#e74c3c;font-weight:700;text-align:center;margin-top:3px;">${match.homePenaltyScore}–${match.awayPenaltyScore} pen</div>`
+        ? `<div style="font-size:11px;color:#e74c3c;font-weight:700;text-align:center;margin-top:3px;">${match.homePenaltyScore}–${match.awayPenaltyScore}</div>`
         : '';
 
     const vsInner = hasScore
