@@ -408,7 +408,7 @@ function buildMatchCard(match, prediction, currentUser, canEdit) {
     const hasRealScore = match.homeScore !== null && match.homeScore !== undefined;
     const hasPenScore = match.homePenaltyScore !== null && match.homePenaltyScore !== undefined;
     const penaltyLine = hasPenScore
-        ? `<div style="font-size:11px;color:#e74c3c;font-weight:700;text-align:center;margin-top:3px;">${match.homePenaltyScore}–${match.awayPenaltyScore}</div>`
+        ? `<div style="font-size:13px;color:#e74c3c;font-weight:700;text-align:center;margin-top:3px;">(${match.homePenaltyScore})–(${match.awayPenaltyScore})</div>`
         : '';
     const vsInner = hasRealScore
         ? `<div><span class="score-display${isLive ? ' score-live' : ''}">${match.homeScore}–${match.awayScore}</span>${penaltyLine}</div>`
