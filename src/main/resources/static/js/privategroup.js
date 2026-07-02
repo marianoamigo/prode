@@ -134,7 +134,7 @@ function renderLiveMatches(liveMatches, groupId) {
              onmouseover="this.style.background='var(--bg-card-hover)'"
              onmouseout="this.style.background='var(--bg-card)'">
             <img src="${match.homeFlagUrl}" style="width:40px;height:28px;object-fit:cover;border-radius:3px;" alt="${match.homeTeam}">
-            <span style="font-size:20px;font-weight:900;color:var(--text-primary);font-family:Impact,monospace;letter-spacing:2px;">
+            <span style="font-size:20px;font-weight:900;color:var(--text-primary);font-family:var(--font-body);letter-spacing:2px;">
                 ${match.homeScore} – ${match.awayScore}
             </span>
             <img src="${match.awayFlagUrl}" style="width:40px;height:28px;object-fit:cover;border-radius:3px;" alt="${match.awayTeam}">
