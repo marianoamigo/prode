@@ -117,7 +117,7 @@ function renderStageMatches(kt, container) {
     let html = '<div class="group-matches-section">';
     Object.keys(byDate).sort().forEach(dk => {
         const d = new Date(dk + 'T12:00:00');
-        html += `<div class="group-matches-label">${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}</div>`;
+        html += `<div class="date-pill">${dias[d.getDay()]} ${d.getDate()} ${meses[d.getMonth()]}</div>`;
         byDate[dk].forEach(m => { html += buildGroupMatchRow(m); });
     });
     html += '</div>';
@@ -169,7 +169,7 @@ function buildGroupMatchesSections(matches) {
 
     let html = '<div class="group-matches-section">';
     Object.keys(byDay).sort((a, b) => Number(a) - Number(b)).forEach(day => {
-        html += `<div class="group-matches-label">Fecha ${day}</div>`;
+        html += `<div class="date-pill">Fecha ${day}</div>`;
         byDay[day].forEach(m => { html += buildGroupMatchRow(m); });
     });
     html += '</div>';

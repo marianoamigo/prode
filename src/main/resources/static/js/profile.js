@@ -194,7 +194,7 @@ function renderProfile(profile) {
                     </div>
                     <div style="text-align:center;flex-shrink:0;min-width:80px;">
                         <div style="font-weight:700;font-size:1rem;">${p.homeScore} – ${p.awayScore}</div>
-                        <div style="font-size:.72rem;color:var(--text-muted);">prono: ${p.predictedHomeScore}–${p.predictedAwayScore}</div>
+                        <div style="font-size:.72rem;color:var(--text-muted);">PRED: ${p.predictedHomeScore}–${p.predictedAwayScore}</div>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0;justify-content:flex-end;">
                         <span style="font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:right;">${p.awayTeam}</span>

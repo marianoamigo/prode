@@ -1,4 +1,4 @@
-const CACHE = 'orsai-v2';
+const CACHE = 'orsai-v3';
 const STATIC = ['/', '/index.html', '/css/style.css', '/js/navbar.js', '/js/app.js', '/js/bottomNav.js', '/manifest.json'];
 
 self.addEventListener('install', e => {
@@ -30,7 +30,7 @@ self.addEventListener('push', e => {
         self.registration.showNotification(data.title, {
             body: data.body,
             icon: data.icon,
-            badge: '/icons/ORSAI-192.png',
+            badge: '/icons/ORSAI-badge.png',
             data: { url: data.url },
             vibrate: [200, 100, 200]
         })

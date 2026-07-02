@@ -139,9 +139,7 @@ async function init() {
         renderMatches(matchesWithDate, predictions, currentUser);
         updateCandidatosPromo();
         updateLateGroupPromo();
-        updateFaseFinalBanner();
-        update16AvosBanner();
-        updateBracketBanner();
+        updatePhaseBanners();
         updateBanderasBanner();
         if (currentUser.role === 'ADMIN') {
             const panel = document.getElementById('adminGlobalPanel');
@@ -278,48 +276,34 @@ function ackUltimosDias() {
     if (box) box.style.display = 'none';
 }
 
-function updateFaseFinalBanner() {
-    const box = document.getElementById('faseFinalBanner');
-    if (!box) return;
-    box.style.display = localStorage.getItem('seVieneFaseFinalAck') ? 'none' : 'block';
-}
+// Phase banners — each shows only on its phase start date (Argentina time, UTC-3)
+const PHASE_BANNERS = [
+    { id: 'domingo16avosBanner', key: 'domingo16avos', year: 2026, month: 5, day: 28 }, // June 28
+    { id: 'octavosBanner',       key: 'octavos',       year: 2026, month: 6, day: 4  }, // July 4
+    { id: 'cuartosBanner',       key: 'cuartos',       year: 2026, month: 6, day: 9  }, // July 9
+    { id: 'semisBanner',         key: 'semis',         year: 2026, month: 6, day: 14 }, // July 14
+    { id: 'tercerPuestoBanner',  key: 'tercerPuesto',  year: 2026, month: 6, day: 18 }, // July 18
+    { id: 'finalBanner',         key: 'final',         year: 2026, month: 6, day: 19 }, // July 19
+];
 
-function ackFaseFinal() {
-    localStorage.setItem('seVieneFaseFinalAck', '1');
-    const box = document.getElementById('faseFinalBanner');
-    if (box) box.style.display = 'none';
-}
-
-function update16AvosBanner() {
-    const box = document.getElementById('domingo16avosBanner');
-    if (!box) return;
-    if (localStorage.getItem('domingo16avosAck')) { box.style.display = 'none'; return; }
+function updatePhaseBanners() {
     const argNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
     const y = argNow.getUTCFullYear(), m = argNow.getUTCMonth(), d = argNow.getUTCDate();
-    const notExpired = y === 2026 && (m === 5 || (m === 6 && d <= 3));
-    box.style.display = notExpired ? 'block' : 'none';
+    PHASE_BANNERS.forEach(({ id, key, year, month, day }) => {
+        const box = document.getElementById(id);
+        if (!box) return;
+        const isToday = y === year && m === month && d === day;
+        box.style.display = (isToday && !localStorage.getItem(key + 'Ack')) ? 'block' : 'none';
+    });
 }
 
-function ack16Avos() {
-    localStorage.setItem('domingo16avosAck', '1');
-    const box = document.getElementById('domingo16avosBanner');
-    if (box) box.style.display = 'none';
-}
-
-function updateBracketBanner() {
-    const box = document.getElementById('bracketBanner');
-    if (!box) return;
-    if (localStorage.getItem('bracketBannerAck')) { box.style.display = 'none'; return; }
-    const argNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
-    const y = argNow.getUTCFullYear(), m = argNow.getUTCMonth(), d = argNow.getUTCDate();
-    const notExpired = y === 2026 && (m === 5 || (m === 6 && d <= 3));
-    box.style.display = notExpired ? 'block' : 'none';
-}
-
-function ackBracketBanner() {
-    localStorage.setItem('bracketBannerAck', '1');
-    const box = document.getElementById('bracketBanner');
-    if (box) box.style.display = 'none';
+function ackPhaseBanner(key) {
+    localStorage.setItem(key + 'Ack', '1');
+    const banner = PHASE_BANNERS.find(b => b.key === key);
+    if (banner) {
+        const box = document.getElementById(banner.id);
+        if (box) box.style.display = 'none';
+    }
 }
 
 function updateBanderasBanner() {

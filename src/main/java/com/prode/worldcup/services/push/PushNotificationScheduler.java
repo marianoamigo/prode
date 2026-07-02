@@ -89,30 +89,41 @@ public class PushNotificationScheduler {
     }
 
     private void checkKnockoutRounds(List<MatchEntity> todayMatches) {
+        LocalDate today = LocalDate.now();
         for (MatchEntity match : todayMatches) {
-            switch (match.getStage()) {
+            MatchStage stage = match.getStage();
+            if (stage == MatchStage.GROUP_STAGE) continue;
+
+            // Only notify on the very first day that stage has matches
+            LocalDate firstDay = matchRepository.findByStage(stage).stream()
+                    .map(m -> m.getDateTime().toLocalDate())
+                    .min(java.util.Comparator.naturalOrder())
+                    .orElse(null);
+            if (!today.equals(firstDay)) continue;
+
+            switch (stage) {
                 case ROUND_OF_32 -> {
-                    pushService.sendToAll("Hoy arrancan los Dieciseisavos de Final 🔥", "¡Empieza la eliminación directa!");
+                    pushService.sendToAll("Hoy arrancan los 16avos 🔥", "¡No te olvides de pronosticar!");
                     return;
                 }
                 case ROUND_OF_16 -> {
-                    pushService.sendToAll("Hoy arrancan los Octavos de Final ⚡", "¡Ya pronosticaste los cruces?");
+                    pushService.sendToAll("Hoy arrancan los octavos 🔥", "¡No te olvides de pronosticar!");
                     return;
                 }
                 case QUARTER_FINAL -> {
-                    pushService.sendToAll("Hoy arrancan los Cuartos de Final 💥", "¡Solo quedan 8 equipos!");
+                    pushService.sendToAll("Hoy arrancan los cuartos de final 🔥", "¡No te olvides de pronosticar!");
                     return;
                 }
                 case SEMI_FINAL -> {
-                    pushService.sendToAll("Hoy arrancan las Semifinales 🏟️", "¡A un paso de la final!");
+                    pushService.sendToAll("Hoy arrancan las semifinales ⚔️", "¿Ya sabés quiénes llegan a la final?");
                     return;
                 }
                 case THIRD_PLACE -> {
-                    pushService.sendToAll("Hoy es el Tercer Puesto 🥉", "¿Quién se queda con el bronce?");
+                    pushService.sendToAll("Hoy es el partido por tercer puesto 🥉", "¡Pronosticá quién llega al podio!");
                     return;
                 }
                 case FINAL -> {
-                    pushService.sendToAll("Hoy es la FINAL 🏆🎉", "¡El partido más importante del mundo!");
+                    pushService.sendToAll("Hoy es la FINAL 🏆", "¿Quién se lleva la copa?");
                     return;
                 }
                 default -> {}

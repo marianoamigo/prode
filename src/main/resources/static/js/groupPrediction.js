@@ -119,7 +119,12 @@ function applyPartidoFilter(matches) {
 function getDefaultFilter() {
     const argNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
     const y = argNow.getUTCFullYear(), m = argNow.getUTCMonth(), d = argNow.getUTCDate();
-    if (y === 2026 && m === 5 && d >= 28) return '16avos';
+    if (y !== 2026) return 'md3';
+    if (m === 5 && d >= 28) return '16avos';         // June 28+
+    if (m === 6 && d <= 3)  return '16avos';         // July 1-3
+    if (m === 6 && d <= 8)  return 'r16';            // July 4-8
+    if (m === 6 && d <= 13) return 'qf';             // July 9-13
+    if (m === 6 && d >= 14) return 'sf';             // July 14+
     return 'md3';
 }
 

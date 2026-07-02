@@ -21,6 +21,12 @@
       "purpose": "any maskable"
     },
     {
+      "src": "/icons/ORSAI-badge.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "monochrome"
+    },
+    {
       "src": "/icons/ORSAI.png",
       "sizes": "2481x2471",
       "type": "image/png",

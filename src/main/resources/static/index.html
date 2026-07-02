@@ -13,7 +13,7 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/icons/ORSAI.png">
   <link rel="icon" href="/icons/ORSAI.png" type="image/png">
-    <link rel="stylesheet" href="/css/style.css?v=2">
+    <link rel="stylesheet" href="/css/style.css?v=3">
 </head>
 
 <body>
@@ -43,28 +43,52 @@
         <button onclick="ackUltimosDias()" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
     </div>
 
-    <div id="faseFinalBanner" class="candidatos-promo" style="display:none;position:relative;">
-        <a href="/pages/rules" style="display:block;text-decoration:none;color:inherit;">
-            <div class="candidatos-promo-title">SE VIENE LA FASE FINAL 🔥</div>
-            <div class="candidatos-promo-sub">ACTUALIZACIÓN DE PUNTAJES PARA PRONÓSTICOS Y CANDIDATOS</div>
-        </a>
-        <button onclick="ackFaseFinal()" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
-    </div>
-
     <div id="domingo16avosBanner" class="candidatos-promo" style="display:none;position:relative;">
         <a href="/pages/group-prediction?filter=16avos" style="display:block;text-decoration:none;color:inherit;">
             <div class="candidatos-promo-title">YA ARRANCÓ LA FASE FINAL 🔥</div>
             <div class="candidatos-promo-sub">¡Ya podés pronosticar todos los partidos de 16avos de final!</div>
         </a>
-        <button onclick="ack16Avos()" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
+        <button onclick="ackPhaseBanner('domingo16avos')" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
     </div>
 
-    <div id="bracketBanner" class="candidatos-promo" style="display:none;position:relative;">
-        <a href="/pages/group-standings" style="display:block;text-decoration:none;color:inherit;">
-            <div class="candidatos-promo-title">CUADRO DE LA FASE FINAL</div>
-            <div class="candidatos-promo-sub">Ya podés ver el cuadro completo de la fase final</div>
+    <div id="octavosBanner" class="candidatos-promo" style="display:none;position:relative;">
+        <a href="/pages/group-prediction?filter=r16" style="display:block;text-decoration:none;color:inherit;">
+            <div class="candidatos-promo-title">Hoy arrancan los octavos 🔥</div>
+            <div class="candidatos-promo-sub">¡No te olvides de pronosticar!</div>
         </a>
-        <button onclick="ackBracketBanner()" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
+        <button onclick="ackPhaseBanner('octavos')" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
+    </div>
+
+    <div id="cuartosBanner" class="candidatos-promo" style="display:none;position:relative;">
+        <a href="/pages/group-prediction?filter=qf" style="display:block;text-decoration:none;color:inherit;">
+            <div class="candidatos-promo-title">Hoy arrancan los cuartos de final 🔥</div>
+            <div class="candidatos-promo-sub">¡No te olvides de pronosticar!</div>
+        </a>
+        <button onclick="ackPhaseBanner('cuartos')" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
+    </div>
+
+    <div id="semisBanner" class="candidatos-promo" style="display:none;position:relative;">
+        <a href="/pages/group-prediction?filter=sf" style="display:block;text-decoration:none;color:inherit;">
+            <div class="candidatos-promo-title">Hoy arrancan las semifinales ⚔️</div>
+            <div class="candidatos-promo-sub">¿Ya sabés quiénes llegan a la final?</div>
+        </a>
+        <button onclick="ackPhaseBanner('semis')" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
+    </div>
+
+    <div id="tercerPuestoBanner" class="candidatos-promo" style="display:none;position:relative;">
+        <a href="/pages/group-prediction?filter=sf" style="display:block;text-decoration:none;color:inherit;">
+            <div class="candidatos-promo-title">Hoy es el partido por tercer puesto 🥉</div>
+            <div class="candidatos-promo-sub">¡Pronosticá quién llega al podio!</div>
+        </a>
+        <button onclick="ackPhaseBanner('tercerPuesto')" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
+    </div>
+
+    <div id="finalBanner" class="candidatos-promo" style="display:none;position:relative;">
+        <a href="/pages/group-prediction?filter=sf" style="display:block;text-decoration:none;color:inherit;">
+            <div class="candidatos-promo-title">Hoy es la FINAL 🏆</div>
+            <div class="candidatos-promo-sub">¿Quién se lleva la copa?</div>
+        </a>
+        <button onclick="ackPhaseBanner('final')" style="position:absolute;top:6px;right:10px;background:none;border:none;color:rgba(255,255,255,0.5);font-size:18px;cursor:pointer;padding:4px;line-height:1;z-index:1;">✕</button>
     </div>
 
     <div id="banderasBanner" class="candidatos-promo" style="display:none;position:relative;">
@@ -148,7 +172,7 @@
 <script src="./js/navbar.js"></script>
 <script src="./js/bottomNav.js"></script>
 <script src="./js/bracket.js?v=4"></script>
-<script src="./js/app.js?v=3"></script>
+<script src="./js/app.js?v=4"></script>
 
 </body>
 </html>

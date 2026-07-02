@@ -65,10 +65,12 @@ function renderNavbar(currentUser) {
         ${icons}
         ${bellIcon}
         <div style="display:flex;align-items:center;gap:10px;">
-            <img src="${currentUser.pictureUrl}"
-                 width="32" height="32"
-                 style="border-radius:50%;border:2px solid var(--border);"
-                 alt="${currentUser.name}">
+            <a href="/pages/profile?id=${currentUser.id}" style="line-height:0;display:flex;align-items:center;">
+                <img src="${currentUser.pictureUrl}"
+                     width="32" height="32"
+                     style="border-radius:50%;border:2px solid var(--border);"
+                     alt="${currentUser.name}">
+            </a>
             <a href="/logout"
                style="font-size:.75rem;color:var(--text-muted);text-decoration:none;">
                 Salir

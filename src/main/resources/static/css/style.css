@@ -908,7 +908,7 @@ hr {
   font-weight: 900;
   color: #1a2540;
   letter-spacing: 2px;
-  font-family: Impact, monospace;
+  font-family: var(--font-body);
 }
 
 .score-live {
@@ -1426,23 +1426,25 @@ hr {
 
 .group-tab {
   flex-shrink: 0;
-  padding: 6px 14px;
-  border: 2px solid #b8c5e8;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
   border-radius: 20px;
-  background: none;
-  color: #b8c5e8;
-  font-size: 12px;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
   letter-spacing: 1px;
   transition: all 0.15s;
   font-family: var(--font-body);
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .group-tab.active {
-  background: #b8c5e8;
-  color: #0e1628;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 /* ---- RANKING GLOBAL BUTTON ---- */
@@ -1632,7 +1634,7 @@ hr {
   font-size: 16px;
   font-weight: 900;
   color: var(--text-primary);
-  font-family: Impact, monospace;
+  font-family: var(--font-body);
   letter-spacing: .04em;
 }
 
