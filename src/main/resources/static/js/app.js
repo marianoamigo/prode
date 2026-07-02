@@ -140,7 +140,6 @@ async function init() {
         updateCandidatosPromo();
         updateLateGroupPromo();
         updatePhaseBanners();
-        updateBanderasBanner();
         if (currentUser.role === 'ADMIN') {
             const panel = document.getElementById('adminGlobalPanel');
             if (panel) panel.style.display = 'block';
@@ -306,17 +305,6 @@ function ackPhaseBanner(key) {
     }
 }
 
-function updateBanderasBanner() {
-    const box = document.getElementById('banderasBanner');
-    if (!box) return;
-    box.style.display = localStorage.getItem('banderasBannerAck') ? 'none' : 'block';
-}
-
-function ackBanderasBanner() {
-    localStorage.setItem('banderasBannerAck', '1');
-    const box = document.getElementById('banderasBanner');
-    if (box) box.style.display = 'none';
-}
 
 async function recalculateMatch(matchId) {
     await fetch(`/api/admin/recalculate/${matchId}`, { method: 'POST' });

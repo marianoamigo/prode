@@ -211,11 +211,12 @@ function renderProfile(profile) {
 function getStageName(stage, groupName) {
     if (stage === 'GROUP_STAGE') return groupName ? `Fase de Grupos — Grupo ${groupName}` : 'Fase de Grupos';
     const map = {
-        ROUND_OF_16: 'Octavos de Final',
+        ROUND_OF_32:   '16avos de Final',
+        ROUND_OF_16:   'Octavos de Final',
         QUARTER_FINAL: 'Cuartos de Final',
-        SEMI_FINAL: 'Semifinal',
-        THIRD_PLACE: 'Tercer Puesto',
-        FINAL: 'Final'
+        SEMI_FINAL:    'Semifinal',
+        THIRD_PLACE:   'Tercer Puesto',
+        FINAL:         'Final'
     };
     return map[stage] || stage;
 }
