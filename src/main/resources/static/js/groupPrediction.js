@@ -798,13 +798,13 @@ function buildComparisonGroupCard(groupId, groupName, teams, predictions, standi
         const flagUrl = team.code ? `/images/flags/${team.code}.svg` : '';
         return `
             <div class="tabla-row">
-                <span class="tabla-pos ${predTop ? 'top' : ''}">${predDisplay}</span>
+                <span class="tabla-pos ${predTop ? 'top' : ''}" style="font-family:var(--font-body);text-align:center;">${predDisplay}</span>
                 <div class="tabla-team">
                     ${flagUrl ? `<a href="/pages/team-results.html?team=${encodeURIComponent(team.name)}" style="line-height:0;"><img src="${flagUrl}" class="tabla-flag-img" width="22" height="15" alt="${team.name}"></a>` : ''}
                     <span class="tabla-name">${team.name}</span>
                 </div>
                 <span class="tabla-stat" style="color:${realTop ? 'var(--accent)' : '#5a6e90'};font-weight:900;font-size:14px;">${realDisplay}</span>
-                <span class="tabla-pts" style="color:${ptsColor};">${ptsDisplay}</span>
+                <span class="tabla-pts" style="color:${ptsColor};font-family:var(--font-body);">${ptsDisplay}</span>
             </div>`;
     }).join('');
 

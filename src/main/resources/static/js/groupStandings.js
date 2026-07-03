@@ -180,6 +180,8 @@ function buildGroupMatchRow(m) {
     const isLive     = m.status === 'LIVE';
     const isFinished = m.status === 'FINISHED';
     const hasScore   = m.homeScore !== null && m.homeScore !== undefined;
+    const hasPen     = m.homePenaltyScore !== null && m.homePenaltyScore !== undefined
+        && m.awayPenaltyScore !== null && m.awayPenaltyScore !== undefined;
 
     let statusLabel;
     if (isLive)     statusLabel = `<span class="gmatch-status live">EN JUEGO</span>`;
@@ -187,7 +189,7 @@ function buildGroupMatchRow(m) {
     else statusLabel = `<span class="gmatch-status sched">${formatGMatchTime(m.dateTime)} hs</span>`;
 
     const scoreBlock = hasScore
-        ? `<span class="gmatch-score${isLive ? ' live' : ''}">${m.homeScore} – ${m.awayScore}</span>`
+        ? `<span class="gmatch-score${isLive ? ' live' : ''}">${hasPen ? `(${m.homePenaltyScore})` : ''}${m.homeScore} – ${m.awayScore}${hasPen ? `(${m.awayPenaltyScore})` : ''}</span>`
         : `<span class="gmatch-vs">VS</span>`;
 
     const homeName = m.homeTeam || '?';
