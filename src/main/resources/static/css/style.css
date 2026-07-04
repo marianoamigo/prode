@@ -1175,7 +1175,7 @@ hr {
   color: #ffffff;
   width: 50px;
   text-align: center;
-  font-family: Impact, monospace;
+  font-family: var(--font-body);
 }
 
 .score-dash {
@@ -1372,7 +1372,7 @@ hr {
   font-weight: 900;
   width: 22px;
   color: #5a6e90;
-  font-family: Impact, monospace;
+  font-family: var(--font-body);
   text-align: right;
 }
 
@@ -1407,7 +1407,7 @@ hr {
   color: #1a2540;
   width: 28px;
   text-align: right;
-  font-family: Impact, monospace;
+  font-family: var(--font-body);
   flex-shrink: 0;
 }
 
