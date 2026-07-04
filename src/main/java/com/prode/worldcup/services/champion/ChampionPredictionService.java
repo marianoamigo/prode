@@ -48,9 +48,10 @@ public class ChampionPredictionService {
 
     @Transactional
     public void save(String googleId, ChampionPredictionRequestDTO req) {
-        if (LocalDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires")).isAfter(DEADLINE)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El plazo para modificar candidatos ya venció");
-        }
+        // TEMP: deadline check deshabilitado momentaneamente para permitir un ajuste manual
+//        if (LocalDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires")).isAfter(DEADLINE)) {
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El plazo para modificar candidatos ya venció");
+//        }
         var user = userRepository.findByGoogleId(googleId).orElseThrow();
         var entity = championRepo.findByUserId(user.getId())
                 .orElseGet(() -> ChampionPredictionEntity.builder().user(user).build());
