@@ -46,11 +46,25 @@ function renderBracketSection(allMatches) {
           ${colR32}${con1}${colR16}${con2}${colQF}${con3}${colSF}${con4}${colFin}
         </div>
       </div>`;
+
+    scrollBracketTo(getCurrentBracketStep(step), false);
 }
 
-function scrollBracketTo(left) {
+function getCurrentBracketStep(step) {
+    const argNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    const y = argNow.getUTCFullYear(), m = argNow.getUTCMonth(), d = argNow.getUTCDate();
+    if (y !== 2026) return 0;
+    if (m === 5 && d >= 28) return 0;         // June 28+   -> 16avos
+    if (m === 6 && d <= 3)  return 0;         // July 1-3   -> 16avos
+    if (m === 6 && d <= 8)  return step;      // July 4-8   -> octavos
+    if (m === 6 && d <= 13) return step * 2;  // July 9-13  -> cuartos
+    if (m === 6 && d >= 14) return step * 3;  // July 14+   -> semis (la final queda a la vista sin scrollear más)
+    return 0;
+}
+
+function scrollBracketTo(left, smooth = true) {
     const wrap = document.getElementById('bracketWrap');
-    if (wrap) wrap.scrollTo({ left, behavior: 'smooth' });
+    if (wrap) wrap.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' });
 }
 
 function buildBracketRound(matches, slotH, id) {
