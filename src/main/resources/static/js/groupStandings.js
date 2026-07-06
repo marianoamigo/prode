@@ -10,6 +10,19 @@ const KNOCKOUT_TABS = [
     { key: 'fin', label: 'FINAL',   stages: ['FINAL', 'THIRD_PLACE'] },
 ];
 
+function getCurrentStandingsTab() {
+    const argNow = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    const y = argNow.getUTCFullYear(), m = argNow.getUTCMonth(), d = argNow.getUTCDate();
+    if (y !== 2026) return 'r32';
+    if (m === 5 && d >= 28) return 'r32';  // June 28+   -> 16avos
+    if (m === 6 && d <= 3)  return 'r32';  // July 1-3   -> 16avos
+    if (m === 6 && d <= 8)  return 'r16';  // July 4-8   -> octavos
+    if (m === 6 && d <= 13) return 'qf';   // July 9-13  -> cuartos
+    if (m === 6 && d <= 17) return 'sf';   // July 14-17 -> semis
+    if (m === 6 && d >= 18) return 'fin';  // July 18+   -> final / 3er puesto
+    return 'r32';
+}
+
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
@@ -38,7 +51,7 @@ async function loadStandings() {
     });
 
     const groups = Object.keys(standingsData).sort();
-    activeStandingsGroup = 'r32';
+    activeStandingsGroup = getCurrentStandingsTab();
 
     renderBracketSection(allMatches);
     renderGroupTabs(groups);
