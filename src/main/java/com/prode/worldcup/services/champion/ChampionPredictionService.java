@@ -2,8 +2,10 @@ package com.prode.worldcup.services.champion;
 
 import com.prode.worldcup.domain.dtos.request.ChampionPredictionRequestDTO;
 import com.prode.worldcup.domain.dtos.response.ChampionPredictionResponseDTO;
+import com.prode.worldcup.domain.dtos.response.ChampionTableRowResponseDTO;
 import com.prode.worldcup.infrastructure.persistence.entity.ChampionPredictionEntity;
 import com.prode.worldcup.infrastructure.persistence.entity.MatchEntity;
+import com.prode.worldcup.infrastructure.persistence.entity.TeamEntity;
 import com.prode.worldcup.infrastructure.persistence.entity.UserEntity;
 import com.prode.worldcup.infrastructure.persistence.repository.ChampionPredictionRepository;
 import com.prode.worldcup.infrastructure.persistence.repository.MatchRepository;
@@ -19,6 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -48,10 +52,9 @@ public class ChampionPredictionService {
 
     @Transactional
     public void save(String googleId, ChampionPredictionRequestDTO req) {
-        // TODO: reactivar chequeo de deadline
-        // if (LocalDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires")).isAfter(DEADLINE)) {
-        //     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El plazo para modificar candidatos ya venció");
-        // }
+        if (LocalDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires")).isAfter(DEADLINE)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "El plazo para modificar candidatos ya venció");
+        }
         var user = userRepository.findByGoogleId(googleId).orElseThrow();
         var entity = championRepo.findByUserId(user.getId())
                 .orElseGet(() -> ChampionPredictionEntity.builder().user(user).build());
@@ -114,6 +117,78 @@ public class ChampionPredictionService {
             user.setTotalPoints(user.getTotalPoints() - oldPoints + newPoints);
             userRepository.save(user);
         });
+    }
+
+    /**
+     * Tabla de candidatos para el perfil: posiciones 1/2 (campeón/subcampeón) se revelan
+     * recién cuando termina la FINAL, y posiciones 3/4 (tercero/cuarto) recién cuando
+     * termina el partido por el TERCER PUESTO, sin importar si el resultado ya era
+     * deducible antes por el otro partido.
+     */
+    public List<ChampionTableRowResponseDTO> getTable(UUID userId) {
+        var champion = championRepo.findByUserId(userId).orElse(null);
+        if (champion == null) return null;
+
+        MatchEntity finalMatch = matchRepository.findAll().stream()
+                .filter(m -> m.getStage() == MatchStage.FINAL)
+                .findFirst().orElse(null);
+        MatchEntity thirdPlaceMatch = matchRepository.findAll().stream()
+                .filter(m -> m.getStage() == MatchStage.THIRD_PLACE)
+                .findFirst().orElse(null);
+
+        boolean finalRevealed = finalMatch != null && finalMatch.getStatus() == MatchStatus.FINISHED;
+        boolean thirdRevealed = thirdPlaceMatch != null && thirdPlaceMatch.getStatus() == MatchStatus.FINISHED;
+
+        String a1 = null, a2 = null, a3 = null, a4 = null;
+        String a1Flag = null, a2Flag = null, a3Flag = null, a4Flag = null;
+
+        if (finalRevealed) {
+            String winner = determineWinner(finalMatch);
+            if (winner != null) {
+                boolean homeWon = winner.equals(finalMatch.getHomeTeam().getName());
+                a1 = winner;
+                a2 = homeWon ? finalMatch.getAwayTeam().getName() : finalMatch.getHomeTeam().getName();
+                a1Flag = flagUrl(homeWon ? finalMatch.getHomeTeam() : finalMatch.getAwayTeam());
+                a2Flag = flagUrl(homeWon ? finalMatch.getAwayTeam() : finalMatch.getHomeTeam());
+            } else {
+                finalRevealed = false;
+            }
+        }
+
+        if (thirdRevealed) {
+            String winner = determineWinner(thirdPlaceMatch);
+            if (winner != null) {
+                boolean homeWon = winner.equals(thirdPlaceMatch.getHomeTeam().getName());
+                a3 = winner;
+                a4 = homeWon ? thirdPlaceMatch.getAwayTeam().getName() : thirdPlaceMatch.getHomeTeam().getName();
+                a3Flag = flagUrl(homeWon ? thirdPlaceMatch.getHomeTeam() : thirdPlaceMatch.getAwayTeam());
+                a4Flag = flagUrl(homeWon ? thirdPlaceMatch.getAwayTeam() : thirdPlaceMatch.getHomeTeam());
+            } else {
+                thirdRevealed = false;
+            }
+        }
+
+        final String fa1 = a1, fa2 = a2, fa3 = a3, fa4 = a4;
+
+        List<ChampionTableRowResponseDTO> rows = new ArrayList<>();
+        rows.add(new ChampionTableRowResponseDTO(1, champion.getChampion(), champion.getChampionFlag(),
+                finalRevealed ? a1 : null, finalRevealed ? a1Flag : null,
+                finalRevealed ? pointsForPick(champion.getChampion(), 1, fa1, fa2, fa3, fa4) : null));
+        rows.add(new ChampionTableRowResponseDTO(2, champion.getRunnerUp(), champion.getRunnerUpFlag(),
+                finalRevealed ? a2 : null, finalRevealed ? a2Flag : null,
+                finalRevealed ? pointsForPick(champion.getRunnerUp(), 2, fa1, fa2, fa3, fa4) : null));
+        rows.add(new ChampionTableRowResponseDTO(3, champion.getThird(), champion.getThirdFlag(),
+                thirdRevealed ? a3 : null, thirdRevealed ? a3Flag : null,
+                thirdRevealed ? pointsForPick(champion.getThird(), 3, fa1, fa2, fa3, fa4) : null));
+        rows.add(new ChampionTableRowResponseDTO(4, champion.getFourth(), champion.getFourthFlag(),
+                thirdRevealed ? a4 : null, thirdRevealed ? a4Flag : null,
+                thirdRevealed ? pointsForPick(champion.getFourth(), 4, fa1, fa2, fa3, fa4) : null));
+
+        return rows;
+    }
+
+    private String flagUrl(TeamEntity team) {
+        return team != null ? "/images/flags/" + team.getCode() + ".svg" : null;
     }
 
     private String determineWinner(MatchEntity match) {

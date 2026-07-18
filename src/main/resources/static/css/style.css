@@ -1850,46 +1850,127 @@ hr {
   line-height: 1.5;
 }
 
-/* ---- CHAMPION BADGE (profile.html) ---- */
-.champion-badge {
-  background: var(--bg-card);
-  border: 1px solid var(--accent);
-  border-radius: 12px;
-  padding: 12px 16px;
+/* ---- CANDIDATOS TABLE (profile.html) — misma paleta que la sección Candidatos de group-prediction ---- */
+.candidatos-table {
   margin-bottom: 16px;
   width: 100%;
 }
 
-.champion-badge-label {
-  display: block;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .12em;
+.candidatos-table-title {
+  color: var(--text-primary);
+  padding: 0;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 8px;
+  font-family: var(--font-body);
+  margin-bottom: 10px;
 }
 
-.champion-badge-team {
+.candidatos-table-cols {
   display: flex;
   align-items: center;
-  gap: 10px;
+  padding: 0 14px 6px 12px;
+  gap: 4px;
 }
 
-.champion-badge-flag {
-  width: 32px;
-  height: 22px;
-  object-fit: cover;
-  border-radius: 3px;
+.candidatos-table-col-pos,
+.candidatos-table-col-team,
+.candidatos-table-col-real,
+.candidatos-table-col-pts {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-family: var(--font-body);
   flex-shrink: 0;
 }
 
-.champion-badge-name {
+.candidatos-table-col-pos { width: 22px; text-align: center; }
+.candidatos-table-col-team { flex: 1; margin-left: 8px; }
+.candidatos-table-col-real,
+.candidatos-table-col-pts { width: 36px; text-align: center; }
+
+.candidatos-table-row {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px 10px 8px;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.candidatos-table-row:last-child { margin-bottom: 0; }
+
+.candidatos-table-row--top {
+  border: 2px solid var(--accent);
+  padding: 9px 13px 9px 7px;
+}
+
+.candidatos-table-pos {
+  width: 22px;
+  flex-shrink: 0;
   font-size: 16px;
   font-weight: 900;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  text-align: center;
+}
+
+.candidatos-table-row--top .candidatos-table-pos { color: var(--accent); }
+
+.candidatos-table-team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  margin-left: 8px;
+}
+
+.candidatos-table-flag {
+  width: 24px;
+  height: 16px;
+  object-fit: cover;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.candidatos-table-name {
+  font-size: 12px;
+  font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: .02em;
   color: var(--text-primary);
-  letter-spacing: .06em;
+  font-family: var(--font-body);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.candidatos-table-row--top .candidatos-table-name { font-weight: 900; }
+
+.candidatos-table-real {
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  flex-shrink: 0;
+}
+
+.candidatos-table-pts {
+  width: 36px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 900;
+  font-family: var(--font-body);
+  flex-shrink: 0;
 }
 
 /* ---- GROUP POS SELECT (tab Grupos en Pronósticos) ---- */

@@ -6,6 +6,7 @@ import com.prode.worldcup.infrastructure.persistence.entity.MatchEntity;
 import com.prode.worldcup.infrastructure.persistence.repository.ChampionPredictionRepository;
 import com.prode.worldcup.infrastructure.persistence.repository.PredictionRepository;
 import com.prode.worldcup.infrastructure.persistence.repository.UserRepository;
+import com.prode.worldcup.services.champion.ChampionPredictionService;
 import com.prode.worldcup.shared.MatchStage;
 import com.prode.worldcup.shared.MatchStatus;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ public class ProfileService {
     private final UserRepository userRepository;
     private final PredictionRepository predictionRepository;
     private final ChampionPredictionRepository championRepo;
+    private final ChampionPredictionService championPredictionService;
 
     public ProfileResponseDTO getProfile(UUID userId) {
         var user = userRepository.findById(userId).orElseThrow();
@@ -61,7 +63,8 @@ public class ProfileService {
                 user.getTotalPoints() != null ? user.getTotalPoints() : 0,
                 predictions,
                 championName,
-                championFlag
+                championFlag,
+                championPredictionService.getTable(userId)
         );
     }
 }

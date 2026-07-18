@@ -62,6 +62,53 @@ async function loadProfileGroupPredictions(userId) {
     container.innerHTML = html;
 }
 
+function candidatosPtsColor(points) {
+    if (points === null || points === undefined) return 'var(--text-muted)';
+    if (points === 10) return '#4caf50';
+    if (points === 6) return '#8bc34a';
+    if (points === 3) return '#f0a500';
+    return 'var(--text-muted)';
+}
+
+function buildCandidatosTable(rows) {
+    const rowsHtml = rows.map(row => {
+        const isTop = row.position === 1;
+        const teamName = row.teamName || '—';
+        const teamFlag = row.teamFlagUrl
+            ? `<img src="${row.teamFlagUrl}" class="candidatos-table-flag" alt="">`
+            : '';
+        const realCell = row.actualTeamFlagUrl
+            ? `<img src="${row.actualTeamFlagUrl}" class="candidatos-table-flag" alt="${row.actualTeamName || ''}">`
+            : '—';
+        const hasPts = row.points !== null && row.points !== undefined;
+        const ptsCell = hasPts ? `+${row.points}` : '—';
+        const ptsColor = candidatosPtsColor(row.points);
+
+        return `
+            <div class="candidatos-table-row${isTop ? ' candidatos-table-row--top' : ''}">
+                <span class="candidatos-table-pos">${row.position}</span>
+                <div class="candidatos-table-team">
+                    ${teamFlag}
+                    <span class="candidatos-table-name">${teamName}</span>
+                </div>
+                <span class="candidatos-table-real">${realCell}</span>
+                <span class="candidatos-table-pts" style="color:${ptsColor};">${ptsCell}</span>
+            </div>`;
+    }).join('');
+
+    return `
+        <div class="candidatos-table">
+            <div class="candidatos-table-title">CANDIDATOS</div>
+            <div class="candidatos-table-cols">
+                <span class="candidatos-table-col-pos">POS</span>
+                <span class="candidatos-table-col-team">PAÍS</span>
+                <span class="candidatos-table-col-real">REAL</span>
+                <span class="candidatos-table-col-pts">PTS</span>
+            </div>
+            ${rowsHtml}
+        </div>`;
+}
+
 function buildProfileGroupCard(group, predictions, groupStandings, isLateGroup, groupFinished) {
     const predictedIds = new Set(predictions.map(p => p.teamId));
 
@@ -155,18 +202,11 @@ function renderProfile(profile) {
         pic.style.display = 'block';
     }
 
-    if (profile.championName) {
+    if (profile.championTable && profile.championTable.length > 0) {
         const badge = document.getElementById('championBadge');
         if (badge) {
-            badge.style.display = 'flex';
-            badge.innerHTML = `
-                <div class="champion-badge">
-                    <span class="champion-badge-label">CANDIDATO AL TÍTULO</span>
-                    <div class="champion-badge-team">
-                        ${profile.championFlagUrl ? `<img src="${profile.championFlagUrl}" class="champion-badge-flag" alt="">` : ''}
-                        <span class="champion-badge-name">${profile.championName}</span>
-                    </div>
-                </div>`;
+            badge.style.display = 'block';
+            badge.innerHTML = buildCandidatosTable(profile.championTable);
         }
     }
 
